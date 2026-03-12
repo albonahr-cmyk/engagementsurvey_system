@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>おじさんインベーダー</title>
+<style>
+  body { background: #111; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: monospace; color: #fff; }
+  canvas { border: 2px solid #f90; }
+  #info { margin-bottom: 10px; font-size: 18px; }
+  #msg { position: absolute; font-size: 32px; color: #ff0; text-align: center; display: none; text-shadow: 2px 2px #f00; }
+</style>
+</head>
+<body>
+<div id="info">スコア: <span id="score">0</span> &nbsp; 残機: <span id="lives">❤️❤️❤️</span></div>
+<div id="msg"></div>
+<canvas id="c" width="620" height="520"></canvas>
+<div style="margin-top:10px; font-size:13px; color:#aaa;">← → 移動 &nbsp; スペース 射撃</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const msgEl = document.getElementById('msg');
+
+const W = canvas.width, H = canvas.height;
+let score = 0, lives = 3;
+let gameOver = false, cleared = false;
+let tick = 0;
+
+// プレイヤー (宇宙船)
+const player = { x: W/2 - 22, y: H - 55, w: 44, h: 22, speed: 5 };
+
+let bullets = [], enemyBullets = [], canShoot = true;
+
+// 敵 おじさん
+const COLS = 9, ROWS = 4;
+const E_W = 48, E_H = 48, E_PAD_X = 14, E_PAD_Y = 8;
+let enemies = [];
+let dir = 1, enemySpeed = 0.8, dropDist = 24;
+let enemyShootTimer = 0;
+
+// おじさんを描く (キャンバス描画、アニメフレームで踊る)
+function drawOjisan(x, y, frame, hue) {
+  const cx = x + E_W/2;
+  const t = frame; // 0 or 1 でポーズ切り替え
+
+  ctx.save();
+  ctx.translate(cx, y);
+
+  // 頭
+  ctx.fillStyle = `hsl(${hue}, 70%, 75%)`;
+  ctx.beginPath();
+  ctx.ellipse(0, 4, 9, 10, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // 髪 (薄い)
+  ctx.fillStyle = `hsl(${hue}, 20%, 55%)`;
+  ctx.beginPath();
+  ctx.ellipse(0, -2, 9, 5, 0, Math.PI, Math.PI*2);
+  ctx.fill();
+
+  // 目
+  ctx.fillStyle = '#000';
+  ctx.fillRect(-4, 2, 3, 3);
+  ctx.fillRect(2, 2, 3, 3);
+
+  // 口 (ニコニコ)
+  ctx.strokeStyle = '#a00';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, 8, 4, 0, Math.PI);
+  ctx.stroke();
+
+  // 胴体
+  ctx.fillStyle = `hsl(${(hue+120)%360}, 60%, 50%)`;
+  ctx.fillRect(-9, 14, 18, 14);
+
+  // 腕 (踊り)
+  ctx.strokeStyle = `hsl(${hue}, 70%, 75%)`;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  if (t === 0) {
+    // 左腕 上げる
+    ctx.beginPath(); ctx.moveTo(-9, 18); ctx.lineTo(-18, 8); ctx.stroke();
+    // 右腕 下げる
+    ctx.beginPath(); ctx.moveTo(9, 18); ctx.lineTo(18, 26); ctx.stroke();
+  } else {
+    // 左腕 下げる
+    ctx.beginPath(); ctx.moveTo(-9, 18); ctx.lineTo(-18, 26); ctx.stroke();
+    // 右腕 上げる
+    ctx.beginPath(); ctx.moveTo(9, 18); ctx.lineTo(18, 8); ctx.stroke();
+  }
+
+  // 足 (踊り)
+  ctx.strokeStyle = `hsl(${(hue+200)%360}, 50%, 40%)`;
+  ctx.lineWidth = 4;
+  if (t === 0) {
+    ctx.beginPath(); ctx.moveTo(-4, 28); ctx.lineTo(-8, 42); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4, 28); ctx.lineTo(10, 38); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(-4, 28); ctx.lineTo(-10, 38); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4, 28); ctx.lineTo(8, 42); ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+// プレイヤー宇宙船
+function drawPlayer() {
+  const px = player.x, py = player.y, pw = player.w, ph = player.h;
+  // 機体
+  ctx.fillStyle = '#0cf';
+  ctx.beginPath();
+  ctx.moveTo(px + pw/2, py - 12);
+  ctx.lineTo(px + pw, py + ph);
+  ctx.lineTo(px, py + ph);
+  ctx.closePath();
+  ctx.fill();
+  // エンジン炎
+  ctx.fillStyle = '#f80';
+  ctx.beginPath();
+  ctx.moveTo(px + pw/2 - 6, py + ph);
+  ctx.lineTo(px + pw/2, py + ph + 8 + Math.random()*6);
+  ctx.lineTo(px + pw/2 + 6, py + ph);
+  ctx.closePath();
+  ctx.fill();
+  // コックピット
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.ellipse(px + pw/2, py + 4, 5, 7, 0, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function initEnemies() {
+  enemies = [];
+  const hues = [0, 30, 60, 200];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      enemies.push({
+        x: 30 + c * (E_W + E_PAD_X),
+        y: 40 + r * (E_H + E_PAD_Y),
+        w: E_W, h: E_H,
+        alive: true,
+        row: r,
+        hue: hues[r]
+      });
+    }
+  }
+}
+
+initEnemies();
+
+const keys = {};
+document.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'Space') e.preventDefault();
+  if ((gameOver || cleared) && e.code === 'Space') restart();
+});
+document.addEventListener('keyup', e => keys[e.code] = false);
+
+function restart() {
+  score = 0; lives = 3;
+  bullets = []; enemyBullets = [];
+  gameOver = false; cleared = false;
+  player.x = W/2 - 22;
+  dir = 1; enemySpeed = 0.8;
+  msgEl.style.display = 'none';
+  initEnemies();
+  loop();
+}
+
+// 爆発エフェクト
+let explosions = [];
+function addExplosion(x, y) {
+  for (let i = 0; i < 10; i++) {
+    explosions.push({
+      x, y,
+      vx: (Math.random()-0.5)*5,
+      vy: (Math.random()-0.5)*5,
+      life: 20,
+      color: `hsl(${Math.random()*60},100%,60%)`
+    });
+  }
+}
+
+function updateExplosions() {
+  explosions = explosions.filter(p => p.life > 0);
+  explosions.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.life--;
+  });
+}
+
+function drawExplosions() {
+  explosions.forEach(p => {
+    ctx.globalAlpha = p.life / 20;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, 4, 4);
+  });
+  ctx.globalAlpha = 1;
+}
+
+function update() {
+  tick++;
+
+  if (keys['ArrowLeft']) player.x = Math.max(0, player.x - player.speed);
+  if (keys['ArrowRight']) player.x = Math.min(W - player.w, player.x + player.speed);
+
+  if (keys['Space'] && canShoot) {
+    bullets.push({ x: player.x + player.w/2 - 1, y: player.y });
+    canShoot = false;
+    setTimeout(() => canShoot = true, 280);
+  }
+
+  bullets = bullets.filter(b => b.y > 0);
+  bullets.forEach(b => b.y -= 9);
+
+  enemyBullets = enemyBullets.filter(b => b.y < H);
+  enemyBullets.forEach(b => b.y += 4);
+
+  const alive = enemies.filter(e => e.alive);
+  if (alive.length === 0) { cleared = true; return; }
+
+  let hitWall = false;
+  alive.forEach(e => {
+    e.x += dir * enemySpeed;
+    if (e.x <= 0 || e.x + e.w >= W) hitWall = true;
+  });
+  if (hitWall) {
+    dir *= -1;
+    alive.forEach(e => e.y += dropDist);
+    enemySpeed += 0.1;
+  }
+
+  alive.forEach(e => { if (e.y + e.h >= player.y) gameOver = true; });
+
+  enemyShootTimer++;
+  if (enemyShootTimer > 55) {
+    enemyShootTimer = 0;
+    const shooters = alive.filter(e =>
+      !alive.some(o => o.x === e.x && o.y > e.y)
+    );
+    if (shooters.length > 0) {
+      const s = shooters[Math.floor(Math.random() * shooters.length)];
+      enemyBullets.push({ x: s.x + s.w/2 - 1, y: s.y + s.h });
+    }
+  }
+
+  // 自弾 vs 敵
+  bullets.forEach(b => {
+    enemies.forEach(e => {
+      if (!e.alive) return;
+      if (b.x < e.x+e.w && b.x+3 > e.x && b.y < e.y+e.h && b.y+10 > e.y) {
+        e.alive = false;
+        b.y = -100;
+        score += 10;
+        scoreEl.textContent = score;
+        addExplosion(e.x + e.w/2, e.y + e.h/2);
+      }
+    });
+  });
+
+  // 敵弾 vs プレイヤー
+  enemyBullets.forEach(b => {
+    if (b.x < player.x+player.w && b.x+3 > player.x && b.y < player.y+player.h && b.y+10 > player.y) {
+      b.y = H + 100;
+      lives--;
+      livesEl.textContent = '❤️'.repeat(lives);
+      player.x = W/2 - 22;
+      if (lives <= 0) gameOver = true;
+    }
+  });
+
+  updateExplosions();
+}
+
+function draw() {
+  // 背景
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, W, H);
+
+  // 星
+  ctx.fillStyle = '#fff';
+  for (let i = 0; i < 80; i++) {
+    const sx = (i * 137 + 13) % W;
+    const sy = (i * 97 + 7) % H;
+    const blink = (tick + i*3) % 60 < 50 ? 1 : 0.3;
+    ctx.globalAlpha = blink * 0.6;
+    ctx.fillRect(sx, sy, 1.5, 1.5);
+  }
+  ctx.globalAlpha = 1;
+
+  // おじさん (2フレームで踊る)
+  const danceFrame = Math.floor(tick / 15) % 2;
+  enemies.filter(e => e.alive).forEach(e => drawOjisan(e.x, e.y, danceFrame, e.hue));
+
+  drawPlayer();
+
+  // 自弾
+  ctx.fillStyle = '#0ff';
+  bullets.forEach(b => {
+    ctx.fillRect(b.x, b.y, 3, 12);
+  });
+
+  // 敵弾 (おにぎり風)
+  ctx.fillStyle = '#f55';
+  enemyBullets.forEach(b => {
+    ctx.font = '14px serif';
+    ctx.fillText('🍙', b.x - 6, b.y + 10);
+  });
+
+  drawExplosions();
+}
+
+function loop() {
+  update();
+  draw();
+  if (gameOver) {
+    msgEl.innerHTML = '💀 GAME OVER 💀<br><span style="font-size:18px">スペースキーでリスタート</span>';
+    msgEl.style.display = 'block';
+    return;
+  }
+  if (cleared) {
+    msgEl.innerHTML = '🎉 おじさん全滅！ 🎉<br><span style="font-size:18px">スペースキーでリスタート</span>';
+    msgEl.style.display = 'block';
+    return;
+  }
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
