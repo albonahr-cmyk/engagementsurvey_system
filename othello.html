@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>オセロ</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: radial-gradient(ellipse at center, #1a3a2a 0%, #0a1a0f 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Helvetica Neue', sans-serif;
+  color: #fff;
+  user-select: none;
+}
+
+h1 {
+  font-size: 2.2rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 16px;
+  text-shadow: 0 0 20px rgba(100,255,150,0.5);
+  color: #a0ffb0;
+}
+
+#scoreboard {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 10px 24px;
+  min-width: 100px;
+  transition: all 0.3s;
+}
+.score-box.active {
+  border-color: #4f8;
+  box-shadow: 0 0 16px rgba(60,255,100,0.4);
+  transform: scale(1.05);
+}
+.score-disc {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.disc-black { background: radial-gradient(circle at 35% 35%, #555, #111); }
+.disc-white { background: radial-gradient(circle at 35% 35%, #fff, #bbb); }
+.score-label { font-size: 11px; color: #8ab; letter-spacing: 1px; }
+.score-num { font-size: 2rem; font-weight: bold; line-height: 1; }
+
+#status {
+  font-size: 1rem;
+  color: #cef;
+  margin-bottom: 14px;
+  height: 24px;
+  letter-spacing: 0.05em;
+}
+
+#board-wrap {
+  background: linear-gradient(135deg, #2a5a3a, #1a4028);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 2px solid rgba(100,200,120,0.3);
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(8, 62px);
+  grid-template-rows: repeat(8, 62px);
+  gap: 3px;
+  background: #1a3a22;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cell {
+  width: 62px; height: 62px;
+  background: radial-gradient(ellipse at 30% 30%, #2d7a40, #1e5a2e);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(0,0,0,0.3);
+}
+.cell:hover { background: radial-gradient(ellipse at 30% 30%, #3a8f4d, #256636); }
+
+/* 星マーク */
+.cell.star::before {
+  content: '';
+  position: absolute;
+  width: 7px; height: 7px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.disc {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  position: absolute;
+  transition: transform 0.08s;
+}
+.disc.black {
+  background: radial-gradient(circle at 35% 30%, #666, #111 60%);
+  box-shadow: 2px 4px 10px rgba(0,0,0,0.7), inset 0 1px 3px rgba(255,255,255,0.15);
+}
+.disc.white {
+  background: radial-gradient(circle at 35% 30%, #fff 30%, #d0d0d0 70%);
+  box-shadow: 2px 4px 10px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.8);
+}
+
+/* フリップアニメ */
+@keyframes flipToWhite {
+  0%   { transform: scaleX(1); }
+  49%  { transform: scaleX(0); background: radial-gradient(circle at 35% 30%, #666, #111 60%); }
+  50%  { transform: scaleX(0); background: radial-gradient(circle at 35% 30%, #fff 30%, #d0d0d0 70%); }
+  100% { transform: scaleX(1); }
+}
+@keyframes flipToBlack {
+  0%   { transform: scaleX(1); }
+  49%  { transform: scaleX(0); background: radial-gradient(circle at 35% 30%, #fff 30%, #d0d0d0 70%); }
+  50%  { transform: scaleX(0); background: radial-gradient(circle at 35% 30%, #666, #111 60%); }
+  100% { transform: scaleX(1); }
+}
+@keyframes placeDisc {
+  0%   { transform: scale(0); opacity: 0.5; }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.flip-to-white { animation: flipToWhite 0.35s ease forwards; }
+.flip-to-black { animation: flipToBlack 0.35s ease forwards; }
+.place-disc { animation: placeDisc 0.25s ease forwards; }
+
+/* ヒント */
+.hint {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  border: 2px solid rgba(255,255,255,0.3);
+  position: absolute;
+  pointer-events: none;
+}
+
+#controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+button {
+  padding: 10px 24px;
+  border: 1px solid rgba(100,255,150,0.4);
+  background: rgba(50,120,70,0.4);
+  color: #aff;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+button:hover {
+  background: rgba(80,180,100,0.5);
+  box-shadow: 0 0 12px rgba(60,255,100,0.3);
+}
+
+#ai-toggle {
+  padding: 10px 20px;
+  font-size: 13px;
+}
+#ai-toggle.on { border-color: #4f8; color: #4f8; }
+#ai-toggle.off { border-color: #f84; color: #f84; }
+
+#modal {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  align-items: center; justify-content: center;
+  z-index: 10;
+}
+#modal.show { display: flex; }
+#modal-box {
+  background: linear-gradient(135deg, #1e4a2c, #0f2a18);
+  border: 2px solid rgba(100,255,150,0.4);
+  border-radius: 20px;
+  padding: 40px 60px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+#modal-box h2 { font-size: 2.5rem; margin-bottom: 10px; color: #aff; }
+#modal-box p { font-size: 1.1rem; color: #cde; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<h1>OTHELLO</h1>
+
+<div id="scoreboard">
+  <div class="score-box" id="box-black">
+    <div class="score-disc disc-black"></div>
+    <div class="score-label">あなた（黒）</div>
+    <div class="score-num" id="score-black">2</div>
+  </div>
+  <div style="font-size:1.4rem; color:#6a9; padding:0 4px;">vs</div>
+  <div class="score-box" id="box-white">
+    <div class="score-disc disc-white"></div>
+    <div class="score-label" id="white-label">CPU（白）</div>
+    <div class="score-num" id="score-white">2</div>
+  </div>
+</div>
+
+<div id="status">あなたの番です</div>
+
+<div id="board-wrap">
+  <div id="board"></div>
+</div>
+
+<div id="controls">
+  <button onclick="newGame()">新しいゲーム</button>
+  <button id="ai-toggle" class="on" onclick="toggleAI()">CPU: ON</button>
+  <button onclick="toggleHints()">ヒント: ON</button>
+</div>
+
+<div id="modal">
+  <div id="modal-box">
+    <h2 id="modal-title"></h2>
+    <p id="modal-body"></p>
+    <button onclick="newGame(); closeModal();" style="font-size:16px; padding:12px 32px;">もう一度</button>
+  </div>
+</div>
+
+<script>
+const EMPTY = 0, BLACK = 1, WHITE = 2;
+const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+const STAR_CELLS = [[2,2],[2,6],[6,2],[6,6]];
+
+let board, current, aiEnabled = true, showHints = true, aiThinking = false;
+
+function newGame() {
+  board = Array.from({length:8}, () => Array(8).fill(EMPTY));
+  board[3][3] = WHITE; board[3][4] = BLACK;
+  board[4][3] = BLACK; board[4][4] = WHITE;
+  current = BLACK;
+  aiThinking = false;
+  updateStatus();
+  renderBoard();
+}
+
+function getFlips(b, r, c, color) {
+  const opp = color === BLACK ? WHITE : BLACK;
+  let flips = [];
+  for (const [dr, dc] of DIRS) {
+    let tmp = [], nr = r+dr, nc = c+dc;
+    while (nr>=0 && nr<8 && nc>=0 && nc<8 && b[nr][nc] === opp) {
+      tmp.push([nr, nc]); nr += dr; nc += dc;
+    }
+    if (tmp.length && nr>=0 && nr<8 && nc>=0 && nc<8 && b[nr][nc] === color) {
+      flips.push(...tmp);
+    }
+  }
+  return flips;
+}
+
+function validMoves(b, color) {
+  const moves = [];
+  for (let r=0; r<8; r++)
+    for (let c=0; c<8; c++)
+      if (b[r][c] === EMPTY && getFlips(b, r, c, color).length > 0)
+        moves.push([r, c]);
+  return moves;
+}
+
+function countScore(b) {
+  let black=0, white=0;
+  for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
+    if (b[r][c] === BLACK) black++;
+    else if (b[r][c] === WHITE) white++;
+  }
+  return {black, white};
+}
+
+// --- AI (minimax + α-β) ---
+const WEIGHT = [
+  [100,-20,10, 5, 5,10,-20,100],
+  [-20,-50,-2,-2,-2,-2,-50,-20],
+  [ 10, -2, 1, 0, 0, 1, -2, 10],
+  [  5, -2, 0, 0, 0, 0, -2,  5],
+  [  5, -2, 0, 0, 0, 0, -2,  5],
+  [ 10, -2, 1, 0, 0, 1, -2, 10],
+  [-20,-50,-2,-2,-2,-2,-50,-20],
+  [100,-20,10, 5, 5,10,-20,100],
+];
+
+function evaluate(b) {
+  let score = 0;
+  for (let r=0; r<8; r++) for (let c=0; c<8; c++) {
+    if (b[r][c] === WHITE) score += WEIGHT[r][c];
+    else if (b[r][c] === BLACK) score -= WEIGHT[r][c];
+  }
+  return score;
+}
+
+function minimax(b, depth, alpha, beta, color) {
+  const moves = validMoves(b, color);
+  const opp = color === BLACK ? WHITE : BLACK;
+  if (depth === 0 || (moves.length === 0 && validMoves(b, opp).length === 0)) {
+    return evaluate(b);
+  }
+  if (moves.length === 0) return minimax(b, depth-1, alpha, beta, opp);
+
+  if (color === WHITE) {
+    let best = -Infinity;
+    for (const [r, c] of moves) {
+      const nb = b.map(row => [...row]);
+      const flips = getFlips(nb, r, c, color);
+      nb[r][c] = color;
+      flips.forEach(([fr, fc]) => nb[fr][fc] = color);
+      best = Math.max(best, minimax(nb, depth-1, alpha, beta, opp));
+      alpha = Math.max(alpha, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const [r, c] of moves) {
+      const nb = b.map(row => [...row]);
+      const flips = getFlips(nb, r, c, color);
+      nb[r][c] = color;
+      flips.forEach(([fr, fc]) => nb[fr][fc] = color);
+      best = Math.min(best, minimax(nb, depth-1, alpha, beta, opp));
+      beta = Math.min(beta, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+function aiMove() {
+  const moves = validMoves(board, WHITE);
+  if (moves.length === 0) return;
+  let best = -Infinity, bestMove = moves[0];
+  for (const [r, c] of moves) {
+    const nb = board.map(row => [...row]);
+    const flips = getFlips(nb, r, c, WHITE);
+    nb[r][c] = WHITE;
+    flips.forEach(([fr, fc]) => nb[fr][fc] = WHITE);
+    const val = minimax(nb, 4, -Infinity, Infinity, BLACK);
+    if (val > best) { best = val; bestMove = [r, c]; }
+  }
+  placeDisc(...bestMove, WHITE);
+}
+
+// --- 描画 ---
+function renderBoard() {
+  const boardEl = document.getElementById('board');
+  boardEl.innerHTML = '';
+  const hints = showHints && !aiThinking ? validMoves(board, current) : [];
+  const hintSet = new Set(hints.map(([r,c]) => r+','+c));
+
+  for (let r=0; r<8; r++) {
+    for (let c=0; c<8; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if (STAR_CELLS.some(([sr,sc]) => sr===r && sc===c)) cell.classList.add('star');
+
+      if (board[r][c] !== EMPTY) {
+        const disc = document.createElement('div');
+        disc.className = 'disc ' + (board[r][c] === BLACK ? 'black' : 'white');
+        cell.appendChild(disc);
+      } else if (hintSet.has(r+','+c)) {
+        const hint = document.createElement('div');
+        hint.className = 'hint';
+        cell.appendChild(hint);
+      }
+
+      cell.addEventListener('click', () => handleClick(r, c));
+      boardEl.appendChild(cell);
+    }
+  }
+
+  const {black, white} = countScore(board);
+  document.getElementById('score-black').textContent = black;
+  document.getElementById('score-white').textContent = white;
+
+  document.getElementById('box-black').classList.toggle('active', current === BLACK);
+  document.getElementById('box-white').classList.toggle('active', current === WHITE);
+}
+
+function handleClick(r, c) {
+  if (aiThinking || current !== BLACK) return;
+  if (board[r][c] !== EMPTY) return;
+  const flips = getFlips(board, r, c, BLACK);
+  if (flips.length === 0) return;
+  placeDisc(r, c, BLACK);
+}
+
+async function placeDisc(r, c, color) {
+  const flips = getFlips(board, r, c, color);
+  board[r][c] = color;
+  flips.forEach(([fr, fc]) => board[fr][fc] = color);
+
+  // アニメーション
+  renderBoard();
+  // 置いた石
+  const idx = r*8 + c;
+  const cells = document.querySelectorAll('.cell');
+  const placed = cells[idx].querySelector('.disc');
+  if (placed) placed.classList.add('place-disc');
+  // ひっくり返す石
+  for (let i = 0; i < flips.length; i++) {
+    const [fr, fc] = flips[i];
+    const flipDisc = cells[fr*8+fc].querySelector('.disc');
+    if (flipDisc) {
+      await delay(i * 60);
+      flipDisc.classList.add(color === WHITE ? 'flip-to-white' : 'flip-to-black');
+    }
+  }
+  await delay(flips.length * 60 + 150);
+
+  // ターン交代
+  const opp = color === BLACK ? WHITE : BLACK;
+  const oppMoves = validMoves(board, opp);
+  const myMoves = validMoves(board, color);
+
+  if (oppMoves.length === 0 && myMoves.length === 0) {
+    endGame();
+    return;
+  }
+  if (oppMoves.length === 0) {
+    current = color;
+    updateStatus(`${color === BLACK ? '白' : '黒'}はパスです`);
+    renderBoard();
+    if (aiEnabled && color === WHITE) scheduleAI();
+    return;
+  }
+
+  current = opp;
+  updateStatus();
+  renderBoard();
+
+  if (aiEnabled && current === WHITE) scheduleAI();
+}
+
+function scheduleAI() {
+  aiThinking = true;
+  updateStatus('CPUが考えています...');
+  renderBoard();
+  setTimeout(() => {
+    aiMove();
+    aiThinking = false;
+  }, 500);
+}
+
+function updateStatus(msg) {
+  const el = document.getElementById('status');
+  if (msg) { el.textContent = msg; return; }
+  if (current === BLACK) el.textContent = 'あなた（黒）の番です';
+  else el.textContent = aiEnabled ? 'CPUの番です...' : '白の番です';
+}
+
+function endGame() {
+  const {black, white} = countScore(board);
+  let title, body;
+  if (black > white) { title = '🎉 あなたの勝ち！'; body = `黒 ${black} - 白 ${white}`; }
+  else if (white > black) { title = '😢 CPUの勝ち'; body = `黒 ${black} - 白 ${white}`; }
+  else { title = '🤝 引き分け'; body = `${black} - ${white}`; }
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent = body;
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('status').textContent = 'ゲーム終了';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function toggleAI() {
+  aiEnabled = !aiEnabled;
+  const btn = document.getElementById('ai-toggle');
+  btn.textContent = 'CPU: ' + (aiEnabled ? 'ON' : 'OFF');
+  btn.className = aiEnabled ? 'on' : 'off';
+  document.getElementById('white-label').textContent = aiEnabled ? 'CPU（白）' : '白';
+  if (aiEnabled && current === WHITE && !aiThinking) scheduleAI();
+}
+
+let hintsOn = true;
+function toggleHints() {
+  hintsOn = !hintsOn;
+  showHints = hintsOn;
+  document.querySelector('button:nth-child(3)').textContent = 'ヒント: ' + (hintsOn ? 'ON' : 'OFF');
+  renderBoard();
+}
+
+newGame();
+</script>
+</body>
+</html>

@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>エンゲージメントサーベイ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f4f8; color: #333; }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
+  .card { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 40px; }
+  .btn { padding: 12px 28px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: #4f46e5; color: white; }
+  .btn-primary:hover { background: #4338ca; }
+  .btn-secondary { background: #e5e7eb; color: #374151; }
+  .btn-secondary:hover { background: #d1d5db; }
+  .btn-sm { padding: 6px 14px; font-size: 13px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .badge-alert { background: #fef2f2; color: #dc2626; }
+  .badge-ok { background: #f0fdf4; color: #16a34a; }
+  .badge-warn { background: #fffbeb; color: #d97706; }
+
+  /* ログイン */
+  #screen-login { align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  #screen-login .card { width: 400px; text-align: center; }
+  #screen-login h1 { font-size: 22px; margin-bottom: 6px; color: #1f2937; }
+  #screen-login > .card > p { color: #6b7280; margin-bottom: 28px; font-size: 14px; }
+  #screen-login input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; text-align: center; letter-spacing: 4px; margin-bottom: 16px; transition: border-color 0.2s; }
+  #screen-login input:focus { outline: none; border-color: #4f46e5; }
+  .login-error { color: #dc2626; font-size: 13px; margin-top: 8px; }
+  .demo-ids { margin-top: 24px; padding: 16px; background: #f9fafb; border-radius: 8px; text-align: left; }
+  .demo-ids p { font-size: 12px; color: #9ca3af; margin-bottom: 6px; }
+  .demo-ids code { font-size: 13px; color: #4f46e5; font-weight: 600; cursor: pointer; }
+
+  /* サーベイ */
+  #screen-survey { align-items: flex-start; justify-content: center; padding: 40px 20px; }
+  #screen-survey .card { width: 100%; max-width: 640px; }
+  .survey-header { margin-bottom: 32px; }
+  .survey-header h2 { font-size: 20px; color: #1f2937; }
+  .survey-header p { color: #6b7280; font-size: 14px; margin-top: 4px; }
+  .progress-bar { height: 6px; background: #e5e7eb; border-radius: 3px; margin-top: 16px; }
+  .progress-fill { height: 100%; background: #4f46e5; border-radius: 3px; transition: width 0.3s; }
+  .question-block { margin-bottom: 32px; }
+  .question-block .category { font-size: 11px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .question-block .question { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: #1f2937; }
+  .rating-scale { display: flex; gap: 8px; }
+  .rating-btn { flex: 1; padding: 10px 4px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; text-align: center; font-size: 13px; font-weight: 600; transition: all 0.15s; color: #6b7280; }
+  .rating-btn:hover { border-color: #4f46e5; color: #4f46e5; }
+  .rating-btn.selected { border-color: #4f46e5; background: #4f46e5; color: white; }
+  .rating-labels { display: flex; justify-content: space-between; margin-top: 6px; }
+  .rating-labels span { font-size: 11px; color: #9ca3af; }
+  .free-text textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 100px; font-family: inherit; transition: border-color 0.2s; }
+  .free-text textarea:focus { outline: none; border-color: #4f46e5; }
+  .survey-footer { display: flex; justify-content: space-between; margin-top: 8px; }
+
+  /* 完了 */
+  #screen-done { align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  #screen-done .card { width: 400px; text-align: center; }
+  .done-icon { font-size: 64px; margin-bottom: 16px; }
+  #screen-done h2 { font-size: 22px; color: #1f2937; margin-bottom: 8px; }
+  #screen-done p { color: #6b7280; font-size: 14px; }
+
+  /* 管理者共通 */
+  #screen-admin { flex-direction: column; }
+  .admin-nav { background: #1e1b4b; color: white; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 60px; flex-shrink: 0; }
+  .admin-nav .logo { font-size: 16px; font-weight: 700; }
+  .admin-nav .user-info { font-size: 13px; color: #a5b4fc; display: flex; align-items: center; gap: 12px; }
+  .admin-nav .logout-btn { background: rgba(255,255,255,0.1); color: white; padding: 6px 14px; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; }
+
+  /* タブ */
+  .admin-tabs { background: white; border-bottom: 1px solid #e5e7eb; padding: 0 32px; display: flex; gap: 0; flex-shrink: 0; }
+  .tab-btn { padding: 14px 24px; background: none; border: none; border-bottom: 3px solid transparent; font-size: 14px; font-weight: 600; color: #6b7280; cursor: pointer; transition: all 0.2s; }
+  .tab-btn.active { color: #4f46e5; border-bottom-color: #4f46e5; }
+  .tab-btn:hover { color: #4f46e5; }
+
+  .admin-body { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; overflow-y: auto; }
+
+  /* 月セレクター */
+  .month-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .month-selector label { font-size: 14px; font-weight: 600; color: #374151; }
+  .month-selector select { padding: 8px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; color: #374151; cursor: pointer; }
+  .month-selector select:focus { outline: none; border-color: #4f46e5; }
+
+  /* KPIカード */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .stat-card .label { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; color: #1f2937; }
+  .stat-card .sub { font-size: 12px; margin-top: 4px; }
+  .stat-card .sub.up { color: #16a34a; }
+  .stat-card .sub.down { color: #dc2626; }
+  .stat-card .sub.neutral { color: #6b7280; }
+
+  .section-title { font-size: 17px; font-weight: 700; color: #1f2937; margin-bottom: 16px; }
+
+  /* カテゴリスコア */
+  .category-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .score-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .score-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .score-card-header .cat-name { font-size: 14px; font-weight: 600; color: #374151; }
+  .score-card-header .score-num { font-size: 22px; font-weight: 700; }
+  .score-card-header .score-num.alert { color: #dc2626; }
+  .score-card-header .score-num.warn { color: #d97706; }
+  .score-card-header .score-num.ok { color: #16a34a; }
+  .score-bar-wrap { height: 8px; background: #f3f4f6; border-radius: 4px; }
+  .score-bar { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .score-bar.alert { background: #ef4444; }
+  .score-bar.warn { background: #f59e0b; }
+  .score-bar.ok { background: #22c55e; }
+  .score-trend { font-size: 12px; color: #6b7280; margin-top: 8px; }
+  .score-trend .down { color: #dc2626; font-weight: 600; }
+  .score-trend .up { color: #16a34a; font-weight: 600; }
+  .mini-chart { display: flex; align-items: flex-end; gap: 4px; height: 40px; margin-top: 10px; }
+  .mini-bar { flex: 1; border-radius: 3px 3px 0 0; }
+
+  /* アラート */
+  .alert-section { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 32px; }
+  .alert-item { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+  .alert-item:last-child { border-bottom: none; }
+  .alert-icon { font-size: 20px; }
+  .alert-content .title { font-size: 14px; font-weight: 600; color: #1f2937; }
+  .alert-content .detail { font-size: 12px; color: #6b7280; margin-top: 2px; }
+  .no-alert { text-align: center; padding: 24px; color: #6b7280; font-size: 14px; }
+
+  /* 回答一覧テーブル */
+  .response-table { background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 32px; }
+  .response-table table { width: 100%; border-collapse: collapse; }
+  .response-table th { background: #f9fafb; padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; }
+  .response-table td { padding: 12px 16px; font-size: 14px; border-top: 1px solid #f3f4f6; }
+  .response-table tr.clickable:hover td { background: #f0f4ff; cursor: pointer; }
+  .detail-link { color: #4f46e5; font-size: 13px; font-weight: 600; background: none; border: none; cursor: pointer; text-decoration: underline; }
+
+  /* 社員詳細画面 */
+  #screen-detail { flex-direction: column; }
+  .detail-body { padding: 32px; max-width: 1000px; margin: 0 auto; width: 100%; }
+  .detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .detail-header .back-btn { background: none; border: 2px solid #e5e7eb; border-radius: 8px; padding: 8px 16px; font-size: 14px; cursor: pointer; color: #374151; }
+  .detail-header .back-btn:hover { border-color: #4f46e5; color: #4f46e5; }
+  .detail-header h2 { font-size: 22px; font-weight: 700; color: #1f2937; }
+  .detail-header .dept-badge { background: #ede9fe; color: #7c3aed; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+
+  /* SVGライングラフ */
+  .chart-card { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
+  .chart-card h3 { font-size: 15px; font-weight: 700; color: #1f2937; margin-bottom: 16px; }
+  .svg-chart { width: 100%; overflow: visible; }
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #374151; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* 月別カテゴリ表 */
+  .monthly-table-card { background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 24px; }
+  .monthly-table-card h3 { font-size: 15px; font-weight: 700; color: #1f2937; padding: 20px 24px 0; }
+  .monthly-table-card table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .monthly-table-card th { background: #f9fafb; padding: 10px 16px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280; }
+  .monthly-table-card th:first-child { text-align: left; }
+  .monthly-table-card td { padding: 10px 16px; font-size: 13px; border-top: 1px solid #f3f4f6; text-align: center; font-weight: 600; }
+  .monthly-table-card td:first-child { text-align: left; color: #374151; }
+  .cell-ok { color: #16a34a; }
+  .cell-warn { color: #d97706; }
+  .cell-alert { color: #dc2626; }
+  .cell-diff-up { color: #16a34a; font-size: 11px; }
+  .cell-diff-down { color: #dc2626; font-size: 11px; }
+
+  /* アラート履歴 */
+  .alert-history { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
+  .alert-history h3 { font-size: 15px; font-weight: 700; color: #1f2937; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ログイン -->
+<div id="screen-login" class="screen active">
+  <div class="card">
+    <h1>月次エンゲージメントサーベイ</h1>
+    <p>2026年3月 回答期間：3/1〜3/15</p>
+    <input type="text" id="login-id" placeholder="社員ID を入力" maxlength="6">
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">ログイン</button>
+    <p class="login-error" id="login-error"></p>
+    <div class="demo-ids">
+      <p>▼ デモ用ID（クリックで入力）</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+        <code onclick="setId('EMP001')">EMP001</code>
+        <code onclick="setId('EMP042')">EMP042</code>
+        <code onclick="setId('EMP099')">EMP099</code>
+        <code onclick="setId('ADMIN')" style="color:#7c3aed">ADMIN（管理者）</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- サーベイ -->
+<div id="screen-survey" class="screen">
+  <div class="card">
+    <div class="survey-header">
+      <h2>2026年3月 エンゲージメントサーベイ</h2>
+      <p id="survey-user-name"></p>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div id="questions-container"></div>
+    <div class="survey-footer">
+      <button class="btn btn-secondary" id="btn-back" onclick="prevPage()" style="display:none">← 戻る</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextPage()">次へ →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 完了 -->
+<div id="screen-done" class="screen">
+  <div class="card">
+    <div class="done-icon">✅</div>
+    <h2>回答が完了しました</h2>
+    <p style="margin-top:8px">ご協力ありがとうございます。<br>結果は人事部が集計し、来月にフィードバックします。</p>
+    <button class="btn btn-primary" style="margin-top:28px;width:100%" onclick="goToLogin()">ログアウト</button>
+  </div>
+</div>
+
+<!-- 管理者ダッシュボード -->
+<div id="screen-admin" class="screen">
+  <nav class="admin-nav">
+    <div class="logo">エンゲージメントサーベイ 管理画面</div>
+    <div class="user-info">
+      <span>人事部 管理者</span>
+      <button class="logout-btn" onclick="goToLogin()">ログアウト</button>
+    </div>
+  </nav>
+  <div class="admin-tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard', this)">月次ダッシュボード</button>
+    <button class="tab-btn" onclick="switchTab('employees', this)">社員一覧</button>
+  </div>
+
+  <!-- 月次ダッシュボード -->
+  <div id="tab-dashboard" class="admin-body">
+    <div class="month-selector">
+      <label>表示月：</label>
+      <select id="month-select" onchange="renderDashboard()">
+        <option value="2025-10">2025年10月</option>
+        <option value="2025-11">2025年11月</option>
+        <option value="2025-12">2025年12月</option>
+        <option value="2026-01">2026年1月</option>
+        <option value="2026-02">2026年2月</option>
+        <option value="2026-03" selected>2026年3月</option>
+      </select>
+    </div>
+    <div class="stats-grid" id="kpi-grid"></div>
+    <div class="section-title">⚠️ アラート</div>
+    <div class="alert-section" id="alert-list"></div>
+    <div class="section-title">カテゴリ別スコア</div>
+    <div class="category-scores" id="category-grid"></div>
+  </div>
+
+  <!-- 社員一覧 -->
+  <div id="tab-employees" class="admin-body" style="display:none">
+    <div class="month-selector">
+      <label>表示月：</label>
+      <select id="emp-month-select" onchange="renderEmployeeList()">
+        <option value="2025-10">2025年10月</option>
+        <option value="2025-11">2025年11月</option>
+        <option value="2025-12">2025年12月</option>
+        <option value="2026-01">2026年1月</option>
+        <option value="2026-02">2026年2月</option>
+        <option value="2026-03" selected>2026年3月</option>
+      </select>
+    </div>
+    <div class="section-title">社員別スコア一覧</div>
+    <div class="response-table" id="emp-table"></div>
+  </div>
+</div>
+
+<!-- 社員詳細 -->
+<div id="screen-detail" class="screen">
+  <nav class="admin-nav">
+    <div class="logo">エンゲージメントサーベイ 管理画面</div>
+    <div class="user-info">
+      <span>人事部 管理者</span>
+      <button class="logout-btn" onclick="goToLogin()">ログアウト</button>
+    </div>
+  </nav>
+  <div class="detail-body">
+    <div class="detail-header">
+      <button class="back-btn" onclick="backToAdmin()">← 一覧に戻る</button>
+      <h2 id="detail-name"></h2>
+      <span class="dept-badge" id="detail-dept"></span>
+      <span id="detail-status-badge"></span>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<script>
+// ===== マスタデータ =====
+const employees = {
+  'EMP001': { name: '田中 一郎', dept: '営業部' },
+  'EMP042': { name: '鈴木 花子', dept: '開発部' },
+  'EMP099': { name: '佐藤 次郎', dept: '総務部' },
+  'EMP017': { name: '山田 美咲', dept: '営業部' },
+  'EMP058': { name: '伊藤 健太', dept: '開発部' },
+  'EMP033': { name: '中村 陽子', dept: 'マーケ部' },
+  'EMP071': { name: '小林 拓也', dept: '総務部' },
+  'EMP088': { name: '渡辺 さくら', dept: 'マーケ部' },
+};
+
+const categories = ['仕事のやりがい', '上司との関係性', 'チームワーク', '業務量・残業', '会社への信頼', '成長・キャリア'];
+const months = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03'];
+const monthLabels = { '2025-10':'10月', '2025-11':'11月', '2025-12':'12月', '2026-01':'1月', '2026-02':'2月', '2026-03':'3月' };
+
+// 月次・社員別スコアデータ（モック）
+const empData = {
+  'EMP001': {
+    '2025-10': { やりがい:82, 上司:80, チーム:78, 業務:72, 信頼:75, 成長:80 },
+    '2025-11': { やりがい:80, 上司:79, チーム:80, 業務:70, 信頼:74, 成長:78 },
+    '2025-12': { やりがい:78, 上司:78, チーム:76, 業務:68, 信頼:72, 成長:76 },
+    '2026-01': { やりがい:76, 上司:78, チーム:75, 業務:66, 信頼:70, 成長:74 },
+    '2026-02': { やりがい:75, 上司:78, チーム:74, 業務:65, 信頼:70, 成長:73 },
+    '2026-03': { やりがい:70, 上司:45, チーム:72, 業務:60, 信頼:62, 成長:71 },
+  },
+  'EMP042': {
+    '2025-10': { やりがい:72, 上司:74, チーム:80, 業務:68, 信頼:70, 成長:72 },
+    '2025-11': { やりがい:74, 上司:75, チーム:82, 業務:66, 信頼:71, 成長:73 },
+    '2025-12': { やりがい:74, 上司:76, チーム:83, 業務:65, 信頼:72, 成長:74 },
+    '2026-01': { やりがい:75, 上司:77, チーム:84, 業務:64, 信頼:72, 成長:75 },
+    '2026-02': { やりがい:76, 上司:77, チーム:83, 業務:66, 信頼:73, 成長:75 },
+    '2026-03': { やりがい:78, 上司:79, チーム:85, 業務:67, 信頼:74, 成長:76 },
+  },
+  'EMP099': {
+    '2025-10': { やりがい:78, 上司:80, チーム:76, 業務:76, 信頼:78, 成長:76 },
+    '2025-11': { やりがい:79, 上司:80, チーム:78, 業務:76, 信頼:79, 成長:77 },
+    '2025-12': { やりがい:80, 上司:81, チーム:79, 業務:77, 信頼:79, 成長:78 },
+    '2026-01': { やりがい:81, 上司:82, チーム:80, 業務:78, 信頼:80, 成長:79 },
+    '2026-02': { やりがい:80, 上司:82, チーム:80, 業務:78, 信頼:80, 成長:79 },
+    '2026-03': { やりがい:82, 上司:84, チーム:82, 業務:80, 信頼:82, 成長:81 },
+  },
+  'EMP017': {
+    '2025-10': { やりがい:74, 上司:76, チーム:72, 業務:70, 信頼:72, 成長:70 },
+    '2025-11': { やりがい:73, 上司:75, チーム:71, 業務:68, 信頼:71, 成長:69 },
+    '2025-12': { やりがい:71, 上司:73, チーム:70, 業務:66, 信頼:70, 成長:68 },
+    '2026-01': { やりがい:68, 上司:70, チーム:68, 業務:62, 信頼:67, 成長:66 },
+    '2026-02': { やりがい:65, 上司:68, チーム:66, 業務:60, 信頼:65, 成長:64 },
+    '2026-03': { やりがい:60, 上司:52, チーム:62, 業務:52, 信頼:58, 成長:61 },
+  },
+  'EMP058': {
+    '2025-10': { やりがい:76, 上司:78, チーム:80, 業務:74, 信頼:74, 成長:76 },
+    '2025-11': { やりがい:75, 上司:77, チーム:79, 業務:72, 信頼:73, 成長:75 },
+    '2025-12': { やりがい:74, 上司:76, チーム:78, 業務:68, 信頼:72, 成長:74 },
+    '2026-01': { やりがい:74, 上司:75, チーム:77, 業務:65, 信頼:71, 成長:73 },
+    '2026-02': { やりがい:73, 上司:74, チーム:77, 業務:63, 信頼:70, 成長:72 },
+    '2026-03': { やりがい:72, 上司:74, チーム:76, 業務:55, 信頼:68, 成長:71 },
+  },
+  'EMP033': {
+    '2025-10': { やりがい:80, 上司:82, チーム:84, 業務:78, 信頼:80, 成長:80 },
+    '2025-11': { やりがい:81, 上司:82, チーム:84, 業務:79, 信頼:81, 成長:80 },
+    '2025-12': { やりがい:82, 上司:83, チーム:85, 業務:80, 信頼:82, 成長:81 },
+    '2026-01': { やりがい:82, 上司:84, チーム:85, 業務:80, 信頼:82, 成長:82 },
+    '2026-02': { やりがい:83, 上司:84, チーム:86, 業務:81, 信頼:83, 成長:82 },
+    '2026-03': { やりがい:84, 上司:85, チーム:87, 業務:82, 信頼:84, 成長:83 },
+  },
+  'EMP071': {
+    '2025-10': { やりがい:68, 上司:70, チーム:72, 業務:66, 信頼:68, 成長:66 },
+    '2025-11': { やりがい:69, 上司:70, チーム:72, 業務:66, 信頼:68, 成長:67 },
+    '2025-12': { やりがい:70, 上司:71, チーム:73, 業務:67, 信頼:69, 成長:68 },
+    '2026-01': { やりがい:70, 上司:72, チーム:73, 業務:67, 信頼:69, 成長:68 },
+    '2026-02': { やりがい:71, 上司:72, チーム:74, 業務:68, 信頼:70, 成長:69 },
+    '2026-03': { やりがい:72, 上司:73, チーム:75, 業務:69, 信頼:71, 成長:70 },
+  },
+  'EMP088': {
+    '2025-10': { やりがい:85, 上司:86, チーム:88, 業務:82, 信頼:84, 成長:84 },
+    '2025-11': { やりがい:84, 上司:86, チーム:88, 業務:82, 信頼:84, 成長:84 },
+    '2025-12': { やりがい:85, 上司:86, チーム:88, 業務:83, 信頼:85, 成長:84 },
+    '2026-01': { やりがい:85, 上司:87, チーム:89, 業務:83, 信頼:85, 成長:85 },
+    '2026-02': { やりがい:86, 上司:87, チーム:89, 業務:84, 信頼:86, 成長:85 },
+    '2026-03': { やりがい:86, 上司:88, チーム:90, 業務:84, 信頼:86, 成長:86 },
+  },
+};
+
+const catKeys = ['やりがい', '上司', 'チーム', '業務', '信頼', '成長'];
+const catNames = { やりがい:'仕事のやりがい', 上司:'上司との関係性', チーム:'チームワーク', 業務:'業務量・残業', 信頼:'会社への信頼', 成長:'成長・キャリア' };
+
+function getTotal(scores) {
+  const vals = Object.values(scores);
+  return Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
+}
+
+function getStatus(score, diff) {
+  if (diff <= -10 || score < 60) return 'alert';
+  if (diff <= -5 || score < 70) return 'warn';
+  return 'ok';
+}
+
+function getMonthData(month) {
+  const prev = months[months.indexOf(month) - 1];
+  const cats = {};
+  catKeys.forEach(k => {
+    const scores = Object.values(empData).map(e => e[month]?.[k] || 0).filter(v => v > 0);
+    cats[k] = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+  });
+  const prevCats = prev ? (() => {
+    const pc = {};
+    catKeys.forEach(k => {
+      const scores = Object.values(empData).map(e => e[prev]?.[k] || 0).filter(v => v > 0);
+      pc[k] = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+    });
+    return pc;
+  })() : null;
+  const total = Math.round(Object.values(cats).reduce((a,b) => a+b, 0) / catKeys.length);
+  const prevTotal = prevCats ? Math.round(Object.values(prevCats).reduce((a,b) => a+b, 0) / catKeys.length) : null;
+  return { cats, prevCats, total, prevTotal };
+}
+
+// ===== ダッシュボード描画 =====
+function renderDashboard() {
+  const month = document.getElementById('month-select').value;
+  const { cats, prevCats, total, prevTotal } = getMonthData(month);
+  const respRate = { '2025-10':80, '2025-11':82, '2025-12':84, '2026-01':85, '2026-02':82, '2026-03':87 };
+  const respCount = Math.round(200 * respRate[month] / 100);
+  const prevRate = months[months.indexOf(month)-1] ? respRate[months[months.indexOf(month)-1]] : null;
+
+  // KPI
+  const kpi = document.getElementById('kpi-grid');
+  const totalDiff = prevTotal !== null ? total - prevTotal : null;
+  const rateDiff = prevRate !== null ? respRate[month] - prevRate : null;
+
+  // アラートカウント
+  let alertCount = 0;
+  if (prevCats) {
+    catKeys.forEach(k => {
+      if (cats[k] - prevCats[k] <= -10 || cats[k] < 60) alertCount++;
+    });
+  }
+
+  kpi.innerHTML = `
+    <div class="stat-card"><div class="label">回答率</div><div class="value">${respRate[month]}%</div>
+      <div class="sub ${rateDiff > 0 ? 'up' : rateDiff < 0 ? 'down' : 'neutral'}">${rateDiff !== null ? (rateDiff > 0 ? '↑' : '↓') + ' 前月比 ' + (rateDiff > 0 ? '+' : '') + rateDiff + '%' : '初回データ'}</div></div>
+    <div class="stat-card"><div class="label">総合スコア</div><div class="value">${total}点</div>
+      <div class="sub ${totalDiff > 0 ? 'up' : totalDiff < 0 ? 'down' : 'neutral'}">${totalDiff !== null ? (totalDiff > 0 ? '↑ +' : '↓ ') + totalDiff + '点' : '初回データ'}</div></div>
+    <div class="stat-card"><div class="label">回答人数</div><div class="value">${respCount}名</div>
+      <div class="sub neutral">対象 200名</div></div>
+    <div class="stat-card"><div class="label">⚠️ アラート件数</div><div class="value" style="color:${alertCount > 0 ? '#dc2626' : '#16a34a'}">${alertCount}件</div>
+      <div class="sub ${alertCount > 0 ? 'down' : 'up'}">${alertCount > 0 ? '要対応あり' : '問題なし'}</div></div>
+  `;
+
+  // アラート
+  const alertList = document.getElementById('alert-list');
+  if (!prevCats) {
+    alertList.innerHTML = '<div class="no-alert">前月データがないためアラート判定できません</div>';
+  } else {
+    const alerts = [];
+    catKeys.forEach(k => {
+      const diff = cats[k] - prevCats[k];
+      if (diff <= -10) alerts.push({ icon:'🔴', name: catNames[k], score: cats[k], prev: prevCats[k], diff, type:'急落' });
+      else if (diff <= -5) alerts.push({ icon:'🟡', name: catNames[k], score: cats[k], prev: prevCats[k], diff, type:'低下' });
+      else if (cats[k] < 60) alerts.push({ icon:'🟡', name: catNames[k], score: cats[k], prev: prevCats[k], diff, type:'基準値割れ' });
+    });
+    if (alerts.length === 0) {
+      alertList.innerHTML = '<div class="no-alert">✅ 今月はアラートなし</div>';
+    } else {
+      alertList.innerHTML = alerts.map(a => `
+        <div class="alert-item">
+          <div class="alert-icon">${a.icon}</div>
+          <div class="alert-content">
+            <div class="title">「${a.name}」スコア${a.type}</div>
+            <div class="detail">前月 ${a.prev}点 → 今月 ${a.score}点（${a.diff > 0 ? '+' : ''}${a.diff}点）</div>
+          </div>
+          <span class="badge ${a.diff <= -10 ? 'badge-alert' : 'badge-warn'}" style="margin-left:auto">${a.diff > 0 ? '+' : ''}${a.diff}点</span>
+        </div>`).join('');
+    }
+  }
+
+  // カテゴリスコア
+  const catGrid = document.getElementById('category-grid');
+  catGrid.innerHTML = catKeys.map((k, i) => {
+    const score = cats[k];
+    const prev = prevCats ? prevCats[k] : null;
+    const diff = prev !== null ? score - prev : null;
+    const status = prev !== null ? getStatus(score, diff) : (score < 60 ? 'alert' : score < 70 ? 'warn' : 'ok');
+    const alert = status !== 'ok' ? ' ⚠️' : '';
+    const pastScores = months.slice(0, months.indexOf(month) + 1).map(m => {
+      const s = Object.values(empData).map(e => e[m]?.[k] || 0).filter(v => v > 0);
+      return Math.round(s.reduce((a,b) => a+b, 0) / s.length);
+    }).slice(-6);
+    const maxS = Math.max(...pastScores);
+    return `
+      <div class="score-card">
+        <div class="score-card-header">
+          <span class="cat-name">${catNames[k]}</span>
+          <span class="score-num ${status}">${score}点${alert}</span>
+        </div>
+        <div class="score-bar-wrap"><div class="score-bar ${status}" style="width:${score}%"></div></div>
+        <div class="score-trend">前月比 ${diff !== null ? `<span class="${diff >= 0 ? 'up' : 'down'}">${diff > 0 ? '+' : ''}${diff}点</span>` : '初回'}</div>
+        <div class="mini-chart">${pastScores.map(v => `<div class="mini-bar" style="height:${(v/maxS)*100}%;background:${status==='alert'?'#ef4444':status==='warn'?'#f59e0b':'#22c55e'};opacity:0.7"></div>`).join('')}</div>
+      </div>`;
+  }).join('');
+}
+
+// ===== 社員一覧描画 =====
+function renderEmployeeList() {
+  const month = document.getElementById('emp-month-select').value;
+  const prev = months[months.indexOf(month) - 1];
+  const rows = Object.entries(empData).map(([id, data]) => {
+    const scores = data[month];
+    if (!scores) return null;
+    const total = getTotal(scores);
+    const prevTotal = prev && data[prev] ? getTotal(data[prev]) : null;
+    const diff = prevTotal !== null ? total - prevTotal : null;
+    const status = diff !== null ? getStatus(total, diff) : (total < 60 ? 'alert' : total < 70 ? 'warn' : 'ok');
+    return { id, name: employees[id]?.name || id, dept: employees[id]?.dept || '', total, diff, status };
+  }).filter(Boolean).sort((a,b) => a.total - b.total);
+
+  const table = document.getElementById('emp-table');
+  table.innerHTML = `<table>
+    <thead><tr>
+      <th>社員ID</th><th>氏名</th><th>所属</th><th>総合スコア</th><th>前月比</th><th>ステータス</th><th>詳細</th>
+    </tr></thead>
+    <tbody>${rows.map(r => `
+      <tr class="clickable" onclick="showDetail('${r.id}')">
+        <td>${r.id}</td>
+        <td>${r.name}</td>
+        <td>${r.dept}</td>
+        <td style="font-weight:700">${r.total}点</td>
+        <td style="color:${r.diff === null ? '#6b7280' : r.diff >= 0 ? '#16a34a' : '#dc2626'};font-weight:600">
+          ${r.diff !== null ? (r.diff > 0 ? '+' : '') + r.diff + '点' : '―'}
+        </td>
+        <td><span class="badge badge-${r.status}">${r.status === 'alert' ? '⚠️ 要確認' : r.status === 'warn' ? '注意' : '良好'}</span></td>
+        <td><button class="detail-link" onclick="event.stopPropagation();showDetail('${r.id}')">詳細を見る</button></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ===== 社員詳細 =====
+let lastTab = 'employees';
+
+function showDetail(empId) {
+  lastTab = document.getElementById('tab-employees').style.display !== 'none' ? 'employees' : 'dashboard';
+  const emp = employees[empId];
+  document.getElementById('detail-name').textContent = emp?.name || empId;
+  document.getElementById('detail-dept').textContent = emp?.dept || '';
+
+  const data = empData[empId];
+  const latestMonth = months[months.length - 1];
+  const latestScores = data[latestMonth];
+  const latestTotal = getTotal(latestScores);
+  const prevMonth = months[months.length - 2];
+  const prevScores = data[prevMonth];
+  const prevTotal = getTotal(prevScores);
+  const diff = latestTotal - prevTotal;
+  const status = getStatus(latestTotal, diff);
+
+  const badge = document.getElementById('detail-status-badge');
+  badge.className = `badge badge-${status}`;
+  badge.textContent = status === 'alert' ? '⚠️ 要確認' : status === 'warn' ? '注意' : '良好';
+
+  // ライングラフ（SVG）
+  const svgW = 700, svgH = 200, padL = 40, padR = 20, padT = 20, padB = 30;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padT - padB;
+  const xStep = chartW / (months.length - 1);
+
+  const colors = ['#4f46e5','#ef4444','#22c55e','#f59e0b','#06b6d4','#ec4899'];
+  const lines = catKeys.map((k, ci) => {
+    const pts = months.map((m, mi) => {
+      const v = data[m]?.[k] || null;
+      if (v === null) return null;
+      const x = padL + mi * xStep;
+      const y = padT + chartH - (v / 100) * chartH;
+      return { x, y, v };
+    });
+    const validPts = pts.filter(Boolean);
+    const path = validPts.map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)).join(' ');
+    return { key: k, path, pts: validPts, color: colors[ci] };
+  });
+
+  // Y軸グリッド
+  const gridLines = [40,60,80,100].map(v => {
+    const y = padT + chartH - (v / 100) * chartH;
+    return `<line x1="${padL}" y1="${y}" x2="${padL+chartW}" y2="${y}" stroke="#f3f4f6" stroke-width="1"/>
+            <text x="${padL-6}" y="${y+4}" font-size="10" fill="#9ca3af" text-anchor="end">${v}</text>`;
+  }).join('');
+
+  // X軸ラベル
+  const xLabels = months.map((m, mi) => {
+    const x = padL + mi * xStep;
+    return `<text x="${x}" y="${svgH-4}" font-size="11" fill="#6b7280" text-anchor="middle">${monthLabels[m]}</text>`;
+  }).join('');
+
+  const svgContent = `
+    <svg class="svg-chart" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+      ${gridLines}
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+chartH}" stroke="#e5e7eb" stroke-width="1"/>
+      ${xLabels}
+      ${lines.map(l => `<path d="${l.path}" fill="none" stroke="${l.color}" stroke-width="2.5" stroke-linejoin="round"/>`).join('')}
+      ${lines.map(l => l.pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="${l.color}"/>`).join('')).join('')}
+    </svg>
+    <div class="chart-legend">${lines.map(l => `
+      <div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${catNames[l.key]}</div>`).join('')}
+    </div>`;
+
+  // 月別カテゴリ表
+  const tableRows = catKeys.map((k, ci) => {
+    const cells = months.map((m, mi) => {
+      const v = data[m]?.[k];
+      if (!v) return '<td>―</td>';
+      const prev2 = mi > 0 ? data[months[mi-1]]?.[k] : null;
+      const d = prev2 ? v - prev2 : null;
+      const cls = v < 60 ? 'cell-alert' : v < 70 ? 'cell-warn' : 'cell-ok';
+      const diff2 = d !== null ? `<br><span class="${d >= 0 ? 'cell-diff-up' : 'cell-diff-down'}">${d > 0 ? '+' : ''}${d}</span>` : '';
+      return `<td class="${cls}">${v}${diff2}</td>`;
+    }).join('');
+    return `<tr><td>${catNames[k]}</td>${cells}</tr>`;
+  });
+
+  const totalRow = months.map((m, mi) => {
+    const v = data[m] ? getTotal(data[m]) : null;
+    if (!v) return '<td>―</td>';
+    const prev2 = mi > 0 && data[months[mi-1]] ? getTotal(data[months[mi-1]]) : null;
+    const d = prev2 !== null ? v - prev2 : null;
+    const cls = v < 60 ? 'cell-alert' : v < 70 ? 'cell-warn' : 'cell-ok';
+    const diff2 = d !== null ? `<br><span class="${d >= 0 ? 'cell-diff-up' : 'cell-diff-down'}">${d > 0 ? '+' : ''}${d}</span>` : '';
+    return `<td class="${cls}" style="font-weight:700">${v}${diff2}</td>`;
+  }).join('');
+
+  // アラート履歴
+  const alertHistory = [];
+  months.forEach((m, mi) => {
+    if (mi === 0 || !data[m] || !data[months[mi-1]]) return;
+    catKeys.forEach(k => {
+      const cur = data[m][k], prev2 = data[months[mi-1]][k];
+      const d = cur - prev2;
+      if (d <= -10) alertHistory.push({ month: m, cat: catNames[k], score: cur, prev: prev2, diff: d, level: 'alert' });
+      else if (d <= -5 || cur < 60) alertHistory.push({ month: m, cat: catNames[k], score: cur, prev: prev2, diff: d, level: 'warn' });
+    });
+  });
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="chart-card">
+      <h3>カテゴリ別スコア推移（過去6ヶ月）</h3>
+      ${svgContent}
+    </div>
+    <div class="monthly-table-card">
+      <h3>月別スコア詳細</h3>
+      <table>
+        <thead><tr><th>カテゴリ</th>${months.map(m => `<th>${monthLabels[m]}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${tableRows.join('')}
+          <tr style="background:#f9fafb"><td style="font-weight:700">総合スコア</td>${totalRow}</tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="alert-history">
+      <h3>⚠️ アラート履歴</h3>
+      ${alertHistory.length === 0
+        ? '<div class="no-alert">過去6ヶ月にアラートはありません</div>'
+        : alertHistory.map(a => `
+          <div class="alert-item">
+            <div class="alert-icon">${a.level === 'alert' ? '🔴' : '🟡'}</div>
+            <div class="alert-content">
+              <div class="title">${monthLabels[a.month]} ／ 「${a.cat}」スコア${a.diff <= -10 ? '急落' : '低下'}</div>
+              <div class="detail">${a.prev}点 → ${a.score}点（${a.diff > 0 ? '+' : ''}${a.diff}点）</div>
+            </div>
+            <span class="badge badge-${a.level}" style="margin-left:auto">${a.diff > 0 ? '+' : ''}${a.diff}点</span>
+          </div>`).join('')}
+    </div>`;
+
+  showScreen('detail');
+}
+
+function backToAdmin() {
+  showScreen('admin');
+  if (lastTab === 'employees') {
+    switchTabById('employees');
+  }
+}
+
+// ===== タブ切替 =====
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-dashboard').style.display = name === 'dashboard' ? 'block' : 'none';
+  document.getElementById('tab-employees').style.display = name === 'employees' ? 'block' : 'none';
+  if (name === 'employees') renderEmployeeList();
+}
+
+function switchTabById(name) {
+  const btns = document.querySelectorAll('.tab-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  const idx = name === 'dashboard' ? 0 : 1;
+  btns[idx].classList.add('active');
+  document.getElementById('tab-dashboard').style.display = name === 'dashboard' ? 'block' : 'none';
+  document.getElementById('tab-employees').style.display = name === 'employees' ? 'block' : 'none';
+}
+
+// ===== サーベイ =====
+const questions = [
+  { page:0, items:[
+    { id:'q1', category:'仕事のやりがい', text:'現在の仕事に充実感・やりがいを感じている', type:'rating' },
+    { id:'q2', category:'仕事のやりがい', text:'自分の強みや能力が仕事で活かされている', type:'rating' },
+  ]},
+  { page:1, items:[
+    { id:'q3', category:'上司との関係性', text:'上司は私の意見や提案をきちんと聞いてくれる', type:'rating' },
+    { id:'q4', category:'上司との関係性', text:'上司からのフィードバックは適切で参考になる', type:'rating' },
+  ]},
+  { page:2, items:[
+    { id:'q5', category:'チームワーク', text:'チームメンバーと協力しながら仕事ができている', type:'rating' },
+    { id:'q6', category:'業務量・残業', text:'業務量は適切で、無理なく取り組める範囲である', type:'rating' },
+  ]},
+  { page:3, items:[
+    { id:'q7', category:'会社への信頼', text:'会社の方向性や経営判断を信頼している', type:'rating' },
+    { id:'q8', category:'成長・キャリア', text:'この会社で自分のキャリアを成長させられると感じる', type:'rating' },
+  ]},
+  { page:4, items:[
+    { id:'q9', category:'自由記述', text:'職場環境や業務について、感じていることを自由に教えてください（任意）', type:'text' },
+  ]},
+];
+
+let currentPage = 0, answers = {};
+
+function setId(id) { document.getElementById('login-id').value = id; }
+
+function doLogin() {
+  const id = document.getElementById('login-id').value.trim().toUpperCase();
+  if (id === 'ADMIN') {
+    showScreen('admin');
+    renderDashboard();
+    return;
+  }
+  if (employees[id]) {
+    showScreen('survey');
+    document.getElementById('survey-user-name').textContent = `${employees[id].name}（${employees[id].dept}）`;
+    currentPage = 0; answers = {};
+    renderPage();
+  } else {
+    document.getElementById('login-error').textContent = '社員IDが見つかりません。もう一度確認してください。';
+  }
+}
+
+document.getElementById('login-id').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function renderPage() {
+  const container = document.getElementById('questions-container');
+  const pageData = questions[currentPage];
+  container.innerHTML = '';
+  pageData.items.forEach(q => {
+    const block = document.createElement('div');
+    block.className = 'question-block';
+    if (q.type === 'rating') {
+      const saved = answers[q.id] || null;
+      block.innerHTML = `
+        <div class="category">${q.category}</div>
+        <div class="question">${q.text}</div>
+        <div class="rating-scale">
+          ${[1,2,3,4,5].map(n => `<button class="rating-btn ${saved===n?'selected':''}" onclick="selectRating('${q.id}',${n},this)">${n}</button>`).join('')}
+        </div>
+        <div class="rating-labels"><span>全くそう思わない</span><span>強くそう思う</span></div>`;
+    } else {
+      block.innerHTML = `
+        <div class="category">${q.category}</div>
+        <div class="question">${q.text}</div>
+        <div class="free-text"><textarea id="ta-${q.id}" placeholder="自由にご記入ください..."
+          onchange="answers['${q.id}']=this.value">${answers[q.id]||''}</textarea></div>`;
+    }
+    container.appendChild(block);
+  });
+  document.getElementById('progress-fill').style.width = (currentPage / questions.length * 100) + '%';
+  document.getElementById('btn-back').style.display = currentPage > 0 ? 'inline-block' : 'none';
+  document.getElementById('btn-next').textContent = currentPage === questions.length - 1 ? '送信する ✓' : '次へ →';
+}
+
+function selectRating(id, val, btn) {
+  answers[id] = val;
+  btn.closest('.rating-scale').querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function nextPage() {
+  const unanswered = questions[currentPage].items.filter(q => q.type === 'rating' && !answers[q.id]);
+  if (unanswered.length > 0) { alert('すべての質問に回答してください。'); return; }
+  if (currentPage === questions.length - 1) { showScreen('done'); }
+  else { currentPage++; renderPage(); window.scrollTo(0,0); }
+}
+
+function prevPage() { currentPage--; renderPage(); window.scrollTo(0,0); }
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function goToLogin() {
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-error').textContent = '';
+  showScreen('login');
+}
+</script>
+</body>
+</html>
