@@ -91,6 +91,13 @@
   #screen-done h2 { font-size: 24px; color: #1e1b4b; margin-bottom: 8px; font-weight: 800; }
   #screen-done p { color: #6b7280; font-size: 14px; line-height: 1.7; }
 
+  /* 回答済み */
+  #screen-already { align-items: center; justify-content: center; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%); }
+  #screen-already .card { width: 420px; text-align: center; border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); }
+  .already-icon { font-size: 72px; margin-bottom: 16px; }
+  #screen-already h2 { font-size: 22px; color: #1e1b4b; margin-bottom: 8px; font-weight: 800; }
+  #screen-already p { color: #6b7280; font-size: 14px; line-height: 1.7; }
+
   /* 管理者共通 */
   #screen-admin { flex-direction: column; }
   .admin-nav { background: linear-gradient(90deg, #1e1b4b 0%, #2e1065 100%); color: white; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
@@ -246,6 +253,72 @@
   .toast { position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; opacity: 0; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 9999; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,0.25); white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ランクバッジ */
+  .rank-badge-lg { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 16px; font-size: 22px; font-weight: 900; color: white; flex-shrink: 0; letter-spacing: -0.5px; }
+  .rank-badge-sm { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 8px; font-size: 12px; font-weight: 900; color: white; }
+  .rank-s { background: linear-gradient(135deg, #7c3aed, #4f46e5); box-shadow: 0 4px 14px rgba(124,58,237,0.4); }
+  .rank-a { background: linear-gradient(135deg, #1d4ed8, #0284c7); box-shadow: 0 4px 14px rgba(29,78,216,0.4); }
+  .rank-b { background: linear-gradient(135deg, #15803d, #059669); box-shadow: 0 4px 14px rgba(21,128,61,0.4); }
+  .rank-c { background: linear-gradient(135deg, #b45309, #dc2626); box-shadow: 0 4px 14px rgba(180,83,9,0.4); }
+  .rank-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .rank-copy { font-size: 18px; font-weight: 800; color: #1e293b; }
+  .rank-label { font-size: 12px; color: #94a3b8; font-weight: 500; }
+  .rank-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .rank-info-item { background: #f8fafc; border-radius: 10px; padding: 12px 14px; }
+  .rank-info-item .ri-label { font-size: 11px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .rank-info-item .ri-text { font-size: 13px; color: #374151; line-height: 1.6; }
+  .rank-info-item.full { grid-column: 1 / -1; }
+  .rank-info-item.growth { background: linear-gradient(135deg, #fefce8, #fef9c3); }
+  .rank-info-item.growth .ri-label { color: #a16207; }
+
+  /* MBTI */
+  .mbti-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .mbti-nt { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+  .mbti-nf { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+  .mbti-sj { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .mbti-sp { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .persona-card { background: linear-gradient(135deg, #fafafa, #f5f3ff); border: 1px solid #e0e7ff; border-radius: 12px; padding: 16px 18px; margin-top: 16px; }
+  .persona-title { font-size: 16px; font-weight: 800; color: #1e1b4b; margin-bottom: 6px; }
+  .persona-desc { font-size: 13px; color: #374151; line-height: 1.75; margin-bottom: 10px; }
+  .persona-watch { background: #fef2f2; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #dc2626; font-weight: 600; line-height: 1.6; }
+  .mbti-detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .mbti-detail-item { background: white; border-radius: 10px; padding: 10px 12px; border: 1px solid #f1f5f9; }
+  .mbti-detail-item .mdi-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .mbti-detail-item .mdi-text { font-size: 12px; color: #374151; line-height: 1.5; }
+
+  /* プロフィールカード（IQ・戦闘力） */
+  .profile-card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
+  .profile-card h3 { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 16px; }
+  .profile-display { display: flex; gap: 16px; margin-bottom: 18px; }
+  .profile-stat { flex: 1; border-radius: 12px; padding: 14px 18px; }
+  .profile-stat.iq-stat { background: linear-gradient(135deg, #f5f3ff, #ede9fe); border: 1px solid #ddd6fe; }
+  .profile-stat.bp-stat { background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 1px solid #fed7aa; }
+  .profile-stat .ps-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .profile-stat.iq-stat .ps-label { color: #7c3aed; }
+  .profile-stat.bp-stat .ps-label { color: #ea580c; }
+  .profile-stat .ps-value { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
+  .profile-stat.iq-stat .ps-value { color: #4c1d95; }
+  .profile-stat.bp-stat .ps-value { color: #9a3412; }
+  .profile-edit-row { display: flex; gap: 12px; align-items: flex-end; }
+  .profile-edit-field { flex: 1; }
+  .profile-edit-field label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+  .profile-edit-field input { width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; font-weight: 700; font-family: 'Inter', monospace; transition: all 0.2s; color: #1e293b; }
+  .profile-edit-field input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+
+  /* 実回答データカード */
+  .answer-detail-card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
+  .answer-detail-card h3 { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+  .answer-submitted-at { font-size: 12px; color: #94a3b8; font-weight: 500; margin-bottom: 20px; }
+  .answer-group { margin-bottom: 18px; }
+  .answer-group-title { font-size: 11px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px; background: #eef2ff; display: inline-block; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+  .answer-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f8fafc; }
+  .answer-row:last-child { border-bottom: none; }
+  .answer-q { flex: 1; font-size: 13px; color: #475569; line-height: 1.4; }
+  .answer-bar-wrap { width: 130px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+  .answer-bar { flex: 1; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+  .answer-bar-fill { height: 100%; border-radius: 4px; }
+  .answer-val { font-size: 14px; font-weight: 800; width: 28px; text-align: right; }
+
   /* 社員詳細：推奨対応 */
   .recommend-section { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
   .recommend-section h3 { font-size: 15px; font-weight: 700; color: #1f2937; margin-bottom: 16px; }
@@ -314,6 +387,17 @@
   </div>
 </div>
 
+<!-- 回答済み -->
+<div id="screen-already" class="screen">
+  <div class="card">
+    <div class="already-icon">📋</div>
+    <h2><span id="already-name"></span> さん</h2>
+    <p>今月のサーベイはすでに回答済みです。</p>
+    <p style="margin-top:8px;color:#94a3b8;font-size:13px">2026年3月のサーベイへのご協力ありがとうございました。<br>来月もよろしくお願いします。</p>
+    <button class="btn btn-primary" style="margin-top:28px;width:100%" onclick="goToLogin()">ログアウト</button>
+  </div>
+</div>
+
 <!-- 管理者ダッシュボード -->
 <div id="screen-admin" class="screen">
   <nav class="admin-nav">
@@ -343,6 +427,10 @@
       </select>
     </div>
     <div class="stats-grid" id="kpi-grid"></div>
+    <div id="unsubmitted-section" style="display:none">
+      <div class="section-title">📬 未回答者一覧 <span id="unsubmitted-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
+      <div id="unsubmitted-list" style="margin-bottom:32px"></div>
+    </div>
     <div class="section-title">⚠️ アラート</div>
     <div class="alert-section" id="alert-list"></div>
     <div class="section-title">カテゴリ別スコア</div>
@@ -426,14 +514,14 @@
 <script>
 // ===== マスタデータ =====
 const employees = {
-  'EMP001': { name: '田中 一郎', dept: '営業部' },
-  'EMP042': { name: '鈴木 花子', dept: '開発部' },
-  'EMP099': { name: '佐藤 次郎', dept: '総務部' },
-  'EMP017': { name: '山田 美咲', dept: '営業部' },
-  'EMP058': { name: '伊藤 健太', dept: '開発部' },
-  'EMP033': { name: '中村 陽子', dept: 'マーケ部' },
-  'EMP071': { name: '小林 拓也', dept: '総務部' },
-  'EMP088': { name: '渡辺 さくら', dept: 'マーケ部' },
+  'EMP001': { name: '田中 一郎',   dept: '営業部',  iq: 110, battlePower:  8500, mbti: 'ESTJ' },
+  'EMP042': { name: '鈴木 花子',   dept: '開発部',  iq: 128, battlePower: 12000, mbti: 'ENFJ' },
+  'EMP099': { name: '佐藤 次郎',   dept: '総務部',  iq: 115, battlePower:  9500, mbti: 'ISTJ' },
+  'EMP017': { name: '山田 美咲',   dept: '営業部',  iq: 105, battlePower:  7000, mbti: 'ESFP' },
+  'EMP058': { name: '伊藤 健太',   dept: '開発部',  iq: 122, battlePower: 11000, mbti: 'ENTP' },
+  'EMP033': { name: '中村 陽子',   dept: 'マーケ部', iq: 135, battlePower: 15000, mbti: 'INTJ' },
+  'EMP071': { name: '小林 拓也',   dept: '総務部',  iq: 108, battlePower:  8000, mbti: 'ISTP' },
+  'EMP088': { name: '渡辺 さくら', dept: 'マーケ部', iq: 140, battlePower: 18000, mbti: 'ENFP' },
 };
 
 const categories = ['仕事のやりがい', '上司との関係性', 'チームワーク', '業務量・残業', '会社への信頼', '成長・キャリア'];
@@ -508,6 +596,81 @@ const empData = {
   },
 };
 
+// ===== 資質ランクマスタ =====
+const rankData = {
+  S1: { copy:'経営幹部候補',     thinking:'極めて高い。複雑な課題を構造化し、本質を見抜く力がある',             execution:'極めて高い。高い主体性と達成意欲で自走できる',                           role:'事業責任者、新規事業リーダー、経営幹部候補',                          growth:'制約を与えず、裁量と挑戦機会を最大化する' },
+  S2: { copy:'高精度プレイヤー', thinking:'高い。戦略立案とアウトプット品質に強み',                             execution:'高い。明確な目標設定下で安定した成果を出す',                             role:'プロジェクトリーダー、専門領域の責任者',                             growth:'曖昧な状況での意思決定経験を積ませる' },
+  S3: { copy:'戦略設計人材',     thinking:'非常に高い。緻密な設計と分析に秀でる',                               execution:'標準〜やや高い。スピードより質を重視する傾向',                          role:'企画職、専門職、クリエイティブ領域',                                growth:'実行フェーズへの関与を増やし、完遂経験を積む' },
+  S4: { copy:'高品質ワーカー',   thinking:'非常に高い。理解力・学習能力は傑出',                                 execution:'発展途上。主体性に課題があるが、依頼業務の品質は高い',                 role:'専門職、企画職、品質重視の業務',                                    growth:'小さな成功体験を積ませ、主体性を育む' },
+  A1: { copy:'突破推進リーダー', thinking:'標準〜やや高い。直感的な判断に強み、緻密さに波あり',                  execution:'極めて高い。圧倒的な行動量と達成意欲',                                  role:'営業エース、事業開発、スタートアップ向き',                           growth:'振り返り習慣をつけ、戦略的思考を補強する' },
+  A2: { copy:'組織中核メンバー', thinking:'標準的。実務レベルの判断は安定',                                     execution:'高い。継続的に成果を出す安定感',                                        role:'チームリーダー、プロジェクト推進の中核',                            growth:'視座を上げる経験（上位者との協働）を増やす' },
+  A3: { copy:'安定実務プレイヤー',thinking:'標準的。定型業務の遂行には十分',                                    execution:'標準的。指示に対して着実に動ける',                                      role:'チームメンバー、オペレーション担当',                                growth:'得意領域を見つけ、専門性を伸ばす' },
+  A4: { copy:'育成期待人材',     thinking:'標準的。基礎的な業務理解は可能',                                     execution:'発展途上。経験を積む段階',                                              role:'チームメンバー、オペレーション担当',                                growth:'成功体験と適切なフィードバックで自信をつける' },
+  B1: { copy:'行動突破型',       thinking:'やや課題あり。計画より行動が先行し、戦略の精度に波がある',            execution:'極めて高い。圧倒的な行動量と粘り強さを持つ',                            role:'テレアポ、飛び込み営業、高負荷オペレーション、現場の突破役',        growth:'思考フレームワークを叩き込み「考えてから動く」習慣をつける' },
+  B2: { copy:'現場実行メンバー', thinking:'やや課題あり。深い分析より即断即決型',                                execution:'高い。動きながら考えるスタイル',                                        role:'フィールドセールス、実行部隊のメンバー',                            growth:'PDCAの「P」と「C」を意識させる習慣づけ' },
+  B3: { copy:'業務補佐メンバー', thinking:'課題あり。複雑な判断は苦手',                                         execution:'標準的。明確な指示があれば動ける',                                      role:'チームメンバー、オペレーション担当',                                growth:'得意な作業領域を見つけ、反復で精度を上げる' },
+  B4: { copy:'定型業務担当',     thinking:'課題あり。ルーティン業務に限定',                                      execution:'低い。受動的な傾向',                                                    role:'チームメンバー、オペレーション担当',                                growth:'小さなタスクの完遂を繰り返し、責任感を醸成' },
+  C1: { copy:'馬力特化型',       thinking:'課題が大きい。方向性を見失いやすく、成果が空回りしがち',               execution:'極めて高い。行動量は突出するが、質への転換が難しい',                    role:'単純作業の大量処理、体力勝負の現場作業、明確なKPI下での実行',      growth:'毎日のタスクを細かく指示。判断を求めない設計' },
+  C2: { copy:'指示遂行メンバー', thinking:'課題が大きい。自律的な判断は困難',                                    execution:'高い。明確な指示があれば動ける行動力はある',                            role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+  C3: { copy:'丁寧フォロー人材', thinking:'課題が大きい。問題解決に困難を伴う',                                  execution:'標準的。意欲はあるが成果に結びつきにくい',                              role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+  C4: { copy:'伴走育成人材',     thinking:'課題が大きい。基礎的な業務理解にも時間を要する',                      execution:'低い。自発的な行動が起きにくい',                                        role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+};
+
+const rankTierColor = { S:'#7c3aed', A:'#2563eb', B:'#16a34a', C:'#d97706' };
+
+function calcRank(iq, bp) {
+  if (!iq || !bp) return null;
+  const iqTier = iq >= 120 ? 'S' : iq >= 105 ? 'A' : iq >= 90 ? 'B' : 'C';
+  const bpTier = bp >= 7000 ? '1' : bp >= 6000 ? '2' : bp >= 5000 ? '3' : '4';
+  return iqTier + bpTier;
+}
+
+const mbtiData = {
+  INTJ: { name:'建築家',        group:'NT', strength:'複雑な問題の構造化・長期計画', motivation:'知的達成・システム構築', blindspot:'対人関係・感情配慮' },
+  INTP: { name:'論理学者',      group:'NT', strength:'論理分析・概念設計',           motivation:'知的探求・真実追求',     blindspot:'実行・締切管理' },
+  ENTJ: { name:'指揮官',        group:'NT', strength:'リーダーシップ・戦略実行',     motivation:'目標達成・組織効率化',   blindspot:'感情的配慮・細部' },
+  ENTP: { name:'討論者',        group:'NT', strength:'創造的問題解決・アイデア発想', motivation:'挑戦・知的刺激',         blindspot:'継続性・ルーティン' },
+  INFJ: { name:'提唱者',        group:'NF', strength:'ビジョン設定・人材育成',       motivation:'意義・人の成長',         blindspot:'自己犠牲傾向・完璧主義' },
+  INFP: { name:'仲介者',        group:'NF', strength:'共感・クリエイティブ発想',     motivation:'価値観への貢献',         blindspot:'現実対処・対立回避' },
+  ENFJ: { name:'主人公',        group:'NF', strength:'人材育成・チームビルディング', motivation:'人の成功・社会貢献',     blindspot:'自己犠牲・過干渉傾向' },
+  ENFP: { name:'広報運動家',    group:'NF', strength:'発想・人脈構築・モチベート',   motivation:'可能性・自由・つながり', blindspot:'継続性・細部' },
+  ISTJ: { name:'管理者',        group:'SJ', strength:'確実な実行・品質管理',         motivation:'義務・安定・信頼',       blindspot:'変化適応・創造性' },
+  ISFJ: { name:'擁護者',        group:'SJ', strength:'細やかなサポート・チームケア', motivation:'人の役に立つこと',       blindspot:'自己主張・変化' },
+  ESTJ: { name:'幹部',          group:'SJ', strength:'組織管理・プロセス標準化',     motivation:'効率・秩序・達成',       blindspot:'感情的柔軟性・新アイデア' },
+  ESFJ: { name:'領事',          group:'SJ', strength:'関係構築・チームハーモニー',   motivation:'人の幸福・共同体貢献',   blindspot:'批判への弱さ・変化' },
+  ISTP: { name:'巨匠',          group:'SP', strength:'問題解決・実践スキル',         motivation:'効率・実用性・自律',     blindspot:'長期計画・感情表現' },
+  ISFP: { name:'冒険家',        group:'SP', strength:'適応力・現場力・美的センス',   motivation:'自由・現在の体験',       blindspot:'長期計画・自己主張' },
+  ESTP: { name:'起業家',        group:'SP', strength:'危機対応・営業・交渉',         motivation:'即時結果・スリル・影響', blindspot:'長期計画・感情への配慮' },
+  ESFP: { name:'エンターテイナー',group:'SP',strength:'人を引きつける・雰囲気作り', motivation:'楽しさ・人のつながり',   blindspot:'長期計画・構造化' },
+};
+
+const mbtiGroupData = {
+  NT: { name:'アナリスト型',       style:'知的・戦略的', color:'#7c3aed' },
+  NF: { name:'ディプロマット型',   style:'共感・ビジョン的', color:'#2563eb' },
+  SJ: { name:'センチネル型',       style:'安定・実行的', color:'#16a34a' },
+  SP: { name:'エクスプローラー型', style:'適応・実践的', color:'#d97706' },
+};
+
+// ランクtier(S/A/B/C) × MBTIグループ(NT/NF/SJ/SP) = 16パターン
+const rankMbtiInsights = {
+  'S-NT': { persona:'知的頂点の戦略家',         desc:'組織最高峰の知性で複雑な問題を体系的に解決。長期ビジョンと緻密な設計で組織の未来を描くことができる。自律駆動型で最も力を発揮する。',                      watch:'孤立・完璧主義・感情軽視に注意。チームへの言語化・共有が鍵。' },
+  'S-NF': { persona:'カリスマ的ビジョナリー',   desc:'高い知性と深い人間理解を組み合わせ、人を鼓舞しながら組織変革を牽引。意義ある仕事に最大のパフォーマンスを発揮し、組織の精神的な支柱になる。',               watch:'理想と現実のギャップ・自己犠牲傾向に注意。自分のリソース管理も必須。' },
+  'S-SJ': { persona:'卓越した実務リーダー',     desc:'高い知的能力と確実な実行力で、システマティックに成果を積み上げる。品質と信頼性において組織の基準を作り、長期に渡って安定した成果を出し続ける。',           watch:'変化への過剰抵抗・革新への消極性に注意。定期的に「疑う時間」を設ける。' },
+  'S-SP': { persona:'天才型イノベーター',       desc:'高い知性と実験精神で既存の枠を超えた解決策を生み出す。現場での応用力と発想力が武器。課題を遊びながら解く天才的なアプローチが特徴。',                         watch:'継続性と組織内政治への対応が課題。「仕組み化」への意識が成長を加速。' },
+  'A-NT': { persona:'実力派戦略プレイヤー',     desc:'論理的思考と安定した実行力を持つ頼れる中核。戦略立案と実務遂行を高い水準でこなし、組織の知的インフラを担う存在。上位層への梯子が見えている。',               watch:'感情的側面の軽視・チーム配慮に意識的に向き合うことが昇格の鍵。' },
+  'A-NF': { persona:'信頼の人材育成者',         desc:'共感力と安定したパフォーマンスで、チームの心理的安全性を高めながら成果を出す。コーチング・育成役として最大の力を発揮し、チームの総合力を底上げする。',         watch:'自身の成果よりチームを優先しすぎる傾向に注意。個人KPIも大切に。' },
+  'A-SJ': { persona:'組織の屋台骨',             desc:'堅実な判断と確実な実行でチームを支える。プロセス管理と品質維持において最も信頼できる存在。嵐の中でも揺るがない安定感が組織の安心感を作る。',                 watch:'新しいアプローチへの柔軟性を意識的に高めること。定期的に「なぜ」を問う習慣を。' },
+  'A-SP': { persona:'現場の問題解決者',         desc:'適度な分析力と高い適応力で、現場の課題を素早く解決する。実践的なアプローチで確実に成果を出し、現場のモチベーションを引き上げる存在感を持つ。',             watch:'長期視点の欠如・計画性強化が成長のカギ。月次で進捗を構造化する習慣を。' },
+  'B-NT': { persona:'潜在能力型分析者',         desc:'論理的思考の資質はあるが、実行力とのバランス調整が成長のカギ。思考と行動をつなぐ訓練で大きく飛躍できるポテンシャルを持つ。',                               watch:'分析過多・実行の遅れに注意。「完璧な計画より速い実行」を意識して刷り込む。' },
+  'B-NF': { persona:'共感型成長人材',           desc:'人への気配りと意欲は本物。スキルの体系的な積み上げと成功体験の蓄積で、安定した成果者へと着実に成長できる素地を持つ。',                                     watch:'感情的疲弊・境界設定の弱さに注意。自分を守りながら貢献する術を学ぶことが先決。' },
+  'B-SJ': { persona:'堅実な現場サポーター',     desc:'指示に対して着実に動ける実行者。ルーティン業務での信頼性は高く、得意領域での専門性向上が有効。安定した出勤・行動そのものが組織への貢献になっている。',       watch:'主体的提案力の弱さが課題。自ら問題提起する小さな経験を積ませる設計を。' },
+  'B-SP': { persona:'現場突破の行動人材',       desc:'行動力と適応力は本物。思考の枠組みを身につけることで、現場での爆発力がより効果的になる。正しい方向への行動力は組織の突破口になりうる。',                     watch:'場当たり的な判断が最大のリスク。振り返りと計画の習慣が成長加速のカギ。' },
+  'C-NT': { persona:'知的素地のある育成枠',     desc:'思考の萌芽はあるが、実行と経験が不足。適切な課題設定と失敗経験の積み重ねで覚醒する可能性を秘める。知的好奇心を実行の起爆剤に変える支援が必要。',           watch:'頭でっかちになるリスクが高い。まず動く経験を意識的に設計し続けること。' },
+  'C-NF': { persona:'感受性豊かな成長途上',     desc:'人への共感と意欲は持っている。成功体験と明確な役割定義で自信をつけることが最優先課題。周囲からの承認が行動の燃料になるタイプ。',                           watch:'失敗への過剰反応・萎縮に注意。安全な環境での小さな挑戦機会を丁寧に提供。' },
+  'C-SJ': { persona:'ルーティン特化の実行者',   desc:'明確な手順と環境があれば確実に動ける。マニュアル化された業務での安定貢献が期待できる。職域の明確化がパフォーマンス最大化の鍵。',                           watch:'判断を求めない設計が効果的。責任範囲を段階的・慎重に拡大する。' },
+  'C-SP': { persona:'行動力先行の育成人材',     desc:'動く意欲はあるが方向性が定まらない。明確なKPIと毎日の小さな成功体験の積み重ねが必須。エネルギーを正しい方向に向ける設計が重要。',                         watch:'空回りリスクが最大の課題。細かいタスク管理と日次確認で軌道修正を継続。' },
+};
+
 const categoryGuide = {
   やりがい: {
     ok:   { eval: '職務満足度は良好な状態です。', action: '現状の業務環境・役割を維持し、強みを活かせる機会を継続的に提供しましょう。' },
@@ -558,6 +721,56 @@ const categoryGuide = {
 
 const catKeys = ['やりがい', '成長', '健康', '上司', 'チーム', '承認', '信頼', '組織', '業務'];
 const catNames = { やりがい:'職務', 成長:'自己成長', 健康:'健康', 上司:'支援', チーム:'人間関係', 承認:'承認', 信頼:'理念戦略', 組織:'組織風土', 業務:'環境' };
+
+const questionCatMap = {
+  q1:'やりがい', q2:'やりがい', q3:'やりがい', q4:'やりがい',
+  q5:'成長', q6:'成長', q7:'成長',
+  q8:'健康', q9:'健康', q10:'健康',
+  q11:'上司', q12:'上司', q13:'上司', q14:'上司', q15:'上司', q16:'上司',
+  q17:'チーム', q18:'チーム', q19:'チーム',
+  q20:'承認', q21:'承認',
+  q22:'信頼', q23:'信頼', q24:'信頼', q25:'信頼',
+  q26:'組織', q27:'組織', q28:'組織', q29:'組織',
+  q30:'業務', q31:'業務', q32:'業務', q33:'業務',
+};
+
+function calcScoresFromAnswers(answers) {
+  const catSums = {}, catCounts = {};
+  Object.entries(answers).forEach(([qId, val]) => {
+    if (typeof val !== 'number') return;
+    const cat = questionCatMap[qId];
+    if (!cat) return;
+    catSums[cat] = (catSums[cat] || 0) + val;
+    catCounts[cat] = (catCounts[cat] || 0) + 1;
+  });
+  const scores = {};
+  catKeys.forEach(k => {
+    if (catSums[k]) scores[k] = Math.round(catSums[k] / catCounts[k] / 7 * 100);
+  });
+  return scores;
+}
+
+function rebuildEmpData() {
+  Object.keys(employees).forEach(empId => {
+    if (!empData[empId]) empData[empId] = {};
+    months.forEach(m => {
+      const saved = localStorage.getItem(`es_${empId}_${m}`);
+      if (!saved) return;
+      try {
+        const scores = calcScoresFromAnswers(JSON.parse(saved));
+        if (Object.keys(scores).length > 0) empData[empId][m] = scores;
+      } catch(e) {}
+    });
+  });
+}
+
+function hasSubmittedThisMonth(empId) {
+  return !!localStorage.getItem(`es_${empId}_${months[months.length - 1]}`);
+}
+
+function getSubmittedIds(month) {
+  return Object.keys(employees).filter(id => !!localStorage.getItem(`es_${id}_${month}`));
+}
 
 function getTotal(scores) {
   const vals = Object.values(scores);
@@ -621,6 +834,53 @@ function renderDashboard() {
     <div class="stat-card"><div class="label">⚠️ アラート件数</div><div class="value" style="color:${alertCount > 0 ? '#dc2626' : '#16a34a'}">${alertCount}件</div>
       <div class="sub ${alertCount > 0 ? 'down' : 'up'}">${alertCount > 0 ? '要対応あり' : '問題なし'}</div></div>
   `;
+
+  // 未回答者一覧（当月のみ）
+  const currentMonth = months[months.length - 1];
+  const unsubSection = document.getElementById('unsubmitted-section');
+  if (month === currentMonth) {
+    const submittedIds = getSubmittedIds(month);
+    const unsubmitted = Object.entries(employees)
+      .filter(([id]) => !submittedIds.includes(id))
+      .map(([id, emp]) => ({ id, ...emp }));
+
+    unsubSection.style.display = 'block';
+    document.getElementById('unsubmitted-count-label').textContent =
+      `（デモ社員 ${submittedIds.length}/${Object.keys(employees).length}名 回答済み）`;
+
+    if (unsubmitted.length === 0) {
+      document.getElementById('unsubmitted-list').innerHTML =
+        '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);padding:24px">✅ 全員が回答済みです</div>';
+    } else {
+      document.getElementById('unsubmitted-list').innerHTML = `
+        <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;border:1px solid rgba(0,0,0,0.04)">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr>
+              <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">社員ID</th>
+              <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">氏名</th>
+              <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">所属</th>
+              <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">ステータス</th>
+            </tr></thead>
+            <tbody>${unsubmitted.map(emp => `
+              <tr>
+                <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;color:#334155">
+                  <span style="font-size:13px;font-weight:800;color:#6366f1;background:#eef2ff;padding:3px 8px;border-radius:6px;font-family:'Inter',monospace">${emp.id}</span>
+                </td>
+                <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;font-weight:600;color:#1e293b">${emp.name}</td>
+                <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc">
+                  <span style="background:#f1f5f9;padding:3px 10px;border-radius:20px;font-size:12px;color:#64748b;font-weight:600">${emp.dept}</span>
+                </td>
+                <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc">
+                  <span style="background:#fef2f2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid #fecaca">未回答</span>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+  } else {
+    unsubSection.style.display = 'none';
+  }
 
   // アラート
   const alertList = document.getElementById('alert-list');
@@ -718,7 +978,12 @@ function renderEmployeeList() {
     const prevTotal = prev && data[prev] ? getTotal(data[prev]) : null;
     const diff = prevTotal !== null ? total - prevTotal : null;
     const status = diff !== null ? getStatus(total, diff) : (total < 60 ? 'alert' : total < 70 ? 'warn' : 'ok');
-    return { id, name: employees[id]?.name || id, dept: employees[id]?.dept || '', total, diff, status };
+    const profile = getProfile(id);
+    const hasReal = !!localStorage.getItem(`es_${id}_${month}`);
+    const rank = calcRank(profile.iq, profile.battlePower);
+    const mbtiType = profile.mbti || employees[id]?.mbti;
+    return { id, name: employees[id]?.name || id, dept: employees[id]?.dept || '', total, diff, status,
+             iq: profile.iq, battlePower: profile.battlePower, hasReal, rank, profile };
   }).filter(Boolean).sort((a,b) => a.total - b.total);
 
   const table = document.getElementById('emp-table');
@@ -728,11 +993,25 @@ function renderEmployeeList() {
     </tr></thead>
     <tbody>${rows.map(r => `
       <tr class="clickable" onclick="showDetail('${r.id}')">
-        <td>${r.id}</td>
-        <td>${r.name}</td>
-        <td>${r.dept}</td>
-        <td style="font-weight:700">${r.total}点</td>
-        <td style="color:${r.diff === null ? '#6b7280' : r.diff >= 0 ? '#16a34a' : '#dc2626'};font-weight:600">
+        <td><span style="font-size:13px;font-weight:800;color:#6366f1;background:#eef2ff;padding:3px 8px;border-radius:6px;font-family:'Inter',monospace">${r.id}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-weight:600;color:#1e293b">${r.name}</span>
+            ${r.rank ? `<span class="rank-badge-sm rank-${r.rank[0].toLowerCase()}">${r.rank}</span>` : ''}
+            ${(() => { const mbtiType = r.profile?.mbti || employees[r.id]?.mbti; const mbtiInfo = mbtiType ? mbtiData[mbtiType] : null; return mbtiInfo ? `<span class="mbti-badge mbti-${mbtiInfo.group.toLowerCase()}" style="font-size:11px;padding:2px 8px">${mbtiType} ${mbtiInfo.name}</span>` : ''; })()}
+          </div>
+          <div style="display:flex;gap:5px;margin-top:4px">
+            ${r.iq ? `<span style="font-size:11px;background:#f5f3ff;color:#7c3aed;padding:2px 7px;border-radius:10px;font-weight:700">🧠 ${r.iq}</span>` : ''}
+            ${r.battlePower ? `<span style="font-size:11px;background:#fff7ed;color:#ea580c;padding:2px 7px;border-radius:10px;font-weight:700">⚡ ${r.battlePower.toLocaleString()}</span>` : ''}
+            ${r.rank ? `<span style="font-size:11px;background:#f8fafc;color:#64748b;padding:2px 7px;border-radius:10px;font-weight:600">${rankData[r.rank]?.copy || ''}</span>` : ''}
+          </div>
+        </td>
+        <td><span style="background:#f1f5f9;padding:3px 10px;border-radius:20px;font-size:12px;color:#64748b;font-weight:600">${r.dept}</span></td>
+        <td>
+          <span style="font-weight:800;font-size:15px">${r.total}点</span>
+          ${r.hasReal ? `<span style="font-size:10px;background:#dcfce7;color:#16a34a;padding:2px 6px;border-radius:8px;margin-left:5px;font-weight:700;border:1px solid #bbf7d0">実データ</span>` : ''}
+        </td>
+        <td style="color:${r.diff === null ? '#6b7280' : r.diff >= 0 ? '#16a34a' : '#dc2626'};font-weight:700">
           ${r.diff !== null ? (r.diff > 0 ? '+' : '') + r.diff + '点' : '―'}
         </td>
         <td><span class="badge badge-${r.status}">${r.status === 'alert' ? '⚠️ 要確認' : r.status === 'warn' ? '注意' : '良好'}</span></td>
@@ -846,7 +1125,112 @@ function showDetail(empId) {
     });
   });
 
-  document.getElementById('detail-content').innerHTML = `
+  // プロフィールカード
+  const profile = getProfile(empId);
+  const initRank = calcRank(profile.iq, profile.battlePower);
+  const profileHtml = `
+    <div class="profile-card">
+      <h3>👤 社員プロフィール</h3>
+      <div class="profile-display">
+        <div class="profile-stat iq-stat">
+          <div class="ps-label">🧠 IQスコア</div>
+          <div class="ps-value" id="pdiq-${empId}">${profile.iq ? profile.iq.toLocaleString() : '―'}</div>
+        </div>
+        <div class="profile-stat bp-stat">
+          <div class="ps-label">⚡ 戦闘力</div>
+          <div class="ps-value" id="pdbp-${empId}">${profile.battlePower ? profile.battlePower.toLocaleString() : '―'}</div>
+        </div>
+        <div class="profile-stat" style="background:linear-gradient(135deg,#f8faff,#eef2ff);border-color:#c7d2fe">
+          <div class="ps-label" style="color:#4f46e5">🧬 MBTI</div>
+          <div id="pmbti-${empId}" style="margin-top:4px">
+            ${profile.mbti && mbtiData[profile.mbti]
+              ? `<span class="mbti-badge mbti-${mbtiData[profile.mbti].group.toLowerCase()}">${profile.mbti} / ${mbtiData[profile.mbti].name}</span>`
+              : '<span style="color:#94a3b8;font-size:14px">未設定</span>'}
+          </div>
+        </div>
+      </div>
+      <div class="profile-edit-row">
+        <div class="profile-edit-field">
+          <label>🧠 IQスコア を編集</label>
+          <input type="number" id="profile-iq-${empId}" value="${profile.iq || ''}" placeholder="例: 120" min="0" max="300">
+        </div>
+        <div class="profile-edit-field">
+          <label>⚡ 戦闘力 を編集</label>
+          <input type="number" id="profile-bp-${empId}" value="${profile.battlePower || ''}" placeholder="例: 10000" min="0">
+        </div>
+        <div class="profile-edit-field" style="min-width:200px">
+          <label>🧬 MBTI タイプ</label>
+          <select id="profile-mbti-${empId}" style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;transition:all 0.2s;color:#1e293b;font-weight:500;background:white">
+            <option value="">選択してください</option>
+            <optgroup label="アナリスト型 (NT)">
+              <option value="INTJ" ${profile.mbti==='INTJ'?'selected':''}>INTJ / 建築家</option>
+              <option value="INTP" ${profile.mbti==='INTP'?'selected':''}>INTP / 論理学者</option>
+              <option value="ENTJ" ${profile.mbti==='ENTJ'?'selected':''}>ENTJ / 指揮官</option>
+              <option value="ENTP" ${profile.mbti==='ENTP'?'selected':''}>ENTP / 討論者</option>
+            </optgroup>
+            <optgroup label="ディプロマット型 (NF)">
+              <option value="INFJ" ${profile.mbti==='INFJ'?'selected':''}>INFJ / 提唱者</option>
+              <option value="INFP" ${profile.mbti==='INFP'?'selected':''}>INFP / 仲介者</option>
+              <option value="ENFJ" ${profile.mbti==='ENFJ'?'selected':''}>ENFJ / 主人公</option>
+              <option value="ENFP" ${profile.mbti==='ENFP'?'selected':''}>ENFP / 広報運動家</option>
+            </optgroup>
+            <optgroup label="センチネル型 (SJ)">
+              <option value="ISTJ" ${profile.mbti==='ISTJ'?'selected':''}>ISTJ / 管理者</option>
+              <option value="ISFJ" ${profile.mbti==='ISFJ'?'selected':''}>ISFJ / 擁護者</option>
+              <option value="ESTJ" ${profile.mbti==='ESTJ'?'selected':''}>ESTJ / 幹部</option>
+              <option value="ESFJ" ${profile.mbti==='ESFJ'?'selected':''}>ESFJ / 領事</option>
+            </optgroup>
+            <optgroup label="エクスプローラー型 (SP)">
+              <option value="ISTP" ${profile.mbti==='ISTP'?'selected':''}>ISTP / 巨匠</option>
+              <option value="ISFP" ${profile.mbti==='ISFP'?'selected':''}>ISFP / 冒険家</option>
+              <option value="ESTP" ${profile.mbti==='ESTP'?'selected':''}>ESTP / 起業家</option>
+              <option value="ESFP" ${profile.mbti==='ESFP'?'selected':''}>ESFP / エンターテイナー</option>
+            </optgroup>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveProfile('${empId}')" style="white-space:nowrap;height:42px;align-self:flex-end">保存する</button>
+      </div>
+      <div id="rank-display-${empId}" style="margin-top:20px;padding-top:20px;border-top:1px solid #f1f5f9">
+        ${initRank ? renderRankBlock(initRank, empId) : '<div style="color:#94a3b8;font-size:13px;text-align:center;padding:8px">IQと戦闘力を入力・保存するとランクが算出されます</div>'}
+      </div>
+    </div>`;
+
+  // 実回答データカード
+  const ansColors = ['','#ef4444','#f97316','#f59e0b','#eab308','#22c55e','#16a34a','#059669'];
+  const rawAnswers = localStorage.getItem(`es_${empId}_${latestMonth}`);
+  let answerDetailHtml = '';
+  if (rawAnswers) {
+    try {
+      const ans = JSON.parse(rawAnswers);
+      const allQs = questions.reduce((acc, p) => [...acc, ...p.items.filter(q => q.type === 'rating')], []);
+      let groupsHtml = '', currentCat = '', groupBuf = '';
+      allQs.forEach(q => {
+        const val = ans[q.id];
+        if (val === undefined) return;
+        if (q.category !== currentCat) {
+          if (currentCat) groupsHtml += `<div class="answer-group"><div class="answer-group-title">${currentCat}</div>${groupBuf}</div>`;
+          currentCat = q.category; groupBuf = '';
+        }
+        const c = ansColors[val] || '#94a3b8';
+        groupBuf += `<div class="answer-row">
+          <div class="answer-q">${q.text}</div>
+          <div class="answer-bar-wrap">
+            <div class="answer-bar"><div class="answer-bar-fill" style="width:${val/7*100}%;background:${c}"></div></div>
+            <div class="answer-val" style="color:${c}">${val}</div>
+          </div>
+        </div>`;
+      });
+      if (currentCat) groupsHtml += `<div class="answer-group"><div class="answer-group-title">${currentCat}</div>${groupBuf}</div>`;
+      answerDetailHtml = `
+        <div class="answer-detail-card">
+          <h3>📝 今月の回答データ（実データ）</h3>
+          <div class="answer-submitted-at">2026年3月 ／ 実際に提出された回答 ／ 7段階評価（1=全くそう思わない ／ 7=強くそう思う）</div>
+          ${groupsHtml}
+        </div>`;
+    } catch(e) {}
+  }
+
+  document.getElementById('detail-content').innerHTML = profileHtml + answerDetailHtml + `
     <div class="chart-card">
       <h3>カテゴリ別スコア推移（過去6ヶ月）</h3>
       ${svgContent}
@@ -998,6 +1382,7 @@ const questions = [
 ];
 
 let currentPage = 0, answers = {};
+let currentEmpId = '';
 
 function setId(id) { document.getElementById('login-id').value = id; }
 
@@ -1009,6 +1394,12 @@ function doLogin() {
     return;
   }
   if (employees[id]) {
+    if (hasSubmittedThisMonth(id)) {
+      document.getElementById('already-name').textContent = employees[id].name;
+      showScreen('already');
+      return;
+    }
+    currentEmpId = id;
     showScreen('survey');
     document.getElementById('survey-user-name').textContent = `${employees[id].name}（${employees[id].dept}）`;
     currentPage = 0; answers = {};
@@ -1060,7 +1451,12 @@ function selectRating(id, val, btn) {
 function nextPage() {
   const unanswered = questions[currentPage].items.filter(q => q.type === 'rating' && !answers[q.id]);
   if (unanswered.length > 0) { alert('すべての質問に回答してください。'); return; }
-  if (currentPage === questions.length - 1) { showScreen('done'); }
+  if (currentPage === questions.length - 1) {
+    const currentMonth = months[months.length - 1];
+    localStorage.setItem(`es_${currentEmpId}_${currentMonth}`, JSON.stringify(answers));
+    rebuildEmpData();
+    showScreen('done');
+  }
   else { currentPage++; renderPage(); window.scrollTo(0,0); }
 }
 
@@ -1075,6 +1471,89 @@ function goToLogin() {
   document.getElementById('login-id').value = '';
   document.getElementById('login-error').textContent = '';
   showScreen('login');
+}
+
+// ===== プロフィール管理（IQ・戦闘力）=====
+function getProfile(empId) {
+  const saved = localStorage.getItem(`es_profile_${empId}`);
+  const defaults = employees[empId] || {};
+  if (saved) { try { return { ...defaults, ...JSON.parse(saved) }; } catch(e) {} }
+  return defaults;
+}
+
+function saveProfile(empId) {
+  const iq = parseInt(document.getElementById(`profile-iq-${empId}`).value) || 0;
+  const bp = parseInt(document.getElementById(`profile-bp-${empId}`).value) || 0;
+  const mbti = document.getElementById(`profile-mbti-${empId}`).value;
+  localStorage.setItem(`es_profile_${empId}`, JSON.stringify({ iq, battlePower: bp, mbti }));
+  employees[empId].iq = iq;
+  employees[empId].battlePower = bp;
+  employees[empId].mbti = mbti;
+  document.getElementById(`pdiq-${empId}`).textContent = iq.toLocaleString();
+  document.getElementById(`pdbp-${empId}`).textContent = bp.toLocaleString();
+  const mbtiEl = document.getElementById(`pmbti-${empId}`);
+  if (mbtiEl) {
+    const m = mbtiData[mbti];
+    const group = m ? m.group.toLowerCase() : '';
+    mbtiEl.innerHTML = mbti && m ? `<span class="mbti-badge mbti-${group}">${mbti} / ${m.name}</span>` : '<span style="color:#94a3b8">未設定</span>';
+  }
+  // ランク再計算
+  const rank = calcRank(iq, bp);
+  const rankEl = document.getElementById(`rank-display-${empId}`);
+  if (rankEl) rankEl.innerHTML = rank ? renderRankBlock(rank, empId) : '<div style="color:#94a3b8;font-size:13px">IQと戦闘力を入力するとランクが算出されます</div>';
+  showToast('✅ プロフィールを保存しました');
+}
+
+function renderRankBlock(rank, empId) {
+  const r = rankData[rank];
+  const tier = rank[0];
+  const profile = getProfile(empId);
+  const mbtiType = profile.mbti;
+  const mbti = mbtiType ? mbtiData[mbtiType] : null;
+  const group = mbti ? mbti.group : null;
+
+  let personaHtml = '';
+  if (mbti && group) {
+    const key = `${tier}-${group}`;
+    const insight = rankMbtiInsights[key];
+    const gData = mbtiGroupData[group];
+    if (insight) {
+      personaHtml = `
+        <div style="margin-top:18px;padding-top:18px;border-top:1px solid #f1f5f9">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">🔬 MBTI × ランク 統合分析</span>
+            <span class="mbti-badge mbti-${group.toLowerCase()}">${mbtiType} / ${mbti.name}</span>
+            <span style="font-size:11px;color:#94a3b8">${gData.name}</span>
+          </div>
+          <div class="persona-card">
+            <div class="persona-title">「${insight.persona}」</div>
+            <div class="persona-desc">${insight.desc}</div>
+            <div class="persona-watch">⚠️ 注意点：${insight.watch}</div>
+          </div>
+          <div class="mbti-detail-grid">
+            <div class="mbti-detail-item"><div class="mdi-label">💪 強み</div><div class="mdi-text">${mbti.strength}</div></div>
+            <div class="mbti-detail-item"><div class="mdi-label">🔥 モチベーション源</div><div class="mdi-text">${mbti.motivation}</div></div>
+            <div class="mbti-detail-item"><div class="mdi-label">👁 盲点</div><div class="mdi-text">${mbti.blindspot}</div></div>
+          </div>
+        </div>`;
+    }
+  }
+
+  return `
+    <div class="rank-header">
+      <div class="rank-badge-lg rank-${tier.toLowerCase()}">${rank}</div>
+      <div>
+        <div class="rank-copy">${r.copy}</div>
+        <div class="rank-label">資質ランク ${rank} ／ IQ ${profile.iq || '―'} × 戦闘力 ${(profile.battlePower || 0).toLocaleString()}</div>
+      </div>
+    </div>
+    <div class="rank-info-grid">
+      <div class="rank-info-item"><div class="ri-label">🧠 思考資質</div><div class="ri-text">${r.thinking}</div></div>
+      <div class="rank-info-item"><div class="ri-label">⚡ 実行資質</div><div class="ri-text">${r.execution}</div></div>
+      <div class="rank-info-item full"><div class="ri-label">🎯 期待役割</div><div class="ri-text">${r.role}</div></div>
+      <div class="rank-info-item full growth"><div class="ri-label">🌱 育成ポイント</div><div class="ri-text">${r.growth}</div></div>
+    </div>
+    ${personaHtml}`;
 }
 
 // ===== ID管理 =====
@@ -1151,6 +1630,8 @@ function showToast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+rebuildEmpData();
 </script>
 <div id="toast" class="toast"></div>
 </body>
