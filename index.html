@@ -711,7 +711,7 @@
     <!-- ランク詳細一覧 -->
     <div class="logic-section">
       <h3>🏆 ランク詳細定義（S1〜C4）</h3>
-      <p class="logic-desc">各ランクのキャッチコピー・思考力・実行力・推奨ロール・育成方針を定義します。</p>
+      <p class="logic-desc">各ランクの思考力・実行力・育成方針を定義します。</p>
       <div style="overflow-x:auto">
         <table class="rank-list-table" id="rank-detail-table"></table>
       </div>
@@ -811,21 +811,11 @@
       <div id="period-current" style="margin-top:16px;font-size:13px;color:#64748b;background:#f8fafc;padding:10px 14px;border-radius:8px;display:inline-block"></div>
     </div>
 
-    <!-- スコアデータインポート -->
+    <!-- スコアデータエクスポート -->
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
-      <div class="section-title" style="margin-bottom:8px">📥 スコアデータ インポート</div>
-      <p style="font-size:13px;color:#64748b;margin-bottom:16px">CSVを貼り付けてスコアを一括登録します。既存データは上書きされます。</p>
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#166534;font-family:monospace;line-height:1.7">
-        <strong>フォーマット（1行目はヘッダー）：</strong><br>
-        社員ID,年月,やりがい,成長,健康,上司,チーム,承認,信頼,組織,業務<br>
-        EMP001,2026-03,75,80,70,65,72,68,74,71,62
-      </div>
-      <textarea id="import-csv-area" rows="8" style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:monospace;resize:vertical;color:#1e293b" placeholder="ここにCSVを貼り付け..."></textarea>
-      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="importScoreCSV()">📥 インポート実行</button>
-        <button class="btn btn-secondary" onclick="document.getElementById('import-csv-area').value=''">クリア</button>
-        <span id="import-result-msg" style="font-size:13px;font-weight:600;display:none"></span>
-      </div>
+      <div class="section-title" style="margin-bottom:8px">📤 スコアデータ エクスポート</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px">全社員・全月のスコアデータをCSVでダウンロードします。</p>
+      <button class="btn btn-primary" onclick="exportScoreCSV()">📤 CSVエクスポート</button>
     </div>
 
     <!-- 質問文カスタマイズ -->
@@ -1013,22 +1003,22 @@ const empData = {
 
 // ===== 資質ランクマスタ =====
 const rankData = {
-  S1: { thinking:'極めて高い。複雑な課題を構造化し、本質を見抜く力がある',             execution:'極めて高い。高い主体性と達成意欲で自走できる',                           role:'事業責任者、新規事業リーダー、経営幹部候補',                          growth:'制約を与えず、裁量と挑戦機会を最大化する' },
-  S2: { thinking:'高い。戦略立案とアウトプット品質に強み',                             execution:'高い。明確な目標設定下で安定した成果を出す',                             role:'プロジェクトリーダー、専門領域の責任者',                             growth:'曖昧な状況での意思決定経験を積ませる' },
-  S3: { thinking:'非常に高い。緻密な設計と分析に秀でる',                               execution:'標準〜やや高い。スピードより質を重視する傾向',                          role:'企画職、専門職、クリエイティブ領域',                                growth:'実行フェーズへの関与を増やし、完遂経験を積む' },
-  S4: { thinking:'非常に高い。理解力・学習能力は傑出',                                 execution:'発展途上。主体性に課題があるが、依頼業務の品質は高い',                 role:'専門職、企画職、品質重視の業務',                                    growth:'小さな成功体験を積ませ、主体性を育む' },
-  A1: { thinking:'標準〜やや高い。直感的な判断に強み、緻密さに波あり',                  execution:'極めて高い。圧倒的な行動量と達成意欲',                                  role:'営業エース、事業開発、スタートアップ向き',                           growth:'振り返り習慣をつけ、戦略的思考を補強する' },
-  A2: { thinking:'標準的。実務レベルの判断は安定',                                     execution:'高い。継続的に成果を出す安定感',                                        role:'チームリーダー、プロジェクト推進の中核',                            growth:'視座を上げる経験（上位者との協働）を増やす' },
-  A3: { thinking:'標準的。定型業務の遂行には十分',                                     execution:'標準的。指示に対して着実に動ける',                                      role:'チームメンバー、オペレーション担当',                                growth:'得意領域を見つけ、専門性を伸ばす' },
-  A4: { thinking:'標準的。基礎的な業務理解は可能',                                     execution:'発展途上。経験を積む段階',                                              role:'チームメンバー、オペレーション担当',                                growth:'成功体験と適切なフィードバックで自信をつける' },
-  B1: { thinking:'やや課題あり。計画より行動が先行し、戦略の精度に波がある',            execution:'極めて高い。圧倒的な行動量と粘り強さを持つ',                            role:'テレアポ、飛び込み営業、高負荷オペレーション、現場の突破役',        growth:'思考フレームワークを叩き込み「考えてから動く」習慣をつける' },
-  B2: { thinking:'やや課題あり。深い分析より即断即決型',                                execution:'高い。動きながら考えるスタイル',                                        role:'フィールドセールス、実行部隊のメンバー',                            growth:'PDCAの「P」と「C」を意識させる習慣づけ' },
-  B3: { thinking:'課題あり。複雑な判断は苦手',                                         execution:'標準的。明確な指示があれば動ける',                                      role:'チームメンバー、オペレーション担当',                                growth:'得意な作業領域を見つけ、反復で精度を上げる' },
-  B4: { thinking:'課題あり。ルーティン業務に限定',                                      execution:'低い。受動的な傾向',                                                    role:'チームメンバー、オペレーション担当',                                growth:'小さなタスクの完遂を繰り返し、責任感を醸成' },
-  C1: { thinking:'課題が大きい。方向性を見失いやすく、成果が空回りしがち',               execution:'極めて高い。行動量は突出するが、質への転換が難しい',                    role:'単純作業の大量処理、体力勝負の現場作業、明確なKPI下での実行',      growth:'毎日のタスクを細かく指示。判断を求めない設計' },
-  C2: { thinking:'課題が大きい。自律的な判断は困難',                                    execution:'高い。明確な指示があれば動ける行動力はある',                            role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
-  C3: { thinking:'課題が大きい。問題解決に困難を伴う',                                  execution:'標準的。意欲はあるが成果に結びつきにくい',                              role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
-  C4: { thinking:'課題が大きい。基礎的な業務理解にも時間を要する',                      execution:'低い。自発的な行動が起きにくい',                                        role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+  S1: { thinking:'極めて高い。複雑な課題を構造化し、本質を見抜く力がある',             execution:'極めて高い。高い主体性と達成意欲で自走できる',                           growth:'制約を与えず、裁量と挑戦機会を最大化する' },
+  S2: { thinking:'高い。戦略立案とアウトプット品質に強み',                             execution:'高い。明確な目標設定下で安定した成果を出す',                             growth:'曖昧な状況での意思決定経験を積ませる' },
+  S3: { thinking:'非常に高い。緻密な設計と分析に秀でる',                               execution:'標準〜やや高い。スピードより質を重視する傾向',                           growth:'実行フェーズへの関与を増やし、完遂経験を積む' },
+  S4: { thinking:'非常に高い。理解力・学習能力は傑出',                                 execution:'発展途上。主体性に課題があるが、依頼業務の品質は高い',                   growth:'小さな成功体験を積ませ、主体性を育む' },
+  A1: { thinking:'標準〜やや高い。直感的な判断に強み、緻密さに波あり',                  execution:'極めて高い。圧倒的な行動量と達成意欲',                                   growth:'振り返り習慣をつけ、戦略的思考を補強する' },
+  A2: { thinking:'標準的。実務レベルの判断は安定',                                     execution:'高い。継続的に成果を出す安定感',                                         growth:'視座を上げる経験（上位者との協働）を増やす' },
+  A3: { thinking:'標準的。定型業務の遂行には十分',                                     execution:'標準的。指示に対して着実に動ける',                                       growth:'得意領域を見つけ、専門性を伸ばす' },
+  A4: { thinking:'標準的。基礎的な業務理解は可能',                                     execution:'発展途上。経験を積む段階',                                               growth:'成功体験と適切なフィードバックで自信をつける' },
+  B1: { thinking:'やや課題あり。計画より行動が先行し、戦略の精度に波がある',            execution:'極めて高い。圧倒的な行動量と粘り強さを持つ',                             growth:'思考フレームワークを叩き込み「考えてから動く」習慣をつける' },
+  B2: { thinking:'やや課題あり。深い分析より即断即決型',                                execution:'高い。動きながら考えるスタイル',                                         growth:'PDCAの「P」と「C」を意識させる習慣づけ' },
+  B3: { thinking:'課題あり。複雑な判断は苦手',                                         execution:'標準的。明確な指示があれば動ける',                                       growth:'得意な作業領域を見つけ、反復で精度を上げる' },
+  B4: { thinking:'課題あり。ルーティン業務に限定',                                      execution:'低い。受動的な傾向',                                                     growth:'小さなタスクの完遂を繰り返し、責任感を醸成' },
+  C1: { thinking:'課題が大きい。方向性を見失いやすく、成果が空回りしがち',               execution:'極めて高い。行動量は突出するが、質への転換が難しい',                     growth:'毎日のタスクを細かく指示。判断を求めない設計' },
+  C2: { thinking:'課題が大きい。自律的な判断は困難',                                    execution:'高い。明確な指示があれば動ける行動力はある',                             growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+  C3: { thinking:'課題が大きい。問題解決に困難を伴う',                                  execution:'標準的。意欲はあるが成果に結びつきにくい',                               growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+  C4: { thinking:'課題が大きい。基礎的な業務理解にも時間を要する',                      execution:'低い。自発的な行動が起きにくい',                                         growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
 };
 
 const rankTierColor = { S:'#7c3aed', A:'#2563eb', B:'#16a34a', C:'#d97706' };
@@ -1081,7 +1071,7 @@ function getPersonaInsight(rank, mbtiType) {
   const tierPrefix  = { S:'最高峰の知性と', A:'確かな思考力と', B:'成長途上の思考力と', C:'基礎を積み上げ中で' };
   const numInfix    = { '1':'圧倒的な実行力を兼ね備えた', '2':'高い実行力を持ち合わせた', '3':'標準的な実行力を持つ', '4':'実行力をこれから伸ばす' };
   const persona = `${m.name}`;
-  const desc    = `${tierPrefix[tier]}${numInfix[num]}${m.name}タイプ（${mbtiType}）。「${m.strength}」を強みとし、${r.role}での活躍が期待される。${m.motivation}をモチベーション源とし、${r.execution}という実行特性を発揮する。`;
+  const desc    = `${tierPrefix[tier]}${numInfix[num]}${m.name}タイプ（${mbtiType}）。「${m.strength}」を強みとし、${m.motivation}をモチベーション源とし、${r.execution}という実行特性を発揮する。`;
   const watch   = `MBTIの盲点「${m.blindspot}」に加え、育成上は「${r.growth}」が重要。両面からのアプローチで成長を加速させる。`;
   return { persona, desc, watch };
 }
@@ -2023,7 +2013,7 @@ function renderLogicTab() {
   rankTable.innerHTML = `
     <thead><tr>
       <th style="width:60px">ランク</th>
-      <th>思考力</th><th>実行力</th><th>推奨ロール</th><th>育成方針</th>
+      <th>思考力</th><th>実行力</th><th>育成方針</th>
     </tr></thead>
     <tbody>${Object.entries(rankData).map(([rank, d]) => {
       const tier = rank[0];
@@ -2031,7 +2021,6 @@ function renderLogicTab() {
         <td><span class="rank-cell ${tierClass[tier]}" style="min-width:40px;font-size:13px">${rank}</span></td>
         <td>${d.thinking}</td>
         <td>${d.execution}</td>
-        <td style="color:#4f46e5;font-weight:600">${d.role}</td>
         <td>${d.growth}</td>
       </tr>`;
     }).join('')}</tbody>`;
@@ -2346,7 +2335,6 @@ function renderRankBlock(rank, empId) {
     <div class="rank-info-grid">
       <div class="rank-info-item"><div class="ri-label">🧠 思考資質</div><div class="ri-text">${r.thinking}</div></div>
       <div class="rank-info-item"><div class="ri-label">⚡ 実行資質</div><div class="ri-text">${r.execution}</div></div>
-      <div class="rank-info-item full"><div class="ri-label">🎯 期待役割</div><div class="ri-text">${r.role}</div></div>
       <div class="rank-info-item full growth"><div class="ri-label">🌱 育成ポイント</div><div class="ri-text">${r.growth}</div></div>
     </div>
     ${personaHtml}`;
@@ -2664,47 +2652,25 @@ function saveSurveyPeriod() {
   if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
 }
 
-function importScoreCSV() {
-  const raw = (document.getElementById('import-csv-area').value || '').trim();
-  if (!raw) { alert('CSVを入力してください'); return; }
-  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
-  const header = lines[0].split(',').map(s => s.trim());
-  const idIdx = header.indexOf('社員ID');
-  const monthIdx = header.indexOf('年月');
-  if (idIdx < 0 || monthIdx < 0) { alert('ヘッダーに「社員ID」「年月」が必要です'); return; }
-  let imported = 0, errors = [];
-  lines.slice(1).forEach((line, i) => {
-    const cols = line.split(',').map(s => s.trim());
-    const empId = cols[idIdx];
-    const month = cols[monthIdx];
-    if (!empId || !month) { errors.push(`行${i+2}: 社員IDまたは年月が空`); return; }
-    if (!empData[empId]) empData[empId] = {};
-    const scores = {};
-    catKeys.forEach(k => {
-      const ci = header.indexOf(k);
-      if (ci >= 0 && cols[ci]) {
-        const v = parseInt(cols[ci], 10);
-        if (!isNaN(v) && v >= 0 && v <= 100) scores[k] = v;
-      }
+function exportScoreCSV() {
+  const headers = ['社員ID','氏名','所属','年月', ...catKeys];
+  const rows = [];
+  Object.entries(empData).forEach(([id, monthMap]) => {
+    const emp = employees[id] || {};
+    Object.entries(monthMap).forEach(([month, scores]) => {
+      rows.push([
+        id, emp.name||'', emp.dept||'', month,
+        ...catKeys.map(k => scores[k] !== undefined ? scores[k] : '')
+      ].join(','));
     });
-    if (Object.keys(scores).length === 0) { errors.push(`行${i+2}: スコアデータなし`); return; }
-    empData[empId][month] = scores;
-    if (!months.includes(month)) months.push(month);
-    imported++;
   });
-  const msg = document.getElementById('import-result-msg');
-  if (msg) {
-    if (imported > 0) {
-      msg.style.color = '#16a34a';
-      msg.textContent = `✅ ${imported}件インポート完了${errors.length ? `（${errors.length}件エラー）` : ''}`;
-    } else {
-      msg.style.color = '#dc2626';
-      msg.textContent = `❌ インポート失敗：${errors[0] || '不明なエラー'}`;
-    }
-    msg.style.display = 'inline';
-    setTimeout(() => msg.style.display = 'none', 5000);
-  }
-  if (imported > 0) renderDashboard();
+  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `score_export.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📤 スコアデータをエクスポートしました');
 }
 
 // ===== 部署別詳細モーダル =====
