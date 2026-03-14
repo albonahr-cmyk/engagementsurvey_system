@@ -273,10 +273,10 @@
 
   /* MBTI */
   .mbti-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-  .mbti-nt { background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; }   /* 分析家：紫 */
-  .mbti-nf { background: #dcfce7; color: #16a34a; border: 1px solid #86efac; }   /* 外交官：緑 */
-  .mbti-sj { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }   /* 番人：青 */
-  .mbti-sp { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }   /* 探検家：黄/オレンジ */
+  .mbti-nt { background: #e9d8f5; color: #5b21b6; border: 1px solid #c4a8e0; }   /* 分析家：薄い紫 */
+  .mbti-nf { background: #d4f0b0; color: #2d6a1f; border: 1px solid #96d468; }   /* 外交官：薄い黄緑 */
+  .mbti-sj { background: #c0d8f0; color: #1a3a6e; border: 1px solid #7ab0d8; }   /* 番人：薄い青 */
+  .mbti-sp { background: #fde5c0; color: #7c3100; border: 1px solid #f5a855; }   /* 探検家：薄いオレンジ */
   .persona-card { background: linear-gradient(135deg, #fafafa, #f5f3ff); border: 1px solid #e0e7ff; border-radius: 12px; padding: 16px 18px; margin-top: 16px; }
   .persona-title { font-size: 16px; font-weight: 800; color: #1e1b4b; margin-bottom: 6px; }
   .persona-desc { font-size: 13px; color: #374151; line-height: 1.75; margin-bottom: 10px; }
@@ -1013,22 +1013,22 @@ const empData = {
 
 // ===== 資質ランクマスタ =====
 const rankData = {
-  S1: { copy:'経営幹部候補',     thinking:'極めて高い。複雑な課題を構造化し、本質を見抜く力がある',             execution:'極めて高い。高い主体性と達成意欲で自走できる',                           role:'事業責任者、新規事業リーダー、経営幹部候補',                          growth:'制約を与えず、裁量と挑戦機会を最大化する' },
-  S2: { copy:'高精度プレイヤー', thinking:'高い。戦略立案とアウトプット品質に強み',                             execution:'高い。明確な目標設定下で安定した成果を出す',                             role:'プロジェクトリーダー、専門領域の責任者',                             growth:'曖昧な状況での意思決定経験を積ませる' },
-  S3: { copy:'戦略設計人材',     thinking:'非常に高い。緻密な設計と分析に秀でる',                               execution:'標準〜やや高い。スピードより質を重視する傾向',                          role:'企画職、専門職、クリエイティブ領域',                                growth:'実行フェーズへの関与を増やし、完遂経験を積む' },
-  S4: { copy:'高品質ワーカー',   thinking:'非常に高い。理解力・学習能力は傑出',                                 execution:'発展途上。主体性に課題があるが、依頼業務の品質は高い',                 role:'専門職、企画職、品質重視の業務',                                    growth:'小さな成功体験を積ませ、主体性を育む' },
-  A1: { copy:'突破推進リーダー', thinking:'標準〜やや高い。直感的な判断に強み、緻密さに波あり',                  execution:'極めて高い。圧倒的な行動量と達成意欲',                                  role:'営業エース、事業開発、スタートアップ向き',                           growth:'振り返り習慣をつけ、戦略的思考を補強する' },
-  A2: { copy:'組織中核メンバー', thinking:'標準的。実務レベルの判断は安定',                                     execution:'高い。継続的に成果を出す安定感',                                        role:'チームリーダー、プロジェクト推進の中核',                            growth:'視座を上げる経験（上位者との協働）を増やす' },
-  A3: { copy:'安定実務プレイヤー',thinking:'標準的。定型業務の遂行には十分',                                    execution:'標準的。指示に対して着実に動ける',                                      role:'チームメンバー、オペレーション担当',                                growth:'得意領域を見つけ、専門性を伸ばす' },
-  A4: { copy:'育成期待人材',     thinking:'標準的。基礎的な業務理解は可能',                                     execution:'発展途上。経験を積む段階',                                              role:'チームメンバー、オペレーション担当',                                growth:'成功体験と適切なフィードバックで自信をつける' },
-  B1: { copy:'行動突破型',       thinking:'やや課題あり。計画より行動が先行し、戦略の精度に波がある',            execution:'極めて高い。圧倒的な行動量と粘り強さを持つ',                            role:'テレアポ、飛び込み営業、高負荷オペレーション、現場の突破役',        growth:'思考フレームワークを叩き込み「考えてから動く」習慣をつける' },
-  B2: { copy:'現場実行メンバー', thinking:'やや課題あり。深い分析より即断即決型',                                execution:'高い。動きながら考えるスタイル',                                        role:'フィールドセールス、実行部隊のメンバー',                            growth:'PDCAの「P」と「C」を意識させる習慣づけ' },
-  B3: { copy:'業務補佐メンバー', thinking:'課題あり。複雑な判断は苦手',                                         execution:'標準的。明確な指示があれば動ける',                                      role:'チームメンバー、オペレーション担当',                                growth:'得意な作業領域を見つけ、反復で精度を上げる' },
-  B4: { copy:'定型業務担当',     thinking:'課題あり。ルーティン業務に限定',                                      execution:'低い。受動的な傾向',                                                    role:'チームメンバー、オペレーション担当',                                growth:'小さなタスクの完遂を繰り返し、責任感を醸成' },
-  C1: { copy:'馬力特化型',       thinking:'課題が大きい。方向性を見失いやすく、成果が空回りしがち',               execution:'極めて高い。行動量は突出するが、質への転換が難しい',                    role:'単純作業の大量処理、体力勝負の現場作業、明確なKPI下での実行',      growth:'毎日のタスクを細かく指示。判断を求めない設計' },
-  C2: { copy:'指示遂行メンバー', thinking:'課題が大きい。自律的な判断は困難',                                    execution:'高い。明確な指示があれば動ける行動力はある',                            role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
-  C3: { copy:'丁寧フォロー人材', thinking:'課題が大きい。問題解決に困難を伴う',                                  execution:'標準的。意欲はあるが成果に結びつきにくい',                              role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
-  C4: { copy:'伴走育成人材',     thinking:'課題が大きい。基礎的な業務理解にも時間を要する',                      execution:'低い。自発的な行動が起きにくい',                                        role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+  S1: { thinking:'極めて高い。複雑な課題を構造化し、本質を見抜く力がある',             execution:'極めて高い。高い主体性と達成意欲で自走できる',                           role:'事業責任者、新規事業リーダー、経営幹部候補',                          growth:'制約を与えず、裁量と挑戦機会を最大化する' },
+  S2: { thinking:'高い。戦略立案とアウトプット品質に強み',                             execution:'高い。明確な目標設定下で安定した成果を出す',                             role:'プロジェクトリーダー、専門領域の責任者',                             growth:'曖昧な状況での意思決定経験を積ませる' },
+  S3: { thinking:'非常に高い。緻密な設計と分析に秀でる',                               execution:'標準〜やや高い。スピードより質を重視する傾向',                          role:'企画職、専門職、クリエイティブ領域',                                growth:'実行フェーズへの関与を増やし、完遂経験を積む' },
+  S4: { thinking:'非常に高い。理解力・学習能力は傑出',                                 execution:'発展途上。主体性に課題があるが、依頼業務の品質は高い',                 role:'専門職、企画職、品質重視の業務',                                    growth:'小さな成功体験を積ませ、主体性を育む' },
+  A1: { thinking:'標準〜やや高い。直感的な判断に強み、緻密さに波あり',                  execution:'極めて高い。圧倒的な行動量と達成意欲',                                  role:'営業エース、事業開発、スタートアップ向き',                           growth:'振り返り習慣をつけ、戦略的思考を補強する' },
+  A2: { thinking:'標準的。実務レベルの判断は安定',                                     execution:'高い。継続的に成果を出す安定感',                                        role:'チームリーダー、プロジェクト推進の中核',                            growth:'視座を上げる経験（上位者との協働）を増やす' },
+  A3: { thinking:'標準的。定型業務の遂行には十分',                                     execution:'標準的。指示に対して着実に動ける',                                      role:'チームメンバー、オペレーション担当',                                growth:'得意領域を見つけ、専門性を伸ばす' },
+  A4: { thinking:'標準的。基礎的な業務理解は可能',                                     execution:'発展途上。経験を積む段階',                                              role:'チームメンバー、オペレーション担当',                                growth:'成功体験と適切なフィードバックで自信をつける' },
+  B1: { thinking:'やや課題あり。計画より行動が先行し、戦略の精度に波がある',            execution:'極めて高い。圧倒的な行動量と粘り強さを持つ',                            role:'テレアポ、飛び込み営業、高負荷オペレーション、現場の突破役',        growth:'思考フレームワークを叩き込み「考えてから動く」習慣をつける' },
+  B2: { thinking:'やや課題あり。深い分析より即断即決型',                                execution:'高い。動きながら考えるスタイル',                                        role:'フィールドセールス、実行部隊のメンバー',                            growth:'PDCAの「P」と「C」を意識させる習慣づけ' },
+  B3: { thinking:'課題あり。複雑な判断は苦手',                                         execution:'標準的。明確な指示があれば動ける',                                      role:'チームメンバー、オペレーション担当',                                growth:'得意な作業領域を見つけ、反復で精度を上げる' },
+  B4: { thinking:'課題あり。ルーティン業務に限定',                                      execution:'低い。受動的な傾向',                                                    role:'チームメンバー、オペレーション担当',                                growth:'小さなタスクの完遂を繰り返し、責任感を醸成' },
+  C1: { thinking:'課題が大きい。方向性を見失いやすく、成果が空回りしがち',               execution:'極めて高い。行動量は突出するが、質への転換が難しい',                    role:'単純作業の大量処理、体力勝負の現場作業、明確なKPI下での実行',      growth:'毎日のタスクを細かく指示。判断を求めない設計' },
+  C2: { thinking:'課題が大きい。自律的な判断は困難',                                    execution:'高い。明確な指示があれば動ける行動力はある',                            role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+  C3: { thinking:'課題が大きい。問題解決に困難を伴う',                                  execution:'標準的。意欲はあるが成果に結びつきにくい',                              role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
+  C4: { thinking:'課題が大きい。基礎的な業務理解にも時間を要する',                      execution:'低い。自発的な行動が起きにくい',                                        role:'マニュアル化されたオペレーション、ルーティン業務の実行',            growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
 };
 
 const rankTierColor = { S:'#7c3aed', A:'#2563eb', B:'#16a34a', C:'#d97706' };
@@ -1060,10 +1060,10 @@ const mbtiData = {
 };
 
 const mbtiGroupData = {
-  NT: { name:'分析家（NT）',   style:'知的・戦略的',   color:'#9b59b6' },
-  NF: { name:'外交官（NF）',   style:'共感・ビジョン的', color:'#27ae60' },
-  SJ: { name:'番人（SJ）',     style:'安定・実行的',   color:'#3498db' },
-  SP: { name:'探検家（SP）',   style:'適応・実践的',   color:'#e67e22' },
+  NT: { name:'分析家（NT）',   style:'知的・戦略的',   color:'#e9d8f5' },
+  NF: { name:'外交官（NF）',   style:'共感・ビジョン的', color:'#d4f0b0' },
+  SJ: { name:'番人（SJ）',     style:'安定・実行的',   color:'#c0d8f0' },
+  SP: { name:'探検家（SP）',   style:'適応・実践的',   color:'#fde5c0' },
 };
 
 // 手動オーバーライド（特定の rank-MBTI に独自定義を入れたい場合はここに追記）
@@ -1080,7 +1080,7 @@ function getPersonaInsight(rank, mbtiType) {
   const tier = rank[0], num = rank[1];
   const tierPrefix  = { S:'最高峰の知性と', A:'確かな思考力と', B:'成長途上の思考力と', C:'基礎を積み上げ中で' };
   const numInfix    = { '1':'圧倒的な実行力を兼ね備えた', '2':'高い実行力を持ち合わせた', '3':'標準的な実行力を持つ', '4':'実行力をこれから伸ばす' };
-  const persona = `${r.copy}型 ${m.name}`;
+  const persona = `${m.name}`;
   const desc    = `${tierPrefix[tier]}${numInfix[num]}${m.name}タイプ（${mbtiType}）。「${m.strength}」を強みとし、${r.role}での活躍が期待される。${m.motivation}をモチベーション源とし、${r.execution}という実行特性を発揮する。`;
   const watch   = `MBTIの盲点「${m.blindspot}」に加え、育成上は「${r.growth}」が重要。両面からのアプローチで成長を加速させる。`;
   return { persona, desc, watch };
@@ -1650,7 +1650,7 @@ function renderEmployeeList() {
           <div style="display:flex;gap:5px;margin-top:4px">
             ${r.iq ? `<span style="font-size:11px;background:#f5f3ff;color:#7c3aed;padding:2px 7px;border-radius:10px;font-weight:700">🧠 ${r.iq}</span>` : ''}
             ${r.battlePower ? `<span style="font-size:11px;background:#fff7ed;color:#ea580c;padding:2px 7px;border-radius:10px;font-weight:700">⚡ ${r.battlePower.toLocaleString()}</span>` : ''}
-            ${r.rank ? `<span style="font-size:11px;background:#f8fafc;color:#64748b;padding:2px 7px;border-radius:10px;font-weight:600">${rankData[r.rank]?.copy || ''}</span>` : ''}
+            ${r.rank ? `` : ''}
           </div>
         </td>
         <td><span style="background:#f1f5f9;padding:3px 10px;border-radius:20px;font-size:12px;color:#64748b;font-weight:600">${r.dept}</span></td>
@@ -2023,14 +2023,12 @@ function renderLogicTab() {
   rankTable.innerHTML = `
     <thead><tr>
       <th style="width:60px">ランク</th>
-      <th style="width:130px">キャッチコピー</th>
       <th>思考力</th><th>実行力</th><th>推奨ロール</th><th>育成方針</th>
     </tr></thead>
     <tbody>${Object.entries(rankData).map(([rank, d]) => {
       const tier = rank[0];
       return `<tr>
         <td><span class="rank-cell ${tierClass[tier]}" style="min-width:40px;font-size:13px">${rank}</span></td>
-        <td style="font-weight:700;color:#1e293b">${d.copy}</td>
         <td>${d.thinking}</td>
         <td>${d.execution}</td>
         <td style="color:#4f46e5;font-weight:600">${d.role}</td>
@@ -2040,10 +2038,10 @@ function renderLogicTab() {
 
   // MBTIグループ
   const groupGrid = document.getElementById('mbti-group-grid');
-  const groupColorBg = { NT:'#f5f3ff', NF:'#eff6ff', SJ:'#f0fdf4', SP:'#fffbeb' };
-  const groupColorText = { NT:'#7c3aed', NF:'#2563eb', SJ:'#16a34a', SP:'#d97706' };
-  const groupColorBorder = { NT:'#ddd6fe', NF:'#bfdbfe', SJ:'#bbf7d0', SP:'#fde68a' };
-  const chipBg = { NT:'#ede9fe', NF:'#dbeafe', SJ:'#dcfce7', SP:'#fef3c7' };
+  const groupColorBg = { NT:'#e9d8f5', NF:'#d4f0b0', SJ:'#c0d8f0', SP:'#fde5c0' };
+  const groupColorText = { NT:'#5b21b6', NF:'#2d6a1f', SJ:'#1a3a6e', SP:'#7c3100' };
+  const groupColorBorder = { NT:'#c4a8e0', NF:'#96d468', SJ:'#7ab0d8', SP:'#f5a855' };
+  const chipBg = { NT:'#f0e4fa', NF:'#e2f5c8', SJ:'#d4e8f8', SP:'#fef0d8' };
   const typesByGroup = {};
   Object.entries(mbtiData).forEach(([type, d]) => {
     if (!typesByGroup[d.group]) typesByGroup[d.group] = [];
@@ -2342,7 +2340,6 @@ function renderRankBlock(rank, empId) {
     <div class="rank-header">
       <div class="rank-badge-lg rank-${tier.toLowerCase()}">${rank}</div>
       <div>
-        <div class="rank-copy">${r.copy}</div>
         <div class="rank-label">資質ランク ${rank} ／ IQ ${profile.iq || '―'} × 戦闘力 ${(profile.battlePower || 0).toLocaleString()}</div>
       </div>
     </div>
@@ -2440,7 +2437,6 @@ function renderPersonaTable() {
     return `<tr>
       <td>
         <span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,${tierGrad[tier]});color:white;font-weight:900;font-size:14px">${rank}</span>
-        <div style="font-size:10px;color:#94a3b8;margin-top:3px;font-weight:600">${r.copy||''}</div>
       </td>
       <td>
         <span class="mbti-badge mbti-${grp.toLowerCase()}">${mbtiType}</span>
@@ -2572,7 +2568,6 @@ function renderIdList() {
       <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
         ${profile.iq ? `<span style="font-size:11px;background:#f5f3ff;color:#7c3aed;padding:2px 7px;border-radius:10px;font-weight:700">🧠 ${profile.iq}</span>` : ''}
         ${profile.battlePower ? `<span style="font-size:11px;background:#fff7ed;color:#ea580c;padding:2px 7px;border-radius:10px;font-weight:700">⚡ ${profile.battlePower.toLocaleString()}</span>` : ''}
-        ${rank ? `<span style="font-size:11px;background:#f8fafc;color:#64748b;padding:2px 7px;border-radius:10px;font-weight:600">${rankData[rank]?.copy||''}</span>` : ''}
       </div>` : '';
     return `<tr>
       <td><span class="id-badge">${id}</span>${newMark}</td>
