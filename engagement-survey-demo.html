@@ -273,10 +273,10 @@
 
   /* MBTI */
   .mbti-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-  .mbti-nt { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }   /* アナリスト：紫 */
-  .mbti-nf { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }   /* ディプロマット：緑 */
-  .mbti-sj { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }   /* センチネル：青 */
-  .mbti-sp { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }   /* エクスプローラー：黄 */
+  .mbti-nt { background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; }   /* 分析家：紫 */
+  .mbti-nf { background: #dcfce7; color: #16a34a; border: 1px solid #86efac; }   /* 外交官：緑 */
+  .mbti-sj { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }   /* 番人：青 */
+  .mbti-sp { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }   /* 探検家：黄/オレンジ */
   .persona-card { background: linear-gradient(135deg, #fafafa, #f5f3ff); border: 1px solid #e0e7ff; border-radius: 12px; padding: 16px 18px; margin-top: 16px; }
   .persona-title { font-size: 16px; font-weight: 800; color: #1e1b4b; margin-bottom: 6px; }
   .persona-desc { font-size: 13px; color: #374151; line-height: 1.75; margin-bottom: 10px; }
@@ -593,19 +593,19 @@
           <label>MBTIタイプ</label>
           <select id="new-emp-mbti">
             <option value="">未設定</option>
-            <optgroup label="NT（アナリスト）">
+            <optgroup label="NT（分析家）">
               <option value="INTJ">INTJ 建築家</option><option value="INTP">INTP 論理学者</option>
               <option value="ENTJ">ENTJ 指揮官</option><option value="ENTP">ENTP 討論者</option>
             </optgroup>
-            <optgroup label="NF（ディプロマット）">
+            <optgroup label="NF（外交官）">
               <option value="INFJ">INFJ 提唱者</option><option value="INFP">INFP 仲介者</option>
               <option value="ENFJ">ENFJ 主人公</option><option value="ENFP">ENFP 広報運動家</option>
             </optgroup>
-            <optgroup label="SJ（センチネル）">
+            <optgroup label="SJ（番人）">
               <option value="ISTJ">ISTJ 管理者</option><option value="ISFJ">ISFJ 擁護者</option>
               <option value="ESTJ">ESTJ 幹部</option><option value="ESFJ">ESFJ 領事</option>
             </optgroup>
-            <optgroup label="SP（エクスプローラー）">
+            <optgroup label="SP（探検家）">
               <option value="ISTP">ISTP 巨匠</option><option value="ISFP">ISFP 冒険家</option>
               <option value="ESTP">ESTP 起業家</option><option value="ESFP">ESFP エンターテイナー</option>
             </optgroup>
@@ -751,10 +751,10 @@
           <label style="display:block;font-size:12px;font-weight:700;color:#64748b;margin-bottom:5px">MBTIタイプで絞り込み</label>
           <select id="filter-mbti" onchange="renderPersonaTable()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:600;color:#334155">
             <option value="">すべてのタイプ</option>
-            <optgroup label="NT（アナリスト）"><option>INTJ</option><option>INTP</option><option>ENTJ</option><option>ENTP</option></optgroup>
-            <optgroup label="NF（ディプロマット）"><option>INFJ</option><option>INFP</option><option>ENFJ</option><option>ENFP</option></optgroup>
-            <optgroup label="SJ（センチネル）"><option>ISTJ</option><option>ISFJ</option><option>ESTJ</option><option>ESFJ</option></optgroup>
-            <optgroup label="SP（エクスプローラー）"><option>ISTP</option><option>ISFP</option><option>ESTP</option><option>ESFP</option></optgroup>
+            <optgroup label="NT（分析家）"><option>INTJ</option><option>INTP</option><option>ENTJ</option><option>ENTP</option></optgroup>
+            <optgroup label="NF（外交官）"><option>INFJ</option><option>INFP</option><option>ENFJ</option><option>ENFP</option></optgroup>
+            <optgroup label="SJ（番人）"><option>ISTJ</option><option>ISFJ</option><option>ESTJ</option><option>ESFJ</option></optgroup>
+            <optgroup label="SP（探検家）"><option>ISTP</option><option>ISFP</option><option>ESTP</option><option>ESFP</option></optgroup>
           </select>
         </div>
         <button onclick="document.getElementById('filter-rank').value='';document.getElementById('filter-mbti').value='';renderPersonaTable()" class="btn btn-secondary btn-sm">リセット</button>
@@ -1048,7 +1048,7 @@ const mbtiData = {
   INFJ: { name:'提唱者',        group:'NF', strength:'ビジョン設定・人材育成',       motivation:'意義・人の成長',         blindspot:'自己犠牲傾向・完璧主義' },
   INFP: { name:'仲介者',        group:'NF', strength:'共感・クリエイティブ発想',     motivation:'価値観への貢献',         blindspot:'現実対処・対立回避' },
   ENFJ: { name:'主人公',        group:'NF', strength:'人材育成・チームビルディング', motivation:'人の成功・社会貢献',     blindspot:'自己犠牲・過干渉傾向' },
-  ENFP: { name:'広報運動家',    group:'NF', strength:'発想・人脈構築・モチベート',   motivation:'可能性・自由・つながり', blindspot:'継続性・細部' },
+  ENFP: { name:'運動家',        group:'NF', strength:'発想・人脈構築・モチベート',   motivation:'可能性・自由・つながり', blindspot:'継続性・細部' },
   ISTJ: { name:'管理者',        group:'SJ', strength:'確実な実行・品質管理',         motivation:'義務・安定・信頼',       blindspot:'変化適応・創造性' },
   ISFJ: { name:'擁護者',        group:'SJ', strength:'細やかなサポート・チームケア', motivation:'人の役に立つこと',       blindspot:'自己主張・変化' },
   ESTJ: { name:'幹部',          group:'SJ', strength:'組織管理・プロセス標準化',     motivation:'効率・秩序・達成',       blindspot:'感情的柔軟性・新アイデア' },
@@ -1060,10 +1060,10 @@ const mbtiData = {
 };
 
 const mbtiGroupData = {
-  NT: { name:'アナリスト型',       style:'知的・戦略的', color:'#7c3aed' },
-  NF: { name:'ディプロマット型',   style:'共感・ビジョン的', color:'#2563eb' },
-  SJ: { name:'センチネル型',       style:'安定・実行的', color:'#16a34a' },
-  SP: { name:'エクスプローラー型', style:'適応・実践的', color:'#d97706' },
+  NT: { name:'分析家（NT）',   style:'知的・戦略的',   color:'#9b59b6' },
+  NF: { name:'外交官（NF）',   style:'共感・ビジョン的', color:'#27ae60' },
+  SJ: { name:'番人（SJ）',     style:'安定・実行的',   color:'#3498db' },
+  SP: { name:'探検家（SP）',   style:'適応・実践的',   color:'#e67e22' },
 };
 
 // 手動オーバーライド（特定の rank-MBTI に独自定義を入れたい場合はここに追記）
@@ -1835,25 +1835,25 @@ function showDetail(empId) {
           <label>🧬 MBTI タイプ</label>
           <select id="profile-mbti-${empId}" style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;transition:all 0.2s;color:#1e293b;font-weight:500;background:white">
             <option value="">選択してください</option>
-            <optgroup label="アナリスト型 (NT)">
+            <optgroup label="分析家（NT）">
               <option value="INTJ" ${profile.mbti==='INTJ'?'selected':''}>INTJ / 建築家</option>
               <option value="INTP" ${profile.mbti==='INTP'?'selected':''}>INTP / 論理学者</option>
               <option value="ENTJ" ${profile.mbti==='ENTJ'?'selected':''}>ENTJ / 指揮官</option>
               <option value="ENTP" ${profile.mbti==='ENTP'?'selected':''}>ENTP / 討論者</option>
             </optgroup>
-            <optgroup label="ディプロマット型 (NF)">
+            <optgroup label="外交官（NF）">
               <option value="INFJ" ${profile.mbti==='INFJ'?'selected':''}>INFJ / 提唱者</option>
               <option value="INFP" ${profile.mbti==='INFP'?'selected':''}>INFP / 仲介者</option>
               <option value="ENFJ" ${profile.mbti==='ENFJ'?'selected':''}>ENFJ / 主人公</option>
               <option value="ENFP" ${profile.mbti==='ENFP'?'selected':''}>ENFP / 広報運動家</option>
             </optgroup>
-            <optgroup label="センチネル型 (SJ)">
+            <optgroup label="番人（SJ）">
               <option value="ISTJ" ${profile.mbti==='ISTJ'?'selected':''}>ISTJ / 管理者</option>
               <option value="ISFJ" ${profile.mbti==='ISFJ'?'selected':''}>ISFJ / 擁護者</option>
               <option value="ESTJ" ${profile.mbti==='ESTJ'?'selected':''}>ESTJ / 幹部</option>
               <option value="ESFJ" ${profile.mbti==='ESFJ'?'selected':''}>ESFJ / 領事</option>
             </optgroup>
-            <optgroup label="エクスプローラー型 (SP)">
+            <optgroup label="探検家（SP）">
               <option value="ISTP" ${profile.mbti==='ISTP'?'selected':''}>ISTP / 巨匠</option>
               <option value="ISFP" ${profile.mbti==='ISFP'?'selected':''}>ISFP / 冒険家</option>
               <option value="ESTP" ${profile.mbti==='ESTP'?'selected':''}>ESTP / 起業家</option>
