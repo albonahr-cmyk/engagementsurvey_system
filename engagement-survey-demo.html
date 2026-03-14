@@ -491,6 +491,7 @@
     <button class="tab-btn" onclick="switchTab('employees', this)">社員一覧</button>
     <button class="tab-btn" onclick="switchTab('idmgmt', this)">ID管理</button>
     <button class="tab-btn" onclick="switchTab('logic', this)">📖 ロジック一覧</button>
+    <button class="tab-btn" onclick="switchTab('settings', this)">⚙️ 設定</button>
   </div>
 
   <!-- 月次ダッシュボード -->
@@ -753,6 +754,18 @@
       </div>
     </div>
 
+    <!-- カテゴリ別目標スコア設定 -->
+    <div class="logic-section">
+      <h3>🎯 カテゴリ別目標スコア設定</h3>
+      <p class="logic-desc">各カテゴリのスコア目標値を設定します。スコアカードに目標ラインが表示され、達成状況を可視化します。</p>
+      <div id="target-editor"></div>
+      <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
+        <button class="btn btn-primary" onclick="applyTargets()">💾 保存して反映</button>
+        <button class="btn btn-secondary" onclick="resetTargets()">↩️ デフォルトに戻す</button>
+        <span id="target-save-msg" style="font-size:13px;color:#16a34a;font-weight:600;display:none">✅ 保存しました</span>
+      </div>
+    </div>
+
     <!-- カテゴリ別閾値設定 -->
     <div class="logic-section">
       <h3>🎚️ カテゴリ別スコア閾値設定</h3>
@@ -766,6 +779,45 @@
     </div>
   </div>
 </div>
+
+  <!-- 設定タブ内容 -->
+  <div id="tab-settings" class="admin-body" style="display:none">
+    <!-- サーベイ期間設定 -->
+    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
+      <div class="section-title" style="margin-bottom:8px">📅 サーベイ回答期間</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:20px">社員がアンケートに回答できる期間を設定します。</p>
+      <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">開始日</label>
+          <input type="date" id="period-start" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">終了日</label>
+          <input type="date" id="period-end" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
+        </div>
+        <button class="btn btn-primary" onclick="saveSurveyPeriod()">💾 保存</button>
+        <span id="period-save-msg" style="font-size:13px;color:#16a34a;font-weight:600;display:none">✅ 保存しました</span>
+      </div>
+      <div id="period-current" style="margin-top:16px;font-size:13px;color:#64748b;background:#f8fafc;padding:10px 14px;border-radius:8px;display:inline-block"></div>
+    </div>
+
+    <!-- スコアデータインポート -->
+    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
+      <div class="section-title" style="margin-bottom:8px">📥 スコアデータ インポート</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px">CSVを貼り付けてスコアを一括登録します。既存データは上書きされます。</p>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#166534;font-family:monospace;line-height:1.7">
+        <strong>フォーマット（1行目はヘッダー）：</strong><br>
+        社員ID,年月,やりがい,成長,健康,上司,チーム,承認,信頼,組織,業務<br>
+        EMP001,2026-03,75,80,70,65,72,68,74,71,62
+      </div>
+      <textarea id="import-csv-area" rows="8" style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:monospace;resize:vertical;color:#1e293b" placeholder="ここにCSVを貼り付け..."></textarea>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="importScoreCSV()">📥 インポート実行</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('import-csv-area').value=''">クリア</button>
+        <span id="import-result-msg" style="font-size:13px;font-weight:600;display:none"></span>
+      </div>
+    </div>
+  </div>
 
 <!-- 社員詳細 -->
 <div id="screen-detail" class="screen">
@@ -790,7 +842,12 @@
 <script>
 // ===== セキュリティ設定 =====
 const ADMIN_PASSWORD = 'admin1234';
-const SURVEY_PERIOD = { start: '2026-03-01', end: '2026-03-15' };
+let surveyPeriod = (() => {
+  try {
+    const s = localStorage.getItem('es_survey_period');
+    return s ? JSON.parse(s) : { start: '2026-03-01', end: '2026-03-15' };
+  } catch(e) { return { start: '2026-03-01', end: '2026-03-15' }; }
+})();
 
 // ===== マスタデータ =====
 const employees = {
@@ -1212,6 +1269,18 @@ let categoryThresholds = (() => {
   } catch(e) { return { ...defaultCategoryThresholds }; }
 })();
 
+// ===== カテゴリ別目標スコア =====
+const defaultCategoryTargets = {
+  やりがい:80, 成長:75, 健康:80, 上司:75, チーム:78, 承認:75, 信頼:75, 組織:75, 業務:72,
+};
+let categoryTargets = (() => {
+  try {
+    const s = localStorage.getItem('es_cat_targets');
+    return s ? { ...defaultCategoryTargets, ...JSON.parse(s) } : { ...defaultCategoryTargets };
+  } catch(e) { return { ...defaultCategoryTargets }; }
+})();
+function saveCategoryTargets() { localStorage.setItem('es_cat_targets', JSON.stringify(categoryTargets)); }
+
 function getCatStatus(cat, score, diff) {
   const th = categoryThresholds[cat] || { alert: 60, warn: 70 };
   if (diff !== null && (diff <= -10 || score < th.alert)) return 'alert';
@@ -1370,8 +1439,11 @@ function renderDashboard() {
           <span class="cat-name">${catNames[k]}</span>
           <span class="score-num ${status}">${score}点${alert}</span>
         </div>
-        <div class="score-bar-wrap"><div class="score-bar ${status}" style="width:${score}%"></div></div>
-        <div class="score-trend">前月比 ${diff !== null ? `<span class="${diff >= 0 ? 'up' : 'down'}">${diff > 0 ? '+' : ''}${diff}点</span>` : '初回'}</div>
+        <div class="score-bar-wrap" style="position:relative;overflow:visible"><div class="score-bar ${status}" style="width:${score}%"></div>${categoryTargets[k] ? `<div style="position:absolute;top:0;bottom:0;left:${Math.min(categoryTargets[k],100)}%;width:2px;background:#6366f1;opacity:0.8;border-radius:1px"></div>` : ''}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0">
+          <div class="score-trend" style="margin:0">前月比 ${diff !== null ? `<span class="${diff >= 0 ? 'up' : 'down'}">${diff > 0 ? '+' : ''}${diff}点</span>` : '初回'}</div>
+          ${categoryTargets[k] ? `<div style="font-size:10px;font-weight:700;color:${score>=categoryTargets[k]?'#16a34a':'#6366f1'}">目標${categoryTargets[k]}点 ${score>=categoryTargets[k]?'✅':'▲'+(categoryTargets[k]-score)}</div>` : ''}
+        </div>
         <div class="mini-chart">${pastScores.map(v => `<div class="mini-bar" style="height:${(v/maxS)*100}%;background:${status==='alert'?'#ef4444':status==='warn'?'#f59e0b':'#22c55e'};opacity:0.7"></div>`).join('')}</div>
       </div>`;
   }).join('');
@@ -1428,7 +1500,7 @@ function renderDashboard() {
       if (avg >= 70) { color1 = '#4ade80'; color2 = '#22c55e'; textColor = '#16a34a'; }
       else if (avg >= 60) { color1 = '#fbbf24'; color2 = '#f59e0b'; textColor = '#d97706'; }
       else { color1 = '#f87171'; color2 = '#ef4444'; textColor = '#dc2626'; }
-      return `<div style="background:white;border-radius:12px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:10px;display:flex;align-items:center;gap:16px">
+      return `<div style="background:white;border-radius:12px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:10px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:box-shadow 0.2s" onclick="showDeptDetail('${dept}', '${month}')" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
         <div style="width:100px;font-size:13px;font-weight:700;color:#374151">${dept}</div>
         <div style="flex:1;background:#f1f5f9;border-radius:4px;height:12px;overflow:hidden">
           <div style="height:100%;width:${avg}%;background:linear-gradient(90deg,${color1},${color2});border-radius:4px;transition:width 0.5s"></div>
@@ -1823,7 +1895,7 @@ function backToAdmin() {
 }
 
 // ===== タブ切替 =====
-const TAB_NAMES = ['dashboard', 'employees', 'idmgmt', 'logic'];
+const TAB_NAMES = ['dashboard', 'employees', 'idmgmt', 'logic', 'settings'];
 function switchTab(name, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1834,6 +1906,7 @@ function switchTab(name, btn) {
   if (name === 'employees') renderEmployeeList();
   if (name === 'idmgmt') renderIdList();
   if (name === 'logic') renderLogicTab();
+  if (name === 'settings') renderSettingsTab();
 }
 
 function switchTabById(name) {
@@ -1895,6 +1968,9 @@ function renderLogicTab() {
 
   // ペルソナテーブル（256パターン、フィルター付き）
   renderPersonaTable();
+
+  // カテゴリ別目標スコアエディター
+  renderTargetEditor();
 
   // カテゴリ別閾値エディター
   renderThresholdEditor();
@@ -1982,14 +2058,14 @@ function doLogin() {
   if (employees[id]) {
     // 回答期間チェック
     const today = new Date();
-    const start = new Date(SURVEY_PERIOD.start);
-    const end = new Date(SURVEY_PERIOD.end);
+    const start = new Date(surveyPeriod.start);
+    const end = new Date(surveyPeriod.end);
     end.setHours(23,59,59);
     if (today < start || today > end) {
-      const s = SURVEY_PERIOD.start.replace(/\d{4}-0?/, '').replace('-0?', '/').replace(/-(\d)$/, '/$1');
-      const e = SURVEY_PERIOD.end.replace(/\d{4}-0?/, '').replace('-0?', '/').replace(/-(\d)$/, '/$1');
-      const sm = SURVEY_PERIOD.start.slice(5).replace('-', '/').replace(/^0/, '');
-      const em = SURVEY_PERIOD.end.slice(5).replace('-', '/').replace(/^0/, '');
+      const s = surveyPeriod.start.replace(/\d{4}-0?/, '').replace('-0?', '/').replace(/-(\d)$/, '/$1');
+      const e = surveyPeriod.end.replace(/\d{4}-0?/, '').replace('-0?', '/').replace(/-(\d)$/, '/$1');
+      const sm = surveyPeriod.start.slice(5).replace('-', '/').replace(/^0/, '');
+      const em = surveyPeriod.end.slice(5).replace('-', '/').replace(/^0/, '');
       document.getElementById('login-error').textContent = `現在は回答期間外です（3/1〜3/15）`;
       return;
     }
@@ -2426,8 +2502,181 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ===== 設定タブ =====
+function renderSettingsTab() {
+  const ps = document.getElementById('period-start');
+  const pe = document.getElementById('period-end');
+  if (ps) ps.value = surveyPeriod.start;
+  if (pe) pe.value = surveyPeriod.end;
+  const cur = document.getElementById('period-current');
+  if (cur) cur.textContent = `現在の期間：${surveyPeriod.start} 〜 ${surveyPeriod.end}`;
+}
+
+function saveSurveyPeriod() {
+  const start = document.getElementById('period-start').value;
+  const end   = document.getElementById('period-end').value;
+  if (!start || !end) { alert('開始日と終了日を入力してください'); return; }
+  if (start > end) { alert('開始日は終了日より前にしてください'); return; }
+  surveyPeriod = { start, end };
+  localStorage.setItem('es_survey_period', JSON.stringify(surveyPeriod));
+  const cur = document.getElementById('period-current');
+  if (cur) cur.textContent = `現在の期間：${surveyPeriod.start} 〜 ${surveyPeriod.end}`;
+  const msg = document.getElementById('period-save-msg');
+  if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
+}
+
+function importScoreCSV() {
+  const raw = (document.getElementById('import-csv-area').value || '').trim();
+  if (!raw) { alert('CSVを入力してください'); return; }
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const header = lines[0].split(',').map(s => s.trim());
+  const idIdx = header.indexOf('社員ID');
+  const monthIdx = header.indexOf('年月');
+  if (idIdx < 0 || monthIdx < 0) { alert('ヘッダーに「社員ID」「年月」が必要です'); return; }
+  let imported = 0, errors = [];
+  lines.slice(1).forEach((line, i) => {
+    const cols = line.split(',').map(s => s.trim());
+    const empId = cols[idIdx];
+    const month = cols[monthIdx];
+    if (!empId || !month) { errors.push(`行${i+2}: 社員IDまたは年月が空`); return; }
+    if (!empData[empId]) empData[empId] = {};
+    const scores = {};
+    catKeys.forEach(k => {
+      const ci = header.indexOf(k);
+      if (ci >= 0 && cols[ci]) {
+        const v = parseInt(cols[ci], 10);
+        if (!isNaN(v) && v >= 0 && v <= 100) scores[k] = v;
+      }
+    });
+    if (Object.keys(scores).length === 0) { errors.push(`行${i+2}: スコアデータなし`); return; }
+    empData[empId][month] = scores;
+    if (!months.includes(month)) months.push(month);
+    imported++;
+  });
+  const msg = document.getElementById('import-result-msg');
+  if (msg) {
+    if (imported > 0) {
+      msg.style.color = '#16a34a';
+      msg.textContent = `✅ ${imported}件インポート完了${errors.length ? `（${errors.length}件エラー）` : ''}`;
+    } else {
+      msg.style.color = '#dc2626';
+      msg.textContent = `❌ インポート失敗：${errors[0] || '不明なエラー'}`;
+    }
+    msg.style.display = 'inline';
+    setTimeout(() => msg.style.display = 'none', 5000);
+  }
+  if (imported > 0) renderDashboard();
+}
+
+// ===== 部署別詳細モーダル =====
+function showDeptDetail(dept, month) {
+  const prev = months[months.indexOf(month) - 1];
+  const deptEmps = Object.entries(employees).filter(([,e]) => e.dept === dept);
+  const rows = deptEmps.map(([id, emp]) => {
+    const scores = empData[id]?.[month];
+    if (!scores) return null;
+    const total = getTotal(scores);
+    const prevTotal = prev && empData[id]?.[prev] ? getTotal(empData[id][prev]) : null;
+    const diff = prevTotal !== null ? total - prevTotal : null;
+    return { id, name: emp.name, scores, total, diff };
+  }).filter(Boolean).sort((a,b) => b.total - a.total);
+
+  const catCols = catKeys.map(k => `<th style="min-width:52px;font-size:11px;color:#94a3b8;font-weight:700;text-align:center;padding:8px 6px">${catNames[k]}</th>`).join('');
+  const dataRows = rows.map(r => {
+    const catCells = catKeys.map(k => {
+      const s = r.scores[k] || 0;
+      const st = getCatStatus(k, s, null);
+      const bg = st==='alert'?'#fef2f2':st==='warn'?'#fffbeb':'#f0fdf4';
+      const cl = st==='alert'?'#dc2626':st==='warn'?'#d97706':'#16a34a';
+      return `<td style="text-align:center;font-size:13px;font-weight:700;color:${cl};background:${bg};padding:8px 6px">${s}</td>`;
+    }).join('');
+    const diffText = r.diff !== null ? `<span style="color:${r.diff>=0?'#16a34a':'#dc2626'};font-size:12px;margin-left:4px">${r.diff>0?'+':''}${r.diff}</span>` : '';
+    return `<tr style="border-bottom:1px solid #f1f5f9">
+      <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap">${r.name}</td>
+      <td style="padding:10px 12px;font-size:15px;font-weight:800;color:#1e293b">${r.total}点${diffText}</td>
+      ${catCells}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('dept-modal-content').innerHTML = `
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:20px;font-weight:800;color:#1e293b">🏢 ${dept} — 詳細分析</h2>
+      <p style="font-size:13px;color:#64748b;margin-top:4px">${month.replace('-', '年').replace(/-(\d+)$/, (_, m) => m + '月')} • ${rows.length}名が回答</p>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="border-bottom:2px solid #e5e7eb">
+          <th style="text-align:left;padding:8px 12px;font-size:12px;color:#94a3b8;font-weight:700">氏名</th>
+          <th style="text-align:left;padding:8px 12px;font-size:12px;color:#94a3b8;font-weight:700">総合</th>
+          ${catCols}
+        </tr></thead>
+        <tbody>${dataRows || '<tr><td colspan="11" style="text-align:center;padding:20px;color:#94a3b8">データがありません</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  document.getElementById('dept-modal-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDeptModal() {
+  document.getElementById('dept-modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ===== カテゴリ別目標スコアエディター =====
+function renderTargetEditor() {
+  const el = document.getElementById('target-editor');
+  if (!el) return;
+  const catLabelMap = {
+    やりがい:'やりがい（職務）', 成長:'成長（キャリア）', 健康:'健康（ウェルビーイング）',
+    上司:'上司（支援）', チーム:'チーム（人間関係）', 承認:'承認', 信頼:'信頼（理念戦略）',
+    組織:'組織（風土）', 業務:'業務（環境）',
+  };
+  el.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:12px">
+      ${catKeys.map(k => {
+        const target = categoryTargets[k] ?? defaultCategoryTargets[k];
+        const changed = target !== defaultCategoryTargets[k];
+        return `<div style="background:#f8fafc;border-radius:10px;padding:14px 16px;min-width:130px;border:1.5px solid ${changed?'#6366f1':'#e2e8f0'}">
+          <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:8px">${catLabelMap[k]||k}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input class="threshold-input" type="number" min="0" max="100" id="tgt-${k}" value="${target}" style="width:58px">
+            <span style="font-size:12px;color:#94a3b8">点</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function applyTargets() {
+  catKeys.forEach(k => {
+    const el = document.getElementById(`tgt-${k}`);
+    if (!el) return;
+    const v = parseInt(el.value, 10);
+    if (!isNaN(v) && v >= 0 && v <= 100) categoryTargets[k] = v;
+  });
+  saveCategoryTargets();
+  renderTargetEditor();
+  const msg = document.getElementById('target-save-msg');
+  if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
+}
+
+function resetTargets() {
+  if (!confirm('目標スコアをデフォルトに戻しますか？')) return;
+  categoryTargets = { ...defaultCategoryTargets };
+  localStorage.removeItem('es_cat_targets');
+  renderTargetEditor();
+  const msg = document.getElementById('target-save-msg');
+  if (msg) { msg.textContent = '↩️ リセットしました'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; msg.textContent = '✅ 保存しました'; }, 2500); }
+}
+
 rebuildEmpData();
 </script>
 <div id="toast" class="toast"></div>
+<div id="dept-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;padding:40px 20px" onclick="if(event.target===this)closeDeptModal()">
+  <div style="background:white;border-radius:16px;max-width:900px;margin:0 auto;padding:32px;position:relative">
+    <button onclick="closeDeptModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8">✕</button>
+    <div id="dept-modal-content"></div>
+  </div>
+</div>
 </body>
 </html>
