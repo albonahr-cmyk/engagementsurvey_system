@@ -1622,19 +1622,21 @@ async function loadAllSettingsFromCloud() {
   if (!GAS_URL) return false;
   try {
     const data = await gasGet({ action: 'loadSettings' });
-    if (!data?.ok || !data.data) return false;
+    console.log('loadSettings response:', data);
+    if (!data?.ok || !data.data) { console.warn('loadSettings: no data returned'); return false; }
     let count = 0;
     _skipSync = true;
     for (const [key, value] of Object.entries(data.data)) {
       if (value && key.startsWith('es_')) {
         _origSetItem(key, value);
         count++;
+        console.log('restored:', key, value.substring?.(0,50) || value);
       }
     }
     _skipSync = false;
     console.log('クラウドから' + count + '件の設定を復元');
     return count > 0;
-  } catch (e) { console.warn('設定読込失敗:', e); return false; }
+  } catch (e) { console.warn('設定読込失敗:', e); _skipSync = false; return false; }
 }
 
 // localStorageのsetItemをフック → 自動でクラウド同期
