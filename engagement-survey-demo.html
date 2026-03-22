@@ -1324,13 +1324,45 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
 // ===== Google Sheets連携 =====
 // ↓ ステップ3でデプロイ後に取得するURLをここに貼り付ける
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwNGZUdEMSMHklI6dz-XlVGqYTmALukzUWCkzeuvo8lh1qQSLowcl6x6vvUp5Prk8zWUA/exec';
+const API_KEY = 'es_secure_2026';
 
-// GAS通信ヘルパー（CORS完全回避版）
+// セッション管理
+let _sessionToken = sessionStorage.getItem('es_token') || '';
+let _sessionRole = sessionStorage.getItem('es_role') || '';
+let _sessionEmpId = sessionStorage.getItem('es_empId') || '';
+let _sessionName = sessionStorage.getItem('es_name') || '';
+let _sessionDept = sessionStorage.getItem('es_dept') || '';
 
-// 書き込み用: imgタグでGET（レスポンス不要、CORS無関係）
+function saveSession(data) {
+  _sessionToken = data.token; _sessionRole = data.role;
+  _sessionEmpId = data.empId; _sessionName = data.name; _sessionDept = data.dept || '';
+  sessionStorage.setItem('es_token', data.token);
+  sessionStorage.setItem('es_role', data.role);
+  sessionStorage.setItem('es_empId', data.empId);
+  sessionStorage.setItem('es_name', data.name);
+  sessionStorage.setItem('es_dept', data.dept || '');
+}
+function clearSession() {
+  _sessionToken = ''; _sessionRole = ''; _sessionEmpId = ''; _sessionName = ''; _sessionDept = '';
+  sessionStorage.clear();
+}
+
+// XSSサニタイズ
+function sanitize(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
+}
+
+// GAS通信ヘルパー（CORS完全回避版 + APIキー + セッショントークン）
+
+// 書き込み用: imgタグでGET（レスポンス不要）
 function gasPost(payload) {
   if (!GAS_URL) return Promise.resolve(null);
-  const params = new URLSearchParams({ action: payload.action, data: JSON.stringify(payload) });
+  payload.apiKey = API_KEY;
+  payload.token = _sessionToken;
+  const params = new URLSearchParams({ action: payload.action, data: JSON.stringify(payload), apiKey: API_KEY, token: _sessionToken });
   return new Promise(resolve => {
     const img = new Image();
     img.onload = img.onerror = () => resolve({ ok: true });
@@ -1338,22 +1370,22 @@ function gasPost(payload) {
   });
 }
 
-// 読み込み用: scriptタグでJSONP（CORS無関係）
+// 読み込み用: scriptタグでJSONP
 let _gasCallbackId = 0;
 function gasGet(params) {
   if (!GAS_URL) return Promise.resolve(null);
   return new Promise(resolve => {
     const cbName = '_gasCb' + (++_gasCallbackId) + '_' + Date.now();
     const timeout = setTimeout(() => { cleanup(); resolve(null); }, 10000);
-
     window[cbName] = function(data) { cleanup(); resolve(data); };
     function cleanup() {
       clearTimeout(timeout);
       delete window[cbName];
       if (script.parentNode) script.parentNode.removeChild(script);
     }
-
     params.callback = cbName;
+    params.apiKey = API_KEY;
+    params.token = _sessionToken;
     const script = document.createElement('script');
     script.src = GAS_URL + '?' + new URLSearchParams(params).toString();
     script.onerror = () => { cleanup(); resolve(null); };
@@ -1361,11 +1393,24 @@ function gasGet(params) {
   });
 }
 
+// ログイン（サーバー側認証）
+async function serverLogin(empId, password) {
+  return gasGet({ action: 'login', empId, password });
+}
+
+async function serverLogout() {
+  await gasGet({ action: 'logout', token: _sessionToken });
+  clearSession();
+}
+
 async function submitToGoogleSheets(empId, month, answers) {
   const data = await gasPost({ action: 'submit', empId, month, answers });
-  if (data?.ok) return true;
-  console.error('Google Sheets送信エラー:', data);
-  return false;
+  return data?.ok === true;
+}
+
+async function fetchEmployeesFromServer() {
+  const data = await gasGet({ action: 'getEmployees' });
+  return data?.ok ? data.data : null;
 }
 
 async function checkSubmittedOnline(empId, month) {
@@ -1427,7 +1472,7 @@ localStorage.setItem = function(key, value) {
 };
 
 // ===== セキュリティ設定 =====
-const ADMIN_PASSWORD = 'admin1234';
+// パスワードはサーバー側（スプレッドシート）で管理。HTMLには保持しない。
 let surveyPeriod = (() => {
   try {
     const s = localStorage.getItem('es_survey_period');
@@ -2849,9 +2894,6 @@ const questions = [
 let currentPage = 0, answers = {};
 let currentEmpId = '';
 
-function setId(id) { document.getElementById('login-id').value = id; }
-function setLogin(id, pw) { document.getElementById('login-id').value = id; document.getElementById('login-pw').value = pw; }
-
 function doLogin() {
   const id = document.getElementById('login-id').value.trim().toUpperCase();
   const pw = document.getElementById('login-pw').value;
@@ -2859,53 +2901,50 @@ function doLogin() {
   if (!id) { errEl.textContent = 'IDを入力してください'; return; }
   if (!pw) { errEl.textContent = 'パスワードを入力してください'; return; }
 
-  // 管理者ログイン
-  if (id === 'ADMIN') {
-    const accounts = getAdminAccounts();
-    const account = accounts.find(a => a.password === pw);
-    if (!account) { errEl.textContent = 'パスワードが正しくありません'; return; }
-    currentAdminName = account.name;
-    document.querySelectorAll('#screen-admin .user-info span, #screen-detail .user-info span').forEach(el => {
-      el.textContent = account.name;
-    });
-    _origSetItem('es_session', JSON.stringify({ type: 'admin', name: account.name }));
-    showScreen('admin');
-    loadAllSettingsFromCloud().then(loaded => {
-      if (loaded) { reloadEmployees(); rebuildEmpData(); }
-      renderDashboard();
-    });
-    return;
-  }
+  errEl.textContent = 'ログイン中...';
+  serverLogin(id, pw).then(result => {
+    if (!result || !result.ok) {
+      errEl.textContent = result?.error === 'invalid_credentials' ? 'IDまたはパスワードが正しくありません' : 'ログインに失敗しました。再度お試しください。';
+      return;
+    }
+    errEl.textContent = '';
+    saveSession(result);
 
-  // 社員ログイン
-  if (!employees[id]) { errEl.textContent = 'IDが見つかりません。もう一度確認してください。'; return; }
-  if (empPasswords[id] !== pw) { errEl.textContent = 'パスワードが正しくありません'; return; }
+    if (result.role === 'admin') {
+      currentAdminName = result.name;
+      document.querySelectorAll('#screen-admin .user-info span, #screen-detail .user-info span').forEach(el => {
+        el.textContent = sanitize(result.name);
+      });
+      showScreen('admin');
+      // サーバーから社員データを取得してダッシュボード表示
+      fetchEmployeesFromServer().then(emps => {
+        if (emps) {
+          Object.keys(employees).forEach(k => delete employees[k]);
+          emps.forEach(e => { employees[e.empId] = e; });
+        }
+        loadAllSettingsFromCloud().then(() => {
+          rebuildEmpData();
+          renderDashboard();
+        });
+      });
+      return;
+    }
 
-  // 回答期間チェック
-  const today = new Date();
-  const start = new Date(surveyPeriod.start);
-  const end = new Date(surveyPeriod.end);
-  end.setHours(23,59,59);
-  if (today < start || today > end) {
-    const sm = surveyPeriod.start.slice(5).replace('-', '/').replace(/^0/, '');
-    const em = surveyPeriod.end.slice(5).replace('-', '/').replace(/^0/, '');
-    errEl.textContent = `現在は回答期間外です（${sm}〜${em}）`;
-    return;
-  }
-  if (hasSubmittedThisMonth(id)) {
-    document.getElementById('already-name').textContent = employees[id].name;
-    showScreen('already');
-    return;
-  }
-  currentEmpId = id;
-  _origSetItem('es_session', JSON.stringify({ type: 'employee', empId: id }));
-  const draft = localStorage.getItem('es_draft_' + id);
-  answers = {};
-  if (draft) { try { answers = JSON.parse(draft); showToast('⏳ 前回の途中保存データを復元しました'); } catch(e) {} }
-  showScreen('survey');
-  document.getElementById('survey-user-name').textContent = `${employees[id].name}（${employees[id].dept}）`;
-  currentPage = 0;
-  renderPage();
+    // 社員ログイン
+    currentEmpId = result.empId;
+    if (hasSubmittedThisMonth(result.empId)) {
+      document.getElementById('already-name').textContent = sanitize(result.name);
+      showScreen('already');
+      return;
+    }
+    const draft = localStorage.getItem('es_draft_' + result.empId);
+    answers = {};
+    if (draft) { try { answers = JSON.parse(draft); showToast('前回の途中保存データを復元しました'); } catch(e) {} }
+    showScreen('survey');
+    document.getElementById('survey-user-name').textContent = `${sanitize(result.name)}（${sanitize(result.dept)}）`;
+    currentPage = 0;
+    renderPage();
+  });
 }
 
 document.getElementById('login-id').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-pw').focus(); });
@@ -3023,7 +3062,7 @@ function goToLogin() {
   document.getElementById('login-id').value = '';
   document.getElementById('login-pw').value = '';
   document.getElementById('login-error').textContent = '';
-  _origSetItem('es_session', '');
+  serverLogout();
   showScreen('login');
 }
 
@@ -3253,15 +3292,7 @@ function initEmpPasswords() {
   if (changed) localStorage.setItem('es_emp_passwords', JSON.stringify(empPasswords));
 }
 
-function renderDemoIds() {
-  const el = document.getElementById('demo-id-list');
-  if (!el) return;
-  const demoIds = ['EMP001', 'EMP042', 'EMP099'];
-  el.innerHTML = demoIds.map(id => {
-    const pw = empPasswords[id] || '------';
-    return `<code onclick="setLogin('${id}','${pw}')" style="font-size:12px;letter-spacing:0.5px">${id} / ${pw}</code>`;
-  }).join('');
-}
+function renderDemoIds() { /* 本番環境では無効化 */ }
 
 // ===== 社員データ永続化 =====
 function saveEmployees() {
@@ -4631,41 +4662,41 @@ function switchMasterTab(name, btn) {
 
 initEmpPasswords();
 rebuildEmpData();
-renderDemoIds();
 
-// セッション復元（リロード時にログイン画面に戻らない）
+// セッション復元（sessionStorageベース、サーバー検証済みトークン）
 (function restoreSession() {
-  try {
-    const session = JSON.parse(localStorage.getItem('es_session') || '""');
-    if (!session) return;
-    if (session.type === 'admin') {
-      currentAdminName = session.name;
-      document.querySelectorAll('#screen-admin .user-info span, #screen-detail .user-info span').forEach(el => {
-        el.textContent = session.name;
-      });
-      showScreen('admin');
-      loadAllSettingsFromCloud().then(loaded => {
-        if (loaded) { reloadEmployees(); rebuildEmpData(); }
+  if (!_sessionToken) return;
+  if (_sessionRole === 'admin') {
+    currentAdminName = _sessionName;
+    document.querySelectorAll('#screen-admin .user-info span, #screen-detail .user-info span').forEach(el => {
+      el.textContent = sanitize(_sessionName);
+    });
+    showScreen('admin');
+    fetchEmployeesFromServer().then(emps => {
+      if (emps) {
+        Object.keys(employees).forEach(k => delete employees[k]);
+        emps.forEach(e => { employees[e.empId] = e; });
+      }
+      loadAllSettingsFromCloud().then(() => {
+        rebuildEmpData();
         renderDashboard();
       });
-    } else if (session.type === 'employee') {
-      const id = session.empId;
-      if (!employees[id]) return;
-      if (hasSubmittedThisMonth(id)) {
-        document.getElementById('already-name').textContent = employees[id].name;
-        showScreen('already');
-        return;
-      }
-      currentEmpId = id;
-      const draft = localStorage.getItem('es_draft_' + id);
-      answers = {};
-      if (draft) { try { answers = JSON.parse(draft); } catch(e) {} }
-      showScreen('survey');
-      document.getElementById('survey-user-name').textContent = `${employees[id].name}（${employees[id].dept}）`;
-      currentPage = 0;
-      renderPage();
+    });
+  } else if (_sessionRole === 'employee' && _sessionEmpId) {
+    currentEmpId = _sessionEmpId;
+    if (hasSubmittedThisMonth(_sessionEmpId)) {
+      document.getElementById('already-name').textContent = sanitize(_sessionName);
+      showScreen('already');
+      return;
     }
-  } catch(e) {}
+    const draft = localStorage.getItem('es_draft_' + _sessionEmpId);
+    answers = {};
+    if (draft) { try { answers = JSON.parse(draft); } catch(e) {} }
+    showScreen('survey');
+    document.getElementById('survey-user-name').textContent = `${sanitize(_sessionName)}（${sanitize(_sessionDept)}）`;
+    currentPage = 0;
+    renderPage();
+  }
 })();
 </script>
 <div id="toast" class="toast"></div>
