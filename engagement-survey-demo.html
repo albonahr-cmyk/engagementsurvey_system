@@ -3193,19 +3193,7 @@ function renderDemoIds() { /* 本番環境では無効化 */ }
 
 // ===== 社員データ永続化 =====
 function saveEmployees() {
-  // デフォルト社員以外の追加・変更分をlocalStorageに保存
-  const toSave = {};
-  Object.entries(employees).forEach(([id, emp]) => {
-    // デフォルトに無いか、変更があれば保存
-    if (!_defaultEmployees[id] || JSON.stringify(emp) !== JSON.stringify(_defaultEmployees[id])) {
-      toSave[id] = emp;
-    }
-  });
-  // 削除された社員: デフォルトにあるがemployeesに無い場合、null マーカー
-  Object.keys(_defaultEmployees).forEach(id => {
-    if (!employees[id]) toSave[id] = null;
-  });
-  localStorage.setItem('es_employees', JSON.stringify(toSave));
+  // サーバー管理に移行済み。個別のsaveEmployee GAS呼び出しで保存。
 }
 
 // ===== ID管理 =====
@@ -3224,48 +3212,47 @@ function issueNewId() {
   const dept = document.getElementById('new-emp-dept').value.trim();
   if (!name) { showToast('⚠️ 氏名を入力してください'); return; }
   if (!dept) { showToast('⚠️ 所属部署を入力してください'); return; }
-  const iq         = parseInt(document.getElementById('new-emp-iq').value) || null;
-  const battlePower = parseInt(document.getElementById('new-emp-bp').value) || null;
-  const mbti       = document.getElementById('new-emp-mbti').value || null;
+  const iq         = parseInt(document.getElementById('new-emp-iq').value) || 0;
+  const battlePower = parseInt(document.getElementById('new-emp-bp').value) || 0;
+  const mbti       = document.getElementById('new-emp-mbti').value || '';
   const newId = nextEmpId();
-  const now = new Date();
-  const issuedAt = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
-  employees[newId] = { name, dept, issuedAt, isNew: true, iq: iq||0, battlePower: battlePower||0, mbti: mbti||'' };
-  saveEmployees();
-  // プロフィールをlocalStorageに即時保存
-  localStorage.setItem(`es_profile_${newId}`, JSON.stringify({
-    iq: iq || 0,
-    battlePower: battlePower || 0,
-    mbti: mbti || ''
-  }));
-  // パスワード生成・保存
-  const newPw = genPassword();
-  empPasswords[newId] = newPw;
-  localStorage.setItem('es_emp_passwords', JSON.stringify(empPasswords));
 
-  lastIssuedId = newId;
-  lastIssuedPw = newPw;
-  const rank = calcRank(iq, battlePower);
-  const result = document.getElementById('issued-result');
-  result.style.display = 'block';
-  result.style.animation = 'none';
-  result.offsetHeight;
-  result.style.animation = '';
-  document.getElementById('issued-id-value').textContent = newId;
-  const subParts = [`${name}（${dept}）`];
-  if (rank) subParts.push(`ランク ${rank}`);
-  if (mbti) subParts.push(mbti);
-  document.getElementById('issued-name-value').textContent = subParts.join(' ／ ');
-  document.getElementById('issued-pw-value').textContent = `PW: ${newPw}`;
-  document.getElementById('new-emp-name').value = '';
-  document.getElementById('new-emp-dept').value = '';
-  document.getElementById('new-emp-iq').value = '';
-  document.getElementById('new-emp-bp').value = '';
-  document.getElementById('new-emp-mbti').value = '';
-  rebuildEmpData();
-  renderIdList();
-  initBizIQMasterUI();
-  showToast('✅ IDを発行しました');
+  showToast('登録中...');
+  gasPost({ action: 'saveEmployee', empId: newId, name, dept, role: 'employee', iq, battlePower, mbti }).then(() => {
+    // サーバーから最新データを取得
+    return fetchEmployeesFromServer();
+  }).then(emps => {
+    if (emps) {
+      Object.keys(employees).forEach(k => delete employees[k]);
+      emps.forEach(e => { employees[e.empId] = e; });
+    }
+    // 発行結果の取得（サーバーで生成されたパスワード）
+    const emp = employees[newId];
+    lastIssuedId = newId;
+    lastIssuedPw = '（スプレッドシートで確認）';
+
+    const rank = calcRank(iq, battlePower);
+    const result = document.getElementById('issued-result');
+    result.style.display = 'block';
+    result.style.animation = 'none';
+    result.offsetHeight;
+    result.style.animation = '';
+    document.getElementById('issued-id-value').textContent = newId;
+    const subParts = [`${sanitize(name)}（${sanitize(dept)}）`];
+    if (rank) subParts.push(`ランク ${rank}`);
+    if (mbti) subParts.push(mbti);
+    document.getElementById('issued-name-value').textContent = subParts.join(' ／ ');
+    document.getElementById('issued-pw-value').textContent = `PW: スプレッドシートで確認`;
+    document.getElementById('new-emp-name').value = '';
+    document.getElementById('new-emp-dept').value = '';
+    document.getElementById('new-emp-iq').value = '';
+    document.getElementById('new-emp-bp').value = '';
+    document.getElementById('new-emp-mbti').value = '';
+    rebuildEmpData();
+    renderIdList();
+    initBizIQMasterUI();
+    showToast('✅ IDを発行しました');
+  });
 }
 
 function renderIdList() {
@@ -3311,24 +3298,21 @@ function renderIdList() {
 function deleteEmployee(id) {
   const emp = employees[id];
   if (!confirm(`${id}（${emp?.name||''}）を削除しますか？\nこの操作は取り消せません。`)) return;
-  delete employees[id];
-  saveEmployees();
-  delete empData[id];
-  // パスワード削除
-  delete empPasswords[id];
-  localStorage.setItem('es_emp_passwords', JSON.stringify(empPasswords));
-  // 月別回答データ削除
-  months.forEach(m => localStorage.removeItem(`es_${id}_${m}`));
-  // その他関連データ削除
-  localStorage.removeItem(`es_draft_${id}`);
-  localStorage.removeItem(`es_biziq_${id}`);
-  localStorage.removeItem(`es_profile_${id}`);
-  renderIdList();
-  initBizIQMasterUI();
-  if (document.getElementById('tab-employees').style.display !== 'none') {
-    renderEmployeeList();
-  }
-  showToast('🗑 削除しました');
+  // サーバーで論理削除（isActive=false）
+  gasPost({ action: 'deleteEmployee', empId: id }).then(() => {
+    return fetchEmployeesFromServer();
+  }).then(emps => {
+    if (emps) {
+      Object.keys(employees).forEach(k => delete employees[k]);
+      emps.forEach(e => { employees[e.empId] = e; });
+    }
+    delete empData[id];
+    renderIdList();
+    initBizIQMasterUI();
+    if (document.getElementById('tab-employees').style.display !== 'none') {
+      renderEmployeeList();
+    }
+  });
 }
 
 function copyIssuedId() { copyIdToClipboard(lastIssuedId); }
