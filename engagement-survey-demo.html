@@ -4217,12 +4217,23 @@ function handleBizIQPaste(empId) {
       summary += `  ${k}: ${v.score ?? '-'}${v.diff !== undefined ? ` (${v.diff >= 0 ? '+' : ''}${v.diff})` : ''}\n`;
     });
   }
-  if (data.comment) summary += `\n【コメント】\n${data.comment.substring(0, 200)}\n`;
+  if (data.thinking && Object.keys(data.thinking).length) {
+    summary += '\n【思考特性】\n';
+    Object.entries(data.thinking).forEach(([k, v]) => { summary += `  ${k}: ${v.score ?? v}\n`; });
+  }
+  if (data.stress && Object.keys(data.stress).length) {
+    summary += '\n【ストレス耐性】\n';
+    Object.entries(data.stress).forEach(([k, v]) => { summary += `  ${k}: ${v.score ?? v}\n`; });
+  }
+  if (data.behavior && Object.keys(data.behavior).length) {
+    summary += '\n【行動特性】\n';
+    Object.entries(data.behavior).forEach(([k, v]) => { summary += `  ${k}: ${v.score ?? v}\n`; });
+  }
+  if (data.comment) summary += `\n【コメント抜粋】\n${data.comment.substring(0, 150)}...\n`;
 
   const missing = [];
   if (!data.iqScore) missing.push('IQスコア');
   if (!data.battlePower) missing.push('戦闘力');
-  if (!data.categories || Object.keys(data.categories).length === 0) missing.push('カテゴリ別スコア');
   if (missing.length) summary += `\n⚠️ 取得できなかった項目: ${missing.join(', ')}`;
 
   alert(summary);
@@ -4509,6 +4520,44 @@ function parseBusinessIQText(text) {
     comment = parts.join('');
   }
 
+  // コメント内に埋め込まれた数値を抽出（ビジネスIQ管理画面のフォーマット対応）
+  const commentScores = {};
+  if (comment) {
+    const patterns = [
+      { re: /共感力(\d+)/, key: '共感力' },
+      { re: /精神的耐性(\d+)/, key: '精神的耐性' },
+      { re: /身体的耐性(\d+)/, key: '身体的耐性' },
+      { re: /精神的?(?:の)?耐性(\d+)/, key: '精神的耐性' },
+      { re: /身体的?(?:の)?耐性(\d+)/, key: '身体的耐性' },
+      { re: /実行力(\d+)/, key: '実行力' },
+      { re: /分析力(\d+)/, key: '分析力' },
+      { re: /直感力(\d+)/, key: '直感力' },
+      { re: /自主性(\d+)/, key: '自主性' },
+      { re: /決断性(\d+)/, key: '決断性' },
+      { re: /活動性(\d+)/, key: '活動性' },
+      { re: /探索性(\d+)/, key: '探索性' },
+      { re: /対人性(\d+)/, key: '対人性' },
+      { re: /慎重性(\d+)/, key: '慎重性' },
+      { re: /執着性(\d+)/, key: '執着性' },
+    ];
+    patterns.forEach(({ re, key }) => {
+      const m = comment.match(re);
+      if (m && !commentScores[key]) commentScores[key] = parseInt(m[1]);
+    });
+    // 思考特性の補完
+    if (commentScores['共感力'] && !thinking['共感力']) thinking['共感力'] = { score: commentScores['共感力'], diff: null };
+    if (commentScores['実行力'] && !thinking['実行力']) thinking['実行力'] = { score: commentScores['実行力'], diff: null };
+    if (commentScores['分析力'] && !thinking['分析力']) thinking['分析力'] = { score: commentScores['分析力'], diff: null };
+    if (commentScores['直感力'] && !thinking['直感力']) thinking['直感力'] = { score: commentScores['直感力'], diff: null };
+    // ストレス耐性の補完
+    if (commentScores['精神的耐性'] && !stress['精神耐性']) stress['精神耐性'] = { score: commentScores['精神的耐性'], diff: null };
+    if (commentScores['身体的耐性'] && !stress['身体耐性']) stress['身体耐性'] = { score: commentScores['身体的耐性'], diff: null };
+    // 行動特性の補完
+    ['自主性','決断性','活動性','探索性','対人性','慎重性','執着性'].forEach(k => {
+      if (commentScores[k] && !behavior[k]) behavior[k] = { score: commentScores[k], diff: null };
+    });
+  }
+
   if (!iqScore && !battlePower) return null;
 
   return {
@@ -4516,7 +4565,7 @@ function parseBusinessIQText(text) {
     behavior, values, desire, thinking, stress,
     jobAptitude, risk,
     iqAbilities, iqAccuracy, iqJobAptitude,
-    comment
+    comment, commentScores
   };
 }
 
