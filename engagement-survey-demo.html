@@ -3555,6 +3555,7 @@ function renderSettingsTab() {
   if (pe) pe.value = surveyPeriod.end;
   const cur = document.getElementById('period-current');
   if (cur) cur.textContent = `現在の期間：${surveyPeriod.start} 〜 ${surveyPeriod.end}`;
+  renderDeptManager();
   renderQuestionEditor();
   renderAdminAccountList();
 }
