@@ -516,18 +516,23 @@ if (typeof pdfjsLib !== 'undefined') {
   .biziq-hero-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
   .biziq-hero-value { font-size: 30px; font-weight: 800; margin-top: 4px; }
   .biziq-hero-sub { font-size: 11px; margin-top: 4px; }
-  .biziq-section { margin-bottom: 20px; }
-  .biziq-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #eef2ff; display: flex; align-items: center; gap: 8px; }
-  .biziq-section-desc { font-size: 11px; color: #94a3b8; font-weight: 500; }
-  .biziq-item { display: flex; align-items: center; gap: 10px; padding: 7px 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 4px; }
-  .biziq-item-name { font-size: 13px; font-weight: 600; color: #374151; min-width: 100px; }
-  .biziq-item-bar { flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px; position: relative; }
-  .biziq-item-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+  .biziq-section { margin-bottom: 20px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; }
+  .biziq-section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
+  .biziq-section-title .biziq-count { font-size: 14px; font-weight: 600; color: #64748b; }
+  .biziq-section-desc { font-size: 12px; color: #64748b; font-weight: 400; margin-bottom: 16px; line-height: 1.5; }
+  .biziq-item { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+  .biziq-item:last-child { border-bottom: none; }
+  .biziq-item-row { display: flex; align-items: center; gap: 10px; }
+  .biziq-item-name { font-size: 15px; font-weight: 700; color: #1e293b; min-width: 90px; flex-shrink: 0; }
+  .biziq-item-bar { flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; position: relative; }
+  .biziq-item-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
   .biziq-item-bar-center { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: #cbd5e1; }
-  .biziq-item-score { font-size: 15px; font-weight: 800; min-width: 32px; text-align: right; }
-  .biziq-item-diff { font-size: 11px; font-weight: 700; min-width: 36px; text-align: right; }
-  .biziq-item-desc { font-size: 11px; color: #6b7280; flex: 2; min-width: 140px; }
-  .biziq-item-label { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; min-width: 44px; text-align: center; }
+  .biziq-item-score { font-size: 18px; font-weight: 800; min-width: 32px; text-align: right; color: #1e293b; }
+  .biziq-item-diff { font-size: 13px; font-weight: 700; min-width: 36px; text-align: right; }
+  .biziq-item-descs { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-top: 4px; padding-left: 100px; }
+  .biziq-item-descs .desc-high { font-weight: 700; color: #374151; }
+  .biziq-item-subdesc { font-size: 11px; color: #94a3b8; margin-top: 3px; padding-left: 100px; }
+  .biziq-item-label { font-size: 13px; font-weight: 700; min-width: 50px; text-align: right; }
   .biziq-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media (max-width: 768px) { .biziq-dual { grid-template-columns: 1fr; } }
 
@@ -4581,31 +4586,121 @@ function biziqDiffHtml(diff) {
   const sign = diff > 0 ? '+' : diff === 0 ? '±' : '';
   return `<span class="biziq-item-diff" style="color:${color}">${sign}${diff}</span>`;
 }
+// 行動特性・潜在価値観の説明（低/高）
+const BIZIQ_DUAL_DESCS = {
+  '自主性': ['協調的で周囲と調和できる', 'リーダーシップを発揮し自ら動ける'],
+  '決断性': ['慎重で思いやりのある判断', '迅速で合理的な判断ができる'],
+  '活動性': ['堅実で冷静な判断ができる', '行動力があり即座に動ける'],
+  '探索性': ['安定志向で一貫性がある', '新しいアイデアや変化に前向き'],
+  '対人性': ['自立的で自分の判断で動ける', '人間関係を構築しチームに貢献'],
+  '慎重性': ['融通が利き決断が速い', '計画的で丁寧、ミスが少ない'],
+  '執着性': ['柔軟で切り替えが早い', '粘り強く最後までやり遂げる'],
+  '成長志向': ['現状の役割に集中できる', '学習意欲が高く成長が早い'],
+  '貢献志向': ['自分の成果に集中できる', '利他的でチームに貢献する'],
+  '充実志向': ['義務感で着実に職務遂行', 'モチベーションを維持しやすい'],
+  '安定志向': ['変化を恐れず挑戦できる', '着実で安定したパフォーマンス'],
+  '報酬志向': ['金銭以外の価値を重視する', '成果に対する意欲が高い'],
+};
+// 欲求・思考・ストレス耐性の説明
+const BIZIQ_SINGLE_DESCS = {
+  '向上意欲': '自己成長・向上したいという意欲',
+  '自律意欲': '自分の意思で物事に取り組みたいという意欲',
+  '挑戦意欲': '困難や目標にチャレンジしたいという意欲',
+  '探究意欲': '本質や理由・成り立ちを知りたいという意欲',
+  '影響意欲': '他者に良い影響を与えたいという意欲',
+  '承認意欲': '役割を果たし他者に認められたいという意欲',
+  '活動意欲': '総合的な活動意欲の強さ',
+  '実行力': '具体的計画を立てて行動し、遂行する力',
+  '分析力': '筋道立てて思考し、定量的に捉える力',
+  '直感力': '概念的な本質を感覚的に捉える力',
+  '共感力': '他者の心理や感情を感知し、汲み取る力',
+  '精神耐性': 'メンタル面でのストレスに耐える強さ',
+  '身体耐性': '神経面・身体面でのストレスに耐える強さ',
+};
+// 職務適性の説明
+const BIZIQ_JOB_DESCS = {
+  '組織統率適性': 'リーダーシップを要する職務への適性',
+  '対人構築適性': '人間関係を築いていく職務への適性',
+  '新規開拓適性': '前例のない新しい職務への適性',
+  '企画創造適性': '企画力や創造力を要する職務への適性',
+  '分析改善適性': '情報を集め問題を分析する職務への適性',
+  '臨機応変適性': 'フットワークの軽さを要する職務への適性',
+  '精密注意適性': '丁寧さ注意深さを要求する職務への適性',
+  '定型反復適性': '反復・継続的な職務への適性',
+};
+
+// 行動特性・潜在価値観レンダリング（低/高の説明付き・濃紺バー）
+function renderBizIQDualItems(items) {
+  return Object.entries(items).map(([k, v]) => {
+    const score = typeof v === 'object' ? v.score : v;
+    const diff = typeof v === 'object' ? v.diff : null;
+    const descs = BIZIQ_DUAL_DESCS[k];
+    return `<div class="biziq-item">
+      <div class="biziq-item-row">
+        <span class="biziq-item-name">${k}</span>
+        <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${score}%;background:#1e3a8a"></div></div>
+        <span class="biziq-item-score">${score}</span>
+        ${biziqDiffHtml(diff)}
+      </div>
+      ${descs ? `<div class="biziq-item-descs"><span>${descs[0]}</span><span class="desc-high">${descs[1]}</span></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// 欲求・思考・ストレス耐性レンダリング（単一説明・濃紺バー）
+function renderBizIQSingleItems(items) {
+  return Object.entries(items).map(([k, v]) => {
+    const score = typeof v === 'object' ? v.score : v;
+    const diff = typeof v === 'object' ? v.diff : null;
+    const desc = BIZIQ_SINGLE_DESCS[k] || '';
+    return `<div class="biziq-item">
+      <div class="biziq-item-row">
+        <span class="biziq-item-name">${k}</span>
+        <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${score}%;background:#1e3a8a"></div></div>
+        <span class="biziq-item-score">${score}</span>
+        ${biziqDiffHtml(diff)}
+      </div>
+      ${desc ? `<div class="biziq-item-subdesc">${desc}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// 職務適性レンダリング（緑/オレンジバー・ラベル付き）
+function renderBizIQJobItems(items) {
+  return Object.entries(items).map(([k, v]) => {
+    const score = v.score;
+    const diff = v.diff;
+    const isHigh = score >= 60;
+    const barColor = isHigh ? 'linear-gradient(90deg, #1e3a8a, #16a34a)' : 'linear-gradient(90deg, #d97706, #fbbf24)';
+    const labelText = isHigh ? '高い' : '要努力';
+    const labelColor = isHigh ? '#2563eb' : '#d97706';
+    const desc = BIZIQ_JOB_DESCS[k] || '';
+    return `<div class="biziq-item">
+      <div class="biziq-item-row">
+        <span class="biziq-item-name">${k}</span>
+        <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${score}%;background:${barColor}"></div></div>
+        <span class="biziq-item-score">${score}</span>
+        ${biziqDiffHtml(diff)}
+        <span class="biziq-item-label" style="color:${labelColor}">${labelText}</span>
+      </div>
+      ${desc ? `<div class="biziq-item-subdesc">${desc}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// 後方互換（IQ詳細など既存用）
 function renderBizIQItems(items, hasCenter) {
   return Object.entries(items).map(([k, v]) => {
     const score = typeof v === 'object' ? v.score : v;
     const diff = typeof v === 'object' ? v.diff : null;
     const color = biziqScoreColor(score);
     return `<div class="biziq-item">
-      <span class="biziq-item-name">${k}</span>
-      <div class="biziq-item-bar">${hasCenter ? '<div class="biziq-item-bar-center"></div>' : ''}<div class="biziq-item-bar-fill" style="width:${score}%;background:${color}"></div></div>
-      <span class="biziq-item-score" style="color:${color}">${score}</span>
-      ${biziqDiffHtml(diff)}
-    </div>`;
-  }).join('');
-}
-function renderBizIQItemsWithDesc(items, descs) {
-  return Object.entries(items).map(([k, v]) => {
-    const score = typeof v === 'object' ? v.score : v;
-    const diff = typeof v === 'object' ? v.diff : null;
-    const color = biziqScoreColor(score);
-    const desc = descs?.[k] || '';
-    return `<div class="biziq-item">
-      <span class="biziq-item-name">${k}</span>
-      <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${score}%;background:${color}"></div></div>
-      <span class="biziq-item-score" style="color:${color}">${score}</span>
-      ${biziqDiffHtml(diff)}
-      ${desc ? `<span class="biziq-item-desc">${desc}</span>` : ''}
+      <div class="biziq-item-row">
+        <span class="biziq-item-name">${k}</span>
+        <div class="biziq-item-bar">${hasCenter ? '<div class="biziq-item-bar-center"></div>' : ''}<div class="biziq-item-bar-fill" style="width:${score}%;background:${color}"></div></div>
+        <span class="biziq-item-score" style="color:${color}">${score}</span>
+        ${biziqDiffHtml(diff)}
+      </div>
     </div>`;
   }).join('');
 }
@@ -4615,13 +4710,14 @@ function renderBizIQRisk(items) {
     const diff = v.diff;
     const color = score <= 25 ? '#16a34a' : score <= 40 ? '#d97706' : '#dc2626';
     const label = score <= 25 ? '許容' : score <= 40 ? '注意' : '警戒';
-    const labelBg = score <= 25 ? '#f0fdf4' : score <= 40 ? '#fffbeb' : '#fef2f2';
     return `<div class="biziq-item">
-      <span class="biziq-item-name">${k}</span>
-      <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${score}%;background:${color}"></div></div>
-      <span class="biziq-item-score" style="color:${color}">${score}</span>
-      ${biziqDiffHtml(diff)}
-      <span class="biziq-item-label" style="background:${labelBg};color:${color}">${label}</span>
+      <div class="biziq-item-row">
+        <span class="biziq-item-name">${k}</span>
+        <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${score}%;background:${color}"></div></div>
+        <span class="biziq-item-score" style="color:${color}">${score}</span>
+        ${biziqDiffHtml(diff)}
+        <span class="biziq-item-label" style="color:${color}">${label}</span>
+      </div>
     </div>`;
   }).join('');
 }
@@ -4665,79 +4761,76 @@ function renderBizIQCard(data, empId) {
   // 行動特性
   let behaviorHtml = '';
   if (Object.keys(data.behavior).length > 0) {
+    const cnt = Object.keys(data.behavior).length;
     behaviorHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#6366f1">🎭 行動特性 <span class="biziq-section-desc">スコアの高低は行動傾向の方向性（優劣ではない）</span></div>
-      ${renderBizIQItems(data.behavior, true)}
+      <div class="biziq-section-title">行動特性 <span class="biziq-count">（${cnt}項目）</span></div>
+      <div class="biziq-section-desc">スコアの高低は行動傾向の方向性を示します（優劣ではありません）。日常の行動パターンや対人場面で表れます</div>
+      ${renderBizIQDualItems(data.behavior)}
     </div>`;
   }
 
   // 潜在価値観
   let valuesHtml = '';
   if (Object.keys(data.values).length > 0) {
+    const cnt = Object.keys(data.values).length;
     valuesHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#8b5cf6">💎 潜在価値観 <span class="biziq-section-desc">無意識の判断基準</span></div>
-      ${renderBizIQItems(data.values, true)}
+      <div class="biziq-section-title">潜在価値観 <span class="biziq-count">（${cnt}項目）</span></div>
+      <div class="biziq-section-desc">スコアの高低は価値観の方向性を示します（優劣ではありません）。無意識の判断基準として、とっさの行動や意思決定に影響します</div>
+      ${renderBizIQDualItems(data.values)}
     </div>`;
   }
 
   // 欲求の傾向
   let desireHtml = '';
   if (Object.keys(data.desire).length > 0) {
+    const cnt = Object.keys(data.desire).length;
     desireHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#ea580c">🔥 欲求の傾向 <span class="biziq-section-desc">高いほど意欲が強い</span></div>
-      ${renderBizIQItems(data.desire, false)}
+      <div class="biziq-section-title">欲求の傾向 <span class="biziq-count">（${cnt}項目）</span></div>
+      <div class="biziq-section-desc">スコアが高いほど各意欲が強いことを示します。仕事への動機付けやモチベーションの源泉です</div>
+      ${renderBizIQSingleItems(data.desire)}
     </div>`;
   }
 
   // 思考特性
   let thinkingHtml = '';
   if (Object.keys(data.thinking).length > 0) {
+    const cnt = Object.keys(data.thinking).length;
     thinkingHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#2563eb">🧠 思考特性 <span class="biziq-section-desc">高いほど強い</span></div>
-      ${renderBizIQItems(data.thinking, false)}
+      <div class="biziq-section-title">思考特性 <span class="biziq-count">（${cnt}項目）</span></div>
+      <div class="biziq-section-desc">スコアが高いほど各思考力が強いことを示します。問題解決や情報処理の場面で発揮されます</div>
+      ${renderBizIQSingleItems(data.thinking)}
     </div>`;
   }
 
   // ストレス耐性
   let stressHtml = '';
   if (Object.keys(data.stress).length > 0) {
+    const cnt = Object.keys(data.stress).length;
     stressHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#059669">💪 ストレス耐性 <span class="biziq-section-desc">高いほど耐性が強い</span></div>
-      ${renderBizIQItems(data.stress, false)}
+      <div class="biziq-section-title">ストレス耐性 <span class="biziq-count">（${cnt}項目）</span></div>
+      <div class="biziq-section-desc">スコアが高いほど耐性が強いことを示します。プレッシャーや負荷がかかる場面での持続力です</div>
+      ${renderBizIQSingleItems(data.stress)}
     </div>`;
   }
 
   // 職務適性
   let jobHtml = '';
   if (Object.keys(data.jobAptitude).length > 0) {
-    const jobLabels = {};
-    Object.entries(data.jobAptitude).forEach(([k,v]) => {
-      const s = v.score;
-      jobLabels[k] = s >= 60 ? '高い' : s >= 45 ? '要努力' : '低い';
-    });
-    const items = Object.entries(data.jobAptitude).map(([k, v]) => {
-      const color = biziqScoreColor(v.score);
-      const label = v.score >= 60 ? '高い' : v.score >= 45 ? '要努力' : '低い';
-      const labelBg = v.score >= 60 ? '#f0fdf4' : v.score >= 45 ? '#fffbeb' : '#fef2f2';
-      return `<div class="biziq-item">
-        <span class="biziq-item-name">${k}</span>
-        <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${v.score}%;background:${color}"></div></div>
-        <span class="biziq-item-score" style="color:${color}">${v.score}</span>
-        ${biziqDiffHtml(v.diff)}
-        <span class="biziq-item-label" style="background:${labelBg};color:${color}">${label}</span>
-      </div>`;
-    }).join('');
+    const cnt = Object.keys(data.jobAptitude).length;
     jobHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#d97706">💼 職務適性</div>
-      ${items}
+      <div class="biziq-section-title">職務適性 <span class="biziq-count">（${cnt}項目）</span></div>
+      <div class="biziq-section-desc">各種職務タイプへの適合度</div>
+      ${renderBizIQJobItems(data.jobAptitude)}
     </div>`;
   }
 
   // リスク傾向
   let riskHtml = '';
   if (Object.keys(data.risk).length > 0) {
+    const cnt = Object.keys(data.risk).length;
     riskHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#dc2626">⚠️ リスク傾向 <span class="biziq-section-desc">低いほど良好</span></div>
+      <div class="biziq-section-title">リスク傾向 <span class="biziq-count">（${cnt}項目）</span></div>
+      <div class="biziq-section-desc">低いほど良好。行動上のリスク傾向を示します</div>
       ${renderBizIQRisk(data.risk)}
     </div>`;
   }
@@ -4747,30 +4840,30 @@ function renderBizIQCard(data, empId) {
   if (Object.keys(data.iqAbilities).length > 0) {
     const abilityItems = Object.entries(data.iqAbilities).map(([k, v]) => {
       const color = v >= 8 ? '#7c3aed' : v >= 6 ? '#16a34a' : v >= 4 ? '#d97706' : '#dc2626';
-      return `<div class="biziq-item">
+      return `<div class="biziq-item"><div class="biziq-item-row">
         <span class="biziq-item-name">${k}</span>
         <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${v*10}%;background:${color}"></div></div>
         <span class="biziq-item-score" style="color:${color}">${v}<span style="font-size:10px;color:#94a3b8">/10</span></span>
-      </div>`;
+      </div></div>`;
     }).join('');
     const accItems = Object.entries(data.iqAccuracy).map(([k, v]) => {
       const color = v >= 80 ? '#16a34a' : v >= 60 ? '#d97706' : '#dc2626';
-      return `<div class="biziq-item">
+      return `<div class="biziq-item"><div class="biziq-item-row">
         <span class="biziq-item-name">${k}</span>
         <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${v}%;background:${color}"></div></div>
         <span class="biziq-item-score" style="color:${color}">${v}<span style="font-size:10px;color:#94a3b8">%</span></span>
-      </div>`;
+      </div></div>`;
     }).join('');
     const iqJobItems = Object.entries(data.iqJobAptitude).map(([k, v]) => {
       const color = v >= 8 ? '#7c3aed' : v >= 6 ? '#16a34a' : v >= 4 ? '#d97706' : '#dc2626';
-      return `<div class="biziq-item">
+      return `<div class="biziq-item"><div class="biziq-item-row">
         <span class="biziq-item-name">${k}</span>
         <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${v*10}%;background:${color}"></div></div>
         <span class="biziq-item-score" style="color:${color}">${v}<span style="font-size:10px;color:#94a3b8">/10</span></span>
-      </div>`;
+      </div></div>`;
     }).join('');
     iqDetailHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#7c3aed">🔬 IQ詳細 ${data.speedGrade ? `<span style="font-size:11px;background:#f1f5f9;padding:2px 8px;border-radius:6px;color:#64748b">スピード評価: ${data.speedGrade}</span>` : ''}</div>
+      <div class="biziq-section-title">IQ詳細 ${data.speedGrade ? `<span class="biziq-count" style="font-size:12px;background:#f1f5f9;padding:2px 8px;border-radius:6px">スピード評価: ${data.speedGrade}</span>` : ''}</div>
       <div class="biziq-dual">
         <div>
           <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px">評価能力（10段階）</div>
@@ -4789,7 +4882,7 @@ function renderBizIQCard(data, empId) {
   let commentHtml = '';
   if (data.comment) {
     commentHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#475569">📝 分析コメント</div>
+      <div class="biziq-section-title">分析コメント</div>
       <div style="background:#f8fafc;border-left:3px solid #6366f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#374151;line-height:1.75">${data.comment}</div>
     </div>`;
   }
@@ -4799,14 +4892,14 @@ function renderBizIQCard(data, empId) {
   if (data.commentScores && Object.keys(data.commentScores).length > 0) {
     const items = Object.entries(data.commentScores).map(([k, v]) => {
       const color = biziqScoreColor(v);
-      return `<div class="biziq-item">
+      return `<div class="biziq-item"><div class="biziq-item-row">
         <span class="biziq-item-name">${k}</span>
         <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${v}%;background:${color}"></div></div>
         <span class="biziq-item-score" style="color:${color}">${v}</span>
-      </div>`;
+      </div></div>`;
     }).join('');
     commentScoresHtml = `<div class="biziq-section">
-      <div class="biziq-section-title" style="color:#0891b2">📊 コメントから抽出したスコア</div>
+      <div class="biziq-section-title">コメントから抽出したスコア</div>
       ${items}
     </div>`;
   }
@@ -4822,8 +4915,10 @@ function renderBizIQCard(data, empId) {
     <h3>📋 ビジネスIQ適性検査 結果</h3>
     ${metaHtml}${heroHtml}
     ${commentScoresHtml}
-    <div class="biziq-dual">${behaviorHtml ? `<div>${behaviorHtml}${valuesHtml}</div>` : ''}${desireHtml || thinkingHtml || stressHtml ? `<div>${desireHtml}${thinkingHtml}${stressHtml}</div>` : ''}</div>
-    ${jobHtml}${riskHtml}${iqDetailHtml}${commentHtml}${noDetailMsg}
+    ${behaviorHtml || valuesHtml ? `<div class="biziq-dual">${behaviorHtml}${valuesHtml}</div>` : ''}
+    ${desireHtml || thinkingHtml || stressHtml ? `<div class="biziq-dual"><div>${desireHtml}</div><div>${thinkingHtml}${stressHtml}</div></div>` : ''}
+    ${jobHtml || riskHtml ? `<div style="margin-top:8px">${jobHtml}${riskHtml}</div>` : ''}
+    ${iqDetailHtml}${commentHtml}${noDetailMsg}
   </div>`;
 }
 
