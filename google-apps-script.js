@@ -9,7 +9,14 @@ const SHEET_EMPLOYEES = 'employees';    // 社員マスタ（任意）
 
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    // form送信（payload パラメータ）と JSON POST の両方に対応
+    var raw = '';
+    if (e.parameter && e.parameter.payload) {
+      raw = e.parameter.payload;
+    } else if (e.postData && e.postData.contents) {
+      raw = e.postData.contents;
+    }
+    const data = JSON.parse(raw);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
     if (data.action === 'submit') {
