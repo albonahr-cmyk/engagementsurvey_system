@@ -4794,11 +4794,36 @@ function renderBizIQCard(data, empId) {
     </div>`;
   }
 
+  // コメントから抽出したスコア一覧（個別セクションに該当しないもの）
+  let commentScoresHtml = '';
+  if (data.commentScores && Object.keys(data.commentScores).length > 0) {
+    const items = Object.entries(data.commentScores).map(([k, v]) => {
+      const color = biziqScoreColor(v);
+      return `<div class="biziq-item">
+        <span class="biziq-item-name">${k}</span>
+        <div class="biziq-item-bar"><div class="biziq-item-bar-fill" style="width:${v}%;background:${color}"></div></div>
+        <span class="biziq-item-score" style="color:${color}">${v}</span>
+      </div>`;
+    }).join('');
+    commentScoresHtml = `<div class="biziq-section">
+      <div class="biziq-section-title" style="color:#0891b2">📊 コメントから抽出したスコア</div>
+      ${items}
+    </div>`;
+  }
+
+  // セクションが全部空の場合のメッセージ
+  const hasDetail = behaviorHtml || valuesHtml || desireHtml || thinkingHtml || stressHtml || jobHtml || riskHtml || iqDetailHtml || commentScoresHtml;
+  const noDetailMsg = !hasDetail ? `<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">
+    詳細スコアは分析コメントから自動抽出されます。<br>
+    データが表示されない場合は、ビジネスIQ管理画面からテキストをコピーして貼り直してください。
+  </div>` : '';
+
   return `<div class="biziq-card" id="biziq-card-${empId}">
     <h3>📋 ビジネスIQ適性検査 結果</h3>
     ${metaHtml}${heroHtml}
+    ${commentScoresHtml}
     <div class="biziq-dual">${behaviorHtml ? `<div>${behaviorHtml}${valuesHtml}</div>` : ''}${desireHtml || thinkingHtml || stressHtml ? `<div>${desireHtml}${thinkingHtml}${stressHtml}</div>` : ''}</div>
-    ${jobHtml}${riskHtml}${iqDetailHtml}${commentHtml}
+    ${jobHtml}${riskHtml}${iqDetailHtml}${commentHtml}${noDetailMsg}
   </div>`;
 }
 
