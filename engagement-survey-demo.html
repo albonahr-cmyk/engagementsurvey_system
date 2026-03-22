@@ -58,61 +58,58 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
     50% { transform: translateY(-20px) scale(1.1); opacity: 0.2; }
   }
   #screen-login .card {
-    width: 420px; text-align: center; position: relative; z-index: 1;
-    border-radius: 24px;
-    background: rgba(255,255,255,0.75);
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    box-shadow: 0 24px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.3);
-    padding: 48px 40px;
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 1;
+    border-radius: 24px 24px 0 0;
+    background: rgba(255,255,255,0.35);
+    backdrop-filter: blur(32px) saturate(1.4);
+    -webkit-backdrop-filter: blur(32px) saturate(1.4);
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
+    padding: 32px 36px 40px;
+    text-align: left;
   }
-  #screen-login .login-icon { font-size: 56px; margin-bottom: 8px; line-height: 1; }
   #screen-login h1 {
-    font-size: 20px; margin-bottom: 4px; color: #2d4a2d; font-weight: 800;
+    font-size: 18px; margin-bottom: 2px; color: rgba(255,255,255,0.95); font-weight: 800;
     letter-spacing: 2px;
   }
   #screen-login .login-subtitle {
-    font-size: 11px; color: #8b9d7a; letter-spacing: 4px; text-transform: uppercase;
-    font-weight: 600; margin-bottom: 28px;
+    font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 4px; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 20px;
   }
-  #screen-login > .card > p { color: #6b7a65; margin-bottom: 24px; font-size: 13px; font-weight: 500; }
-  #screen-login input {
-    width: 100%; padding: 14px 16px;
-    border: 2px solid #d4dcc8; border-radius: 12px;
-    font-size: 16px; text-align: center; letter-spacing: 4px;
-    margin-bottom: 14px; transition: all 0.3s;
+  #screen-login > .card > p { color: rgba(255,255,255,0.5); margin-bottom: 16px; font-size: 12px; font-weight: 500; }
+  .login-fields {
+    display: flex; gap: 10px; margin-bottom: 14px;
+  }
+  .login-fields input {
+    flex: 1; padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+    font-size: 14px; text-align: center; letter-spacing: 2px;
+    transition: all 0.3s;
     font-family: 'Inter', monospace; font-weight: 600;
-    background: rgba(245,248,240,0.8);
-    color: #2d4a2d;
+    background: rgba(0,0,0,0.3);
+    color: #fff;
   }
-  #screen-login input::placeholder { color: #a3b396; letter-spacing: 2px; font-size: 14px; }
-  #screen-login input:focus {
-    outline: none; border-color: #5a8a4a;
-    box-shadow: 0 0 0 4px rgba(90,138,74,0.12);
-    background: white;
+  .login-fields input::placeholder { color: rgba(255,255,255,0.35); letter-spacing: 1px; font-size: 13px; }
+  .login-fields input:focus {
+    outline: none; border-color: rgba(255,255,255,0.5);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.4);
   }
   #screen-login .btn-primary {
-    background: linear-gradient(135deg, #4a7a3a, #5a8a4a);
-    box-shadow: 0 4px 0 #3a6a2a, 0 6px 20px rgba(74,122,58,0.3);
-    letter-spacing: 2px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: none;
+    letter-spacing: 3px; color: #fff;
   }
   #screen-login .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 0 #3a6a2a, 0 8px 24px rgba(74,122,58,0.35);
+    background: rgba(255,255,255,0.25);
+    transform: none;
+    box-shadow: none;
   }
   #screen-login .btn-primary:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 #3a6a2a;
+    background: rgba(255,255,255,0.1);
+    transform: none; box-shadow: none;
   }
-  .login-error { color: #c0392b; font-size: 13px; margin-top: 8px; font-weight: 500; }
-  .login-divider {
-    display: flex; align-items: center; gap: 12px; margin: 20px 0 8px;
-    font-size: 10px; color: #a3b396; letter-spacing: 2px;
-  }
-  .login-divider::before, .login-divider::after {
-    content: ''; flex: 1; height: 1px;
-    background: linear-gradient(90deg, transparent, #c8d4bc, transparent);
-  }
+  .login-error { color: #ff8a8a; font-size: 12px; margin-top: 6px; font-weight: 500; }
 
   /* サーベイ */
   #screen-survey { align-items: flex-start; justify-content: center; padding: 40px 20px; background: linear-gradient(160deg, #eef2ff 0%, #faf5ff 50%, #f0fdf4 100%); }
@@ -672,7 +669,8 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
 .dept-bar-card:hover { box-shadow:0 8px 24px rgba(0,0,0,0.14) !important; transform:translateY(-2px); transition:all 0.2s; }
 
 @media (max-width: 640px) {
-  #screen-login .card { width: 92vw; padding: 36px 24px; }
+  #screen-login .card { padding: 24px 20px 32px; }
+  .login-fields { flex-wrap: wrap; }
   #screen-survey { padding: 16px 12px; }
   #screen-survey .card { padding: 24px 16px; }
   .rating-scale { gap: 4px; }
@@ -701,15 +699,14 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
 <div id="screen-login" class="screen active">
   <div class="garden-particles" id="garden-particles"></div>
   <div class="card">
-    <div class="login-icon">🌿</div>
     <h1>エンゲージメントサーベイ</h1>
     <div class="login-subtitle">Engagement Survey</div>
-    <p id="login-period-label" style="font-size:12px;color:#7a8a6e;margin-bottom:24px"></p>
-    <input type="text" id="login-id" placeholder="社員ID" maxlength="10">
-    <input type="password" id="login-pw" placeholder="パスワード" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn btn-primary" style="width:100%;letter-spacing:3px" onclick="doLogin()">ログイン</button>
+    <div class="login-fields">
+      <input type="text" id="login-id" placeholder="ID" maxlength="10">
+      <input type="password" id="login-pw" placeholder="PASS" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn btn-primary" onclick="doLogin()">ログイン</button>
+    </div>
     <p class="login-error" id="login-error"></p>
-    <div class="login-divider">一期一会</div>
   </div>
 </div>
 
