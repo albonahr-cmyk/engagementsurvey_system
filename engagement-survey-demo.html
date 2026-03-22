@@ -842,10 +842,7 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
         <div class="form-group">
           <label>所属部署 <span style="color:#ef4444">*</span></label>
           <input type="text" id="new-emp-dept" placeholder="例：営業部" list="dept-list">
-          <datalist id="dept-list">
-            <option value="営業部"><option value="開発部"><option value="総務部">
-            <option value="マーケ部"><option value="人事部"><option value="経理部">
-          </datalist>
+          <datalist id="dept-list"></datalist>
         </div>
       </div>
       <div class="form-row" style="margin-bottom:14px">
@@ -1300,6 +1297,17 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
       <button class="btn btn-primary" onclick="exportScoreCSV()">📤 CSVエクスポート</button>
     </div>
 
+    <!-- 部署管理 -->
+    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
+      <div class="section-title" style="margin-bottom:8px">🏢 部署管理</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px">部署の追加・削除ができます。社員のID発行時や部署フィルターに反映されます。</p>
+      <div id="dept-manager-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="new-dept-name" placeholder="新しい部署名" style="flex:1;padding:10px 14px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;color:#1e293b" onkeydown="if(event.key==='Enter'&&!event.isComposing)addDept()">
+        <button class="btn btn-primary btn-sm" onclick="addDept()">追加</button>
+      </div>
+    </div>
+
     <!-- 質問文カスタマイズ -->
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
       <div class="section-title" style="margin-bottom:8px">📝 サーベイ質問文カスタマイズ</div>
@@ -1496,7 +1504,7 @@ async function loadAllFromGoogleSheets(month) {
 const SYNC_KEYS = [
   'es_employees', 'es_emp_passwords', 'es_survey_period',
   'es_cat_thresholds', 'es_cat_targets', 'es_admin_accounts',
-  'es_custom_questions', 'es_action_plan', 'es_question_cat_map', 'es_cat_weights'
+  'es_custom_questions', 'es_action_plan', 'es_question_cat_map', 'es_cat_weights', 'es_dept_list'
 ];
 
 // 設定を1つ保存
@@ -2808,6 +2816,8 @@ function renderLogicTab() {
 
   // カテゴリ別閾値エディター
   renderThresholdEditor();
+  // 部署管理
+  renderDeptManager();
 }
 
 // ===== サーベイ =====
@@ -3617,6 +3627,62 @@ function deleteAdminAccount(idx) {
   accounts.splice(idx, 1);
   saveAdminAccounts(accounts);
   renderAdminAccountList();
+}
+
+// ===== 部署管理 =====
+let deptList = (() => {
+  try { return JSON.parse(localStorage.getItem('es_dept_list') || '[]'); } catch(e) { return []; }
+})();
+
+function getDeptsFromEmployees() {
+  const fromEmps = [...new Set(Object.values(employees).map(e => e.dept).filter(Boolean))];
+  const merged = [...new Set([...deptList, ...fromEmps])].sort();
+  return merged;
+}
+
+function renderDeptManager() {
+  const el = document.getElementById('dept-manager-list');
+  if (!el) return;
+  const depts = getDeptsFromEmployees();
+  el.innerHTML = depts.map(d => `<div style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;font-size:13px;font-weight:600;color:#16a34a">
+    ${sanitize(d)}
+    <span onclick="removeDept('${sanitize(d)}')" style="cursor:pointer;color:#94a3b8;font-size:16px;line-height:1;margin-left:2px" title="削除">&times;</span>
+  </div>`).join('');
+  updateDeptOptions();
+}
+
+function addDept() {
+  const input = document.getElementById('new-dept-name');
+  const name = input.value.trim();
+  if (!name) return;
+  if (!deptList.includes(name)) {
+    deptList.push(name);
+    localStorage.setItem('es_dept_list', JSON.stringify(deptList));
+    saveSettingToCloud('es_dept_list');
+  }
+  input.value = '';
+  renderDeptManager();
+}
+
+function removeDept(name) {
+  if (!confirm(`「${name}」を部署一覧から削除しますか？\n※所属社員のデータは変わりません。`)) return;
+  deptList = deptList.filter(d => d !== name);
+  localStorage.setItem('es_dept_list', JSON.stringify(deptList));
+  saveSettingToCloud('es_dept_list');
+  renderDeptManager();
+}
+
+function updateDeptOptions() {
+  const depts = getDeptsFromEmployees();
+  // ID発行フォームのdatalist
+  const datalist = document.getElementById('dept-list');
+  if (datalist) datalist.innerHTML = depts.map(d => `<option value="${sanitize(d)}">`).join('');
+  // 社員一覧のフィルター
+  const filter = document.getElementById('emp-dept-filter');
+  if (filter) {
+    const current = filter.value;
+    filter.innerHTML = '<option value="">すべての部署</option>' + depts.map(d => `<option value="${sanitize(d)}"${d===current?' selected':''}>${sanitize(d)}</option>`).join('');
+  }
 }
 
 // ===== 質問カスタマイズ =====
