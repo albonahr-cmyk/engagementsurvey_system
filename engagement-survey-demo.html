@@ -4199,12 +4199,33 @@ function handleBizIQPaste(empId) {
     battlePower: data.battlePower || profile.battlePower || 0,
     mbti: profile.mbti || ''
   };
-  localStorage.setItem(`es_profile_${empId}`, JSON.stringify(newProfile));
+  gasPost({ action: 'saveEmployee', empId, iq: newProfile.iq, battlePower: newProfile.battlePower });
   if (employees[empId]) {
     employees[empId].iq = newProfile.iq;
     employees[empId].battlePower = newProfile.battlePower;
   }
-  showToast('✅ ビジネスIQ適性検査データを取り込みました');
+
+  // 取り込み結果の詳細を表示
+  let summary = '【取り込み結果】\n';
+  summary += `IQスコア: ${data.iqScore ?? '取得できず'}\n`;
+  summary += `戦闘力: ${data.battlePower ?? '取得できず'}\n`;
+  if (data.rank16) summary += `ランク: ${data.rank16}\n`;
+  if (data.trustScore !== undefined) summary += `信頼スコア: ${data.trustScore}\n`;
+  if (data.categories && Object.keys(data.categories).length) {
+    summary += '\n【カテゴリ別スコア】\n';
+    Object.entries(data.categories).forEach(([k, v]) => {
+      summary += `  ${k}: ${v.score ?? '-'}${v.diff !== undefined ? ` (${v.diff >= 0 ? '+' : ''}${v.diff})` : ''}\n`;
+    });
+  }
+  if (data.comment) summary += `\n【コメント】\n${data.comment.substring(0, 200)}\n`;
+
+  const missing = [];
+  if (!data.iqScore) missing.push('IQスコア');
+  if (!data.battlePower) missing.push('戦闘力');
+  if (!data.categories || Object.keys(data.categories).length === 0) missing.push('カテゴリ別スコア');
+  if (missing.length) summary += `\n⚠️ 取得できなかった項目: ${missing.join(', ')}`;
+
+  alert(summary);
   showDetail(empId);
 }
 
