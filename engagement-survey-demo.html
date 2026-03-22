@@ -1808,8 +1808,11 @@ function rebuildEmpData() {
 }
 
 function hasSubmittedThisMonth(empId) {
+  // localStorageで即時チェック + サーバー側で重複防止済み
   return !!localStorage.getItem(`es_${empId}_${months[months.length - 1]}`);
 }
+// Note: サーバー側(GAS)でも重複送信チェックしているので、
+// localStorageを消しても同じ月に2回送信はできない
 
 function getSubmittedIds(month) {
   return Object.keys(employees).filter(id => !!localStorage.getItem(`es_${id}_${month}`));
@@ -2979,11 +2982,9 @@ function goToLogin() {
 
 // ===== プロフィール管理（IQ・戦闘力）=====
 function getProfile(empId) {
-  const saved = localStorage.getItem(`es_profile_${empId}`);
+  // サーバーから取得した社員データをそのまま使う
   const defaults = employees[empId] || {};
-  let base;
-  if (saved) { try { base = { ...defaults, ...JSON.parse(saved) }; } catch(e) { base = { ...defaults }; } } else { base = { ...defaults }; }
-  // BizIQ data is authoritative for IQ/battlePower
+  const base = { ...defaults };
   const biziq = getBizIQData(empId);
   if (biziq) {
     if (biziq.iqScore) base.iq = biziq.iqScore;
@@ -2996,7 +2997,8 @@ function saveProfile(empId) {
   const iq = parseInt(document.getElementById(`profile-iq-${empId}`).value) || 0;
   const bp = parseInt(document.getElementById(`profile-bp-${empId}`).value) || 0;
   const mbti = document.getElementById(`profile-mbti-${empId}`).value;
-  localStorage.setItem(`es_profile_${empId}`, JSON.stringify({ iq, battlePower: bp, mbti }));
+  // サーバーに保存
+  gasPost({ action: 'saveEmployee', empId, iq, battlePower: bp, mbti });
   employees[empId].iq = iq;
   employees[empId].battlePower = bp;
   employees[empId].mbti = mbti;
@@ -3281,10 +3283,10 @@ function renderIdList() {
         ${statsRow}
       </td>
       <td><span class="dept-chip">${emp.dept}</span></td>
-      <td style="font-family:'Inter',monospace;font-size:13px;font-weight:700;color:#6366f1">${empPasswords[id] || '—'}</td>
+      <td style="font-family:'Inter',monospace;font-size:13px;font-weight:500;color:#94a3b8">スプシで管理</td>
       <td style="color:#94a3b8;font-size:13px">${issuedAt}</td>
       <td>
-        <button class="copy-btn" onclick="copyIdToClipboard('${id}+${empPasswords[id]||''}')">📋 ID/PASS</button>
+        <button class="copy-btn" onclick="copyIdToClipboard('${id}')">📋 ID</button>
         <button onclick="deleteEmployee('${id}')" class="copy-btn" style="color:#dc2626;border-color:#fecaca;margin-left:6px">🗑 削除</button>
       </td>
     </tr>`;
