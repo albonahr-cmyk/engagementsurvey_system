@@ -516,24 +516,24 @@ if (typeof pdfjsLib !== 'undefined') {
   .biziq-hero-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
   .biziq-hero-value { font-size: 30px; font-weight: 800; margin-top: 4px; }
   .biziq-hero-sub { font-size: 11px; margin-top: 4px; }
-  .biziq-section { margin-bottom: 20px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; }
-  .biziq-section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
-  .biziq-section-title .biziq-count { font-size: 14px; font-weight: 600; color: #64748b; }
-  .biziq-section-desc { font-size: 12px; color: #64748b; font-weight: 400; margin-bottom: 16px; line-height: 1.5; }
-  .biziq-item { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+  .biziq-section { margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px 18px; }
+  .biziq-section-title { font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 2px; display: flex; align-items: baseline; gap: 4px; }
+  .biziq-section-title .biziq-count { font-size: 12px; font-weight: 600; color: #64748b; }
+  .biziq-section-desc { font-size: 11px; color: #94a3b8; font-weight: 400; margin-bottom: 12px; line-height: 1.4; }
+  .biziq-item { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
   .biziq-item:last-child { border-bottom: none; }
-  .biziq-item-row { display: flex; align-items: center; gap: 10px; }
-  .biziq-item-name { font-size: 15px; font-weight: 700; color: #1e293b; min-width: 90px; flex-shrink: 0; }
-  .biziq-item-bar { flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; position: relative; }
-  .biziq-item-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+  .biziq-item-row { display: flex; align-items: center; gap: 8px; }
+  .biziq-item-name { font-size: 12px; font-weight: 700; color: #1e293b; min-width: 72px; flex-shrink: 0; }
+  .biziq-item-bar { flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px; position: relative; }
+  .biziq-item-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
   .biziq-item-bar-center { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: #cbd5e1; }
-  .biziq-item-score { font-size: 18px; font-weight: 800; min-width: 32px; text-align: right; color: #1e293b; }
-  .biziq-item-diff { font-size: 13px; font-weight: 700; min-width: 36px; text-align: right; }
-  .biziq-item-descs { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-top: 4px; padding-left: 100px; }
+  .biziq-item-score { font-size: 14px; font-weight: 800; min-width: 28px; text-align: right; color: #1e293b; }
+  .biziq-item-diff { font-size: 11px; font-weight: 700; min-width: 32px; text-align: right; }
+  .biziq-item-descs { display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; margin-top: 2px; padding-left: 80px; }
   .biziq-item-descs .desc-high { font-weight: 700; color: #374151; }
-  .biziq-item-subdesc { font-size: 11px; color: #94a3b8; margin-top: 3px; padding-left: 100px; }
-  .biziq-item-label { font-size: 13px; font-weight: 700; min-width: 50px; text-align: right; }
-  .biziq-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .biziq-item-subdesc { font-size: 10px; color: #94a3b8; margin-top: 2px; padding-left: 80px; }
+  .biziq-item-label { font-size: 11px; font-weight: 700; min-width: 44px; text-align: right; }
+  .biziq-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 768px) { .biziq-dual { grid-template-columns: 1fr; } }
 
   /* プロフィールカード（IQ・戦闘力） */
@@ -1051,10 +1051,6 @@ if (typeof pdfjsLib !== 'undefined') {
         <div class="master-flow-box" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);color:#4c1d95;border:1px solid #ddd6fe">
           📋 ビジネスIQ適性検査<br><span style="font-size:11px;font-weight:500">IQ + 戦闘力 + ランク</span>
         </div>
-        <div class="master-flow-arrow">＋</div>
-        <div class="master-flow-box" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);color:#9a3412;border:1px solid #fed7aa">
-          📊 適性検査PDF<br><span style="font-size:11px;font-weight:500">行動・意欲・思考特性</span>
-        </div>
         <div class="master-flow-arrow">→</div>
         <div class="master-flow-box" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#3730a3;border:1px solid #c7d2fe">
           🏆 ランク算出<br><span style="font-size:11px;font-weight:500">S1〜C4（16段階）</span>
@@ -1068,8 +1064,6 @@ if (typeof pdfjsLib !== 'undefined') {
       <!-- タブ切替 -->
       <div class="master-tabs">
         <button class="master-tab active" onclick="switchMasterTab('matrix',this)">ランクマトリクス</button>
-        <button class="master-tab" onclick="switchMasterTab('iq-master',this)">🔬 IQ詳細項目</button>
-        <button class="master-tab" onclick="switchMasterTab('bp-master',this)">📊 戦闘力詳細項目</button>
       </div>
 
       <!-- ランクマトリクス -->
@@ -1139,159 +1133,6 @@ if (typeof pdfjsLib !== 'undefined') {
         </div>
       </div>
 
-      <!-- IQ構成要素マスタ -->
-      <div id="master-iq-master" class="master-tab-content" style="display:none">
-        <div style="margin-bottom:16px;padding:14px 18px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe;border-radius:12px">
-          <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">🔬 データソース：ビジネスIQ適性検査（IQ詳細セクション）</div>
-          <div style="font-size:12px;color:#6d28d9">PDFアップロードにより自動取込。6能力の10段階評価 → IQスコア（50〜200）として算出。</div>
-        </div>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">📊 能力評価項目（10段階）</div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th style="width:160px">能力名</th><th>定義</th><th style="width:90px">スケール</th><th style="width:200px">高スコアの特徴</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:700;color:#6366f1">分析力</td><td>具体やパターンを抽出・整理する力</td><td><span class="scale-badge" style="background:#eef2ff;color:#4f46e5">1〜10</span></td><td>情報を多面的に捉え、因果関係を特定できる</td></tr>
-            <tr><td style="font-weight:700;color:#6366f1">思考力</td><td>論理的に筋道を立てて考え、結論を導き出す力</td><td><span class="scale-badge" style="background:#eef2ff;color:#4f46e5">1〜10</span></td><td>複雑な問題を構造的に整理し解決策を導ける</td></tr>
-            <tr><td style="font-weight:700;color:#6366f1">図形・空間認知力</td><td>図や空間の位置・構造・変化を的確に把握する力</td><td><span class="scale-badge" style="background:#eef2ff;color:#4f46e5">1〜10</span></td><td>立体的なイメージ形成や配置の最適化に優れる</td></tr>
-            <tr><td style="font-weight:700;color:#6366f1">洞察力</td><td>抽象的な物事に対して本質的なルールや関連性を見抜く力</td><td><span class="scale-badge" style="background:#eef2ff;color:#4f46e5">1〜10</span></td><td>暗黙のパターンや構造を直感的に把握できる</td></tr>
-            <tr><td style="font-weight:700;color:#6366f1">計算力</td><td>数量や数式を正確かつ素早く処理する力</td><td><span class="scale-badge" style="background:#eef2ff;color:#4f46e5">1〜10</span></td><td>複雑な数的処理を正確・迅速に行える</td></tr>
-            <tr><td style="font-weight:700;color:#6366f1">言語・読解力</td><td>文章の意図を正確に理解し、その内容を要約・解釈する力</td><td><span class="scale-badge" style="background:#eef2ff;color:#4f46e5">1〜10</span></td><td>複雑な文章の論理展開を迅速に読み解ける</td></tr>
-          </tbody>
-        </table>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">🎯 分野別正答率</div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th style="width:160px">分野</th><th>出題内容</th><th style="width:90px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:600">パターン認識</td><td>規則性・法則性の発見に関する問題</td><td><span class="scale-badge" style="background:#f0fdf4;color:#16a34a">0〜100%</span></td></tr>
-            <tr><td style="font-weight:600">抽象推論</td><td>抽象的概念の関係性把握に関する問題</td><td><span class="scale-badge" style="background:#f0fdf4;color:#16a34a">0〜100%</span></td></tr>
-            <tr><td style="font-weight:600">図形分析</td><td>図形の回転・変形・構造分析に関する問題</td><td><span class="scale-badge" style="background:#f0fdf4;color:#16a34a">0〜100%</span></td></tr>
-            <tr><td style="font-weight:600">演繹的推論</td><td>前提から論理的に結論を導く問題</td><td><span class="scale-badge" style="background:#f0fdf4;color:#16a34a">0〜100%</span></td></tr>
-            <tr><td style="font-weight:600">数的推論</td><td>数列・数量関係の推論問題</td><td><span class="scale-badge" style="background:#f0fdf4;color:#16a34a">0〜100%</span></td></tr>
-            <tr><td style="font-weight:600">文章読解</td><td>長文の論旨把握・要約に関する問題</td><td><span class="scale-badge" style="background:#f0fdf4;color:#16a34a">0〜100%</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">💼 職務適性（10段階）</div>
-        <table class="master-table">
-          <thead><tr><th style="width:240px">職務タイプ</th><th>高スコアが示す適性</th><th style="width:90px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:600">発想力や柔軟性が必要な仕事</td><td>企画・クリエイティブ・新規事業などで力を発揮</td><td><span class="scale-badge" style="background:#fffbeb;color:#d97706">1〜10</span></td></tr>
-            <tr><td style="font-weight:600">決断力が必要な仕事</td><td>経営判断・マネジメントなど意思決定業務に適性</td><td><span class="scale-badge" style="background:#fffbeb;color:#d97706">1〜10</span></td></tr>
-            <tr><td style="font-weight:600">集中して着実に進める仕事</td><td>品質管理・経理・開発など正確性が求められる業務に適性</td><td><span class="scale-badge" style="background:#fffbeb;color:#d97706">1〜10</span></td></tr>
-            <tr><td style="font-weight:600">多角的な視点が求められる仕事</td><td>コンサルティング・リサーチなど俯瞰力が必要な業務に適性</td><td><span class="scale-badge" style="background:#fffbeb;color:#d97706">1〜10</span></td></tr>
-            <tr><td style="font-weight:600">複雑な情報を統合して考える仕事</td><td>アナリスト・戦略策定など情報統合力が必要な業務に適性</td><td><span class="scale-badge" style="background:#fffbeb;color:#d97706">1〜10</span></td></tr>
-            <tr><td style="font-weight:600">文章力の求められる仕事</td><td>編集・法務・広報など文章構成力が必要な業務に適性</td><td><span class="scale-badge" style="background:#fffbeb;color:#d97706">1〜10</span></td></tr>
-            <tr><td style="font-weight:600">スピードの重要な仕事</td><td>営業・トレーディングなど即応性が求められる業務に適性</td><td><span class="scale-badge" style="background:#fffbeb;color:#d97706">1〜10</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="margin-top:20px;padding:14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-          <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:6px">⏱ スピード評価について</div>
-          <div style="font-size:12px;color:#64748b;line-height:1.6">回答速度も S / A / B / C / D / E の6段階で評価されます。IQスコアとは別軸の指標として、処理速度の参考値となります。所要時間・テスト内順位も記録されます。</div>
-        </div>
-      </div>
-
-      <!-- 戦闘力構成要素マスタ -->
-      <div id="master-bp-master" class="master-tab-content" style="display:none">
-        <div style="margin-bottom:16px;padding:14px 18px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1px solid #fed7aa;border-radius:12px">
-          <div style="font-size:13px;font-weight:700;color:#9a3412;margin-bottom:4px">📊 データソース：ビジネスIQ適性検査（戦闘力詳細セクション）</div>
-          <div style="font-size:12px;color:#c2410c">PDFアップロードにより自動取込。7分野・計40以上の尺度で資質を測定し、戦闘力（総合値）を算出。</div>
-        </div>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">🎭 性格特性（7尺度・各0〜100）</div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th style="width:120px">尺度名</th><th>低い場合の特徴</th><th>高い場合の特徴</th><th style="width:80px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:700;color:#ea580c">活動性</td><td>落ち着きがある、腰が重い</td><td>行動的、落ち着きがない</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">社交性</td><td>人付合いを好まず、控えめ</td><td>おしゃべり、人付合いを好む</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">慎重性</td><td>気さく、大雑把</td><td>慎重、丁寧、神経質</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">新奇性</td><td>謙虚、受け身</td><td>前向き、自信過剰</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">固執性</td><td>こだわりがなく柔軟</td><td>こだわりが強く粘り強い</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">主体性</td><td>周囲と調和、協調的</td><td>迎合しない、自信過剰</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">決断性</td><td>優しく寛容、情緒的</td><td>合理的、独善的</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">🔥 活動意欲（7尺度・各0〜100）</div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th style="width:120px">尺度名</th><th>定義</th><th style="width:80px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:700;color:#ea580c">向上欲求</td><td>自己成長・向上したいという意欲</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">挑戦欲求</td><td>困難や目標にチャレンジしたいという意欲</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">自律欲求</td><td>自分の意思で物事に取り組みたいという意欲</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">探求欲求</td><td>本質や理由・成り立ちを知りたいという意欲</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">啓発欲求</td><td>他者に良い影響を与えたいという意欲</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">承認欲求</td><td>役割を果たし他者に認められたいという意欲</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">エネルギー</td><td>総合的な活動意欲の強さ（意欲の総合判定）</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">🧠 思考・能力（4尺度・各0〜100）</div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th style="width:120px">尺度名</th><th>定義</th><th style="width:80px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:700;color:#ea580c">直観力</td><td>抽象的な事柄や概念的な本質を感覚的に捉える力</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">論理力</td><td>筋道立てて思考し、物事を定性的・定量的に捉える力</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">実行力</td><td>具体的計画を立てて行動し、遂行する力</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">共感力</td><td>他者の心理や感情を感知し、汲み取る力</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">💪 ストレス耐性（2尺度・各0〜100）</div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th style="width:120px">尺度名</th><th>定義</th><th style="width:80px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:700;color:#ea580c">精神的耐性</td><td>メンタル面（精神面）でのストレスに耐える強さ</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">身体的耐性</td><td>神経面（身体面）でのストレスに耐える強さ</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">💎 価値観（5尺度・各0〜100）</div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th style="width:120px">尺度名</th><th>低い場合の特徴</th><th>高い場合の特徴</th><th style="width:80px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:700;color:#ea580c">公益志向</td><td>人の役に立つことに価値を感じない</td><td>人の役に立つことに価値を感じる</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">成長志向</td><td>自己の能力向上に価値を感じない</td><td>自己の能力向上に価値を感じる</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">金権志向</td><td>お金を稼ぐことに価値を感じない</td><td>お金を稼ぐことに価値を感じる</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">享楽志向</td><td>娯楽的な面白さに価値を感じない</td><td>娯楽的な面白さに価値を感じる</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#ea580c">安定志向</td><td>生活・収入の安定に価値を感じない</td><td>生活・収入の安定に価値を感じる</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">⚠️ ネガティブ傾向（6尺度・各0〜100） <span style="font-size:11px;font-weight:500;color:#dc2626">※ 高いほどリスク大</span></div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th style="width:140px">尺度名</th><th>定義</th><th style="width:80px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:700;color:#dc2626">非自尊傾向</td><td>自己卑下する傾向にあり本番に弱い傾向</td><td><span class="scale-badge" style="background:#fef2f2;color:#dc2626">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#dc2626">気分傾向</td><td>気分の浮き沈みで、仕事にムラがでる傾向</td><td><span class="scale-badge" style="background:#fef2f2;color:#dc2626">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#dc2626">悲観傾向</td><td>建設的に捉えたり、考えたりできない傾向</td><td><span class="scale-badge" style="background:#fef2f2;color:#dc2626">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#dc2626">非倫理傾向</td><td>遵法・倫理意識が低く、目的の為に手段を選ばない傾向</td><td><span class="scale-badge" style="background:#fef2f2;color:#dc2626">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#dc2626">モラトリアム傾向</td><td>無気力・無関心に傾き、不平や不満を持ちやすい傾向</td><td><span class="scale-badge" style="background:#fef2f2;color:#dc2626">0〜100</span></td></tr>
-            <tr><td style="font-weight:700;color:#dc2626">不適応傾向</td><td>環境に適応しにくく、集団に馴染みにくい傾向</td><td><span class="scale-badge" style="background:#fef2f2;color:#dc2626">0〜100</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">💼 職務適性（8タイプ・各0〜100）</div>
-        <table class="master-table" style="margin-bottom:20px">
-          <thead><tr><th>職務の特性</th><th style="width:80px">スケール</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:600">人間関係を築いていく職務</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:600">フットワークの軽さを必要とする職務</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:600">リーダーシップを必要とする職務</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:600">過去に事例のない新しい職務</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:600">反復・継続的な職務</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:600">企画力や創造力を必要とする職務</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:600">丁寧さ注意深さを必要とする職務</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-            <tr><td style="font-weight:600">情報を集め問題を分析する職務</td><td><span class="scale-badge" style="background:#fff7ed;color:#ea580c">0〜100</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="padding:14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
-          <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:6px">🔍 虚偽回答傾向について</div>
-          <div style="font-size:12px;color:#64748b;line-height:1.6">0〜10の11段階で評価。数値が高いほど虚偽回答の可能性が高い。0の場合「回答に虚偽の傾向を検出できない」と判定。</div>
-        </div>
-      </div>
     </div>
 
     <!-- ランク詳細一覧 -->
