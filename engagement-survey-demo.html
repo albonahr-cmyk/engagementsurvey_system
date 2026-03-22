@@ -45,7 +45,7 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
   }
   @keyframes kenBurns {
     0% { transform: scale(1) translate(0, 0); }
-    100% { transform: scale(1.08) translate(-1%, -1%); }
+    100% { transform: scale(1.15) translate(-2%, -2%); }
   }
   #screen-login::before {
     content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
@@ -57,14 +57,20 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
   }
   /* 光の筋 */
   .light-ray {
-    position: absolute; top: -10%; left: 45%; width: 200px; height: 120%; z-index: 1;
-    background: linear-gradient(180deg, rgba(255,255,200,0.06), transparent 70%);
-    transform: rotate(8deg); pointer-events: none;
-    animation: rayPulse 8s ease-in-out infinite;
+    position: absolute; top: -10%; left: 42%; width: 300px; height: 120%; z-index: 1;
+    background: linear-gradient(180deg, rgba(255,255,200,0.15), transparent 60%);
+    transform: rotate(6deg); pointer-events: none;
+    animation: rayPulse 6s ease-in-out infinite;
+  }
+  .light-ray::after {
+    content: ''; position: absolute; top: 0; left: -120px; width: 180px; height: 100%;
+    background: linear-gradient(180deg, rgba(255,255,200,0.08), transparent 50%);
+    transform: rotate(-4deg);
+    animation: rayPulse 6s ease-in-out infinite reverse;
   }
   @keyframes rayPulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.8; }
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
   }
   /* 蛍のような光粒 */
   .garden-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
@@ -74,18 +80,20 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
   }
   @keyframes fireflyFloat {
     0% { transform: translateY(0) translateX(0); opacity: 0; }
-    10% { opacity: 0.6; }
-    90% { opacity: 0.6; }
-    100% { transform: translateY(-100vh) translateX(30px); opacity: 0; }
+    5% { opacity: 0; }
+    15% { opacity: 0.9; }
+    85% { opacity: 0.9; }
+    95% { opacity: 0; }
+    100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
   }
   #screen-login .login-title {
     position: absolute; top: 36px; left: 40px; z-index: 3;
-    animation: titleFadeIn 1.5s cubic-bezier(0.16,1,0.3,1) both;
-    animation-delay: 0.3s;
+    animation: titleFadeIn 2s cubic-bezier(0.16,1,0.3,1) both;
+    animation-delay: 0.5s;
   }
   @keyframes titleFadeIn {
-    from { opacity: 0; transform: translateX(-30px); }
-    to { opacity: 1; transform: translateX(0); }
+    from { opacity: 0; transform: translateX(-50px) scale(0.95); filter: blur(4px); }
+    to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
   }
   #screen-login .login-title h1 {
     font-size: 16px; color: rgba(255,255,255,0.9); font-weight: 700;
@@ -105,12 +113,12 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
     box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.06);
     padding: 16px 20px;
     text-align: left;
-    animation: cardSlideUp 1.2s cubic-bezier(0.16,1,0.3,1) both;
-    animation-delay: 0.6s;
+    animation: cardSlideUp 1.8s cubic-bezier(0.16,1,0.3,1) both;
+    animation-delay: 1s;
   }
   @keyframes cardSlideUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(60px) scale(0.95); filter: blur(4px); }
+    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
   }
   .login-fields {
     display: flex; gap: 8px; align-items: center;
@@ -4752,16 +4760,16 @@ rebuildEmpData();
 (function initGardenParticles() {
   const container = document.getElementById('garden-particles');
   if (!container) return;
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 25; i++) {
     const p = document.createElement('div');
     p.className = 'garden-particle';
-    const size = 2 + Math.random() * 4;
-    const duration = 12 + Math.random() * 18;
+    const size = 3 + Math.random() * 6;
+    const duration = 10 + Math.random() * 15;
     p.style.cssText = `
       width:${size}px; height:${size}px;
-      left:${Math.random()*100}%; bottom:${-Math.random()*20}%;
-      background: radial-gradient(circle, rgba(200,230,150,0.8), rgba(150,200,100,0.2));
-      box-shadow: 0 0 ${size*3}px rgba(180,220,130,0.3);
+      left:${Math.random()*100}%; bottom:${-Math.random()*30}%;
+      background: radial-gradient(circle, rgba(220,255,170,0.9), rgba(150,220,100,0.1));
+      box-shadow: 0 0 ${size*4}px rgba(180,240,130,0.5), 0 0 ${size*8}px rgba(160,220,100,0.2);
       animation-delay:${Math.random()*duration}s;
       animation-duration:${duration}s;
     `;
