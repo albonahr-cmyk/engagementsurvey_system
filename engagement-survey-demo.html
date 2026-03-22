@@ -1325,39 +1325,49 @@ if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = ''
 // ↓ ステップ3でデプロイ後に取得するURLをここに貼り付ける
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwNGZUdEMSMHklI6dz-XlVGqYTmALukzUWCkzeuvo8lh1qQSLowcl6x6vvUp5Prk8zWUA/exec';
 
-async function submitToGoogleSheets(empId, month, answers) {
-  if (!GAS_URL) { console.log('GAS_URL未設定: localStorageのみに保存'); return true; }
+// GAS通信ヘルパー（リダイレクト対応）
+async function gasPost(payload) {
+  if (!GAS_URL) return null;
   try {
     const res = await fetch(GAS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'submit', empId, month, answers })
+      body: JSON.stringify(payload),
+      redirect: 'follow'
     });
-    const data = await res.json();
-    return data.ok === true;
+    return await res.json();
   } catch (e) {
-    console.error('Google Sheets送信エラー:', e);
-    // オフラインでも回答は失われない（localStorageに保存済み）
-    return false;
+    console.warn('GAS POST error:', e);
+    return null;
   }
 }
 
-async function checkSubmittedOnline(empId, month) {
-  if (!GAS_URL) return null;  // URL未設定時はローカルチェックに任せる
+async function gasGet(params) {
+  if (!GAS_URL) return null;
   try {
-    const res = await fetch(GAS_URL + '?action=check&empId=' + empId + '&month=' + month);
-    const data = await res.json();
-    return data.submitted === true;
-  } catch (e) { return null; }
+    const url = GAS_URL + '?' + new URLSearchParams(params).toString();
+    const res = await fetch(url, { redirect: 'follow' });
+    return await res.json();
+  } catch (e) {
+    console.warn('GAS GET error:', e);
+    return null;
+  }
+}
+
+async function submitToGoogleSheets(empId, month, answers) {
+  const data = await gasPost({ action: 'submit', empId, month, answers });
+  if (data?.ok) return true;
+  console.error('Google Sheets送信エラー:', data);
+  return false;
+}
+
+async function checkSubmittedOnline(empId, month) {
+  const data = await gasGet({ action: 'check', empId, month });
+  return data?.submitted === true ? true : null;
 }
 
 async function loadAllFromGoogleSheets(month) {
-  if (!GAS_URL) return null;
-  try {
-    const res = await fetch(GAS_URL + '?action=load&month=' + (month || ''));
-    const data = await res.json();
-    return data.ok ? data.data : null;
-  } catch (e) { return null; }
+  const data = await gasGet({ action: 'load', month: month || '' });
+  return data?.ok ? data.data : null;
 }
 
 // ===== Google Sheets 設定データ同期 =====
@@ -1372,22 +1382,15 @@ async function saveSettingToCloud(key) {
   if (!GAS_URL) return;
   const value = localStorage.getItem(key);
   if (value === null) return;
-  try {
-    await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'saveSettings', key, value })
-    });
-  } catch (e) { console.warn('設定保存失敗:', key, e); }
+  await gasPost({ action: 'saveSettings', key, value });
 }
 
 // クラウドから全設定を読込
 async function loadAllSettingsFromCloud() {
   if (!GAS_URL) return false;
   try {
-    const res = await fetch(GAS_URL + '?action=loadSettings');
-    const data = await res.json();
-    if (!data.ok || !data.data) return false;
+    const data = await gasGet({ action: 'loadSettings' });
+    if (!data?.ok || !data.data) return false;
     let count = 0;
     _skipSync = true;
     for (const [key, value] of Object.entries(data.data)) {
