@@ -3018,6 +3018,7 @@ function doLogin() {
           emps.forEach(e => { employees[e.empId] = e; });
         }
         loadAllSettingsFromCloud().then(() => {
+          reloadAllSettings();
           rebuildEmpData();
           renderDashboard();
         });
@@ -3745,6 +3746,36 @@ function deleteAdminAccount(idx) {
 let deptList = (() => {
   try { return JSON.parse(localStorage.getItem('es_dept_list') || '[]'); } catch(e) { return []; }
 })();
+
+function reloadDeptList() {
+  try { deptList = JSON.parse(localStorage.getItem('es_dept_list') || '[]'); } catch(e) { deptList = []; }
+}
+
+// クラウド復元後に全設定変数をlocalStorageから再読込
+function reloadAllSettings() {
+  try { deptList = JSON.parse(localStorage.getItem('es_dept_list') || '[]'); } catch(e) { deptList = []; }
+  try { surveyPeriod = JSON.parse(localStorage.getItem('es_survey_period') || '{}'); } catch(e) {}
+  try {
+    const saved = localStorage.getItem('es_cat_thresholds');
+    if (saved) Object.assign(categoryThresholds, JSON.parse(saved));
+  } catch(e) {}
+  try {
+    const saved = localStorage.getItem('es_cat_targets');
+    if (saved) Object.assign(categoryTargets, JSON.parse(saved));
+  } catch(e) {}
+  try {
+    const saved = localStorage.getItem('es_cat_weights');
+    if (saved) Object.assign(categoryWeights, JSON.parse(saved));
+  } catch(e) {}
+  try {
+    const saved = localStorage.getItem('es_custom_questions');
+    if (saved) customQuestions = JSON.parse(saved);
+  } catch(e) {}
+  try {
+    const saved = localStorage.getItem('es_question_cat_map');
+    if (saved) Object.assign(questionCatMap, JSON.parse(saved));
+  } catch(e) {}
+}
 
 function getDeptsFromEmployees() {
   const fromEmps = [...new Set(Object.values(employees).map(e => e.dept).filter(Boolean))];
