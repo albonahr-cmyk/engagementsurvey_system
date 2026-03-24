@@ -1380,14 +1380,21 @@ function sanitize(str) {
 }
 
 // API通信ヘルパー（Vercel Serverless Functions用）
+function authHeaders() {
+  const h = { 'Content-Type': 'application/json' };
+  if (_sessionToken) h['Authorization'] = 'Bearer ' + _sessionToken;
+  return h;
+}
+
 async function apiPost(endpoint, payload) {
   try {
     const res = await fetch(API_BASE + '/api/' + endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify(payload),
     });
     const data = await res.json();
+    if (res.status === 401) { clearSession(); showScreen('login'); showToast('⚠️ セッション切れ。再ログインしてください'); return { ok: false, error: 'unauthorized' }; }
     if (!res.ok) { console.error(`apiPost ${endpoint} failed:`, data); return { ok: false, error: data.error || 'Server error' }; }
     return data;
   } catch (e) { console.error('apiPost error:', e); return { ok: false, error: e.message }; }
@@ -1396,8 +1403,9 @@ async function apiPost(endpoint, payload) {
 async function apiGet(endpoint, params) {
   try {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    const res = await fetch(API_BASE + '/api/' + endpoint + qs);
+    const res = await fetch(API_BASE + '/api/' + endpoint + qs, { headers: authHeaders() });
     const data = await res.json();
+    if (res.status === 401) { clearSession(); showScreen('login'); showToast('⚠️ セッション切れ。再ログインしてください'); return { ok: false, error: 'unauthorized' }; }
     if (!res.ok) { console.error(`apiGet ${endpoint} failed:`, data); return { ok: false, error: data.error || 'Server error' }; }
     return data;
   } catch (e) { console.error('apiGet error:', e); return { ok: false, error: e.message }; }
@@ -2850,8 +2858,7 @@ function doLogin() {
   errEl.textContent = 'ログイン中...';
   serverLogin(id, pw).then(result => {
     if (!result?.ok) {
-      const e = result?.error || '';
-      errEl.textContent = (e === 'invalid_password' || e === 'not_found') ? 'IDまたはパスワードが正しくありません' : 'ログインに失敗しました。再度お試しください。';
+      errEl.textContent = result?.error === 'invalid_credentials' ? 'IDまたはパスワードが正しくありません' : 'ログインに失敗しました。再度お試しください。';
       return;
     }
     errEl.textContent = '';

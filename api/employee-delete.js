@@ -1,16 +1,14 @@
-const { queryDB, updatePage, P } = require('./notion');
+const { queryDB, updatePage, P } = require('../lib/notion');
+const { requireAuth } = require('../lib/auth');
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(204).end();
+  const user = requireAuth(req, res, 'admin');
+  if (!user) return;
 
   try {
     const { empId } = req.method === 'POST' ? req.body : req.query;
     if (!empId) return res.status(400).json({ ok: false, error: 'empId required' });
 
-    // 論理削除（isActive = false）
     const existing = await queryDB('employees', {
       property: 'empId', rich_text: { equals: empId },
     });

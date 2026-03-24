@@ -1,11 +1,10 @@
-const { queryDB, createPage, updatePage, P } = require('./notion');
+const { queryDB, createPage, updatePage, P } = require('../lib/notion');
+const { requireAuth } = require('../lib/auth');
 const crypto = require('crypto');
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(204).end();
+  const user = requireAuth(req, res, 'admin');
+  if (!user) return;
 
   try {
     const body = req.method === 'POST' ? req.body : req.query;
@@ -27,10 +26,8 @@ module.exports = async function handler(req, res) {
     if (password) props.password = P.rich(password);
 
     if (existing.length > 0) {
-      // 更新
       await updatePage(existing[0].id, props);
     } else {
-      // 新規作成
       props.empId = P.rich(empId);
       props.isActive = P.checkbox(true);
       if (!props.name) props.name = P.title('');
