@@ -9,7 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 if (typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 </script>
 <style>
@@ -1387,16 +1387,20 @@ async function apiPost(endpoint, payload) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    return await res.json();
-  } catch (e) { console.error('apiPost error:', e); return null; }
+    const data = await res.json();
+    if (!res.ok) { console.error(`apiPost ${endpoint} failed:`, data); return { ok: false, error: data.error || 'Server error' }; }
+    return data;
+  } catch (e) { console.error('apiPost error:', e); return { ok: false, error: e.message }; }
 }
 
 async function apiGet(endpoint, params) {
   try {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
     const res = await fetch(API_BASE + '/api/' + endpoint + qs);
-    return await res.json();
-  } catch (e) { console.error('apiGet error:', e); return null; }
+    const data = await res.json();
+    if (!res.ok) { console.error(`apiGet ${endpoint} failed:`, data); return { ok: false, error: data.error || 'Server error' }; }
+    return data;
+  } catch (e) { console.error('apiGet error:', e); return { ok: false, error: e.message }; }
 }
 
 // ログイン（サーバー側認証）
@@ -2845,8 +2849,9 @@ function doLogin() {
 
   errEl.textContent = 'ログイン中...';
   serverLogin(id, pw).then(result => {
-    if (!result || !result.ok) {
-      errEl.textContent = result?.error === 'invalid_credentials' ? 'IDまたはパスワードが正しくありません' : 'ログインに失敗しました。再度お試しください。';
+    if (!result?.ok) {
+      const e = result?.error || '';
+      errEl.textContent = (e === 'invalid_password' || e === 'not_found') ? 'IDまたはパスワードが正しくありません' : 'ログインに失敗しました。再度お試しください。';
       return;
     }
     errEl.textContent = '';
@@ -2860,14 +2865,18 @@ function doLogin() {
       showScreen('admin');
       // サーバーから社員データを取得してダッシュボード表示
       fetchEmployeesFromServer().then(emps => {
-        if (emps) {
-          Object.keys(employees).forEach(k => delete employees[k]);
-          emps.forEach(e => { employees[e.empId] = e; });
+        if (!emps) {
+          showToast('⚠️ 社員データの読込に失敗しました');
+          return;
         }
+        Object.keys(employees).forEach(k => delete employees[k]);
+        emps.forEach(e => { employees[e.empId] = e; });
         loadAllSettingsFromCloud().then(() => {
           reloadAllSettings();
           rebuildEmpData();
           renderDashboard();
+          renderIdList();
+          renderEmployeeList();
           syncLocalBizIQToCloud();
         });
       });
@@ -3249,6 +3258,13 @@ function nextEmpId() {
   return 'EMP' + String((nums.length > 0 ? Math.max(...nums) : 0) + 1).padStart(3, '0');
 }
 
+function generatePassword() {
+  const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+  let pw = '';
+  for (let i = 0; i < 8; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+  return pw;
+}
+
 function issueNewId() {
   const name = document.getElementById('new-emp-name').value.trim();
   const dept = document.getElementById('new-emp-dept').value.trim();
@@ -3258,20 +3274,18 @@ function issueNewId() {
   const battlePower = parseInt(document.getElementById('new-emp-bp').value) || 0;
   const mbti       = document.getElementById('new-emp-mbti').value || '';
   const newId = nextEmpId();
+  const pw = generatePassword();
 
   showToast('登録中...');
-  apiPost('employee-save', { empId: newId, name, dept, role: 'employee', iq, battlePower, mbti }).then(() => {
-    // サーバーから最新データを取得
+  apiPost('employee-save', { empId: newId, name, dept, role: 'employee', iq, battlePower, mbti, password: pw }).then(saveRes => {
+    if (!saveRes?.ok) { showToast('❌ 保存に失敗しました'); return Promise.reject(); }
     return fetchEmployeesFromServer();
   }).then(emps => {
-    if (emps) {
-      Object.keys(employees).forEach(k => delete employees[k]);
-      emps.forEach(e => { employees[e.empId] = e; });
-    }
-    // 発行結果の取得（サーバーで生成されたパスワード）
-    const emp = employees[newId];
+    if (!emps) { showToast('⚠️ データ取得に失敗しました。リロードしてください'); return; }
+    Object.keys(employees).forEach(k => delete employees[k]);
+    emps.forEach(e => { employees[e.empId] = e; });
     lastIssuedId = newId;
-    lastIssuedPw = '（スプレッドシートで確認）';
+    lastIssuedPw = pw;
 
     const rank = calcRank(iq, battlePower);
     const result = document.getElementById('issued-result');
@@ -3284,7 +3298,7 @@ function issueNewId() {
     if (rank) subParts.push(`ランク ${rank}`);
     if (mbti) subParts.push(mbti);
     document.getElementById('issued-name-value').textContent = subParts.join(' ／ ');
-    document.getElementById('issued-pw-value').textContent = `PW: スプレッドシートで確認`;
+    document.getElementById('issued-pw-value').textContent = `PW: ${pw}`;
     document.getElementById('new-emp-name').value = '';
     document.getElementById('new-emp-dept').value = '';
     document.getElementById('new-emp-iq').value = '';
@@ -3292,9 +3306,10 @@ function issueNewId() {
     document.getElementById('new-emp-mbti').value = '';
     rebuildEmpData();
     renderIdList();
+    renderEmployeeList();
     initBizIQMasterUI();
     showToast('✅ IDを発行しました');
-  });
+  }).catch(() => {});
 }
 
 function renderIdList() {
@@ -3323,10 +3338,11 @@ function renderIdList() {
         ${statsRow}
       </td>
       <td><span class="dept-chip">${emp.dept}</span></td>
-      <td style="font-family:'Inter',monospace;font-size:13px;font-weight:500;color:#94a3b8">スプシで管理</td>
+      <td style="font-family:'Inter',monospace;font-size:13px;font-weight:500;color:#6366f1">${emp.password || '<span style="color:#94a3b8">未設定</span>'}</td>
       <td style="color:#94a3b8;font-size:13px">${issuedAt}</td>
       <td>
         <button class="copy-btn" onclick="copyIdToClipboard('${id}')">📋 ID</button>
+        <button class="copy-btn" onclick="promptChangePassword('${id}')" style="margin-left:6px">🔑 PW変更</button>
         <button onclick="deleteEmployee('${id}')" class="copy-btn" style="color:#dc2626;border-color:#fecaca;margin-left:6px">🗑 削除</button>
       </td>
     </tr>`;
@@ -3341,19 +3357,32 @@ function deleteEmployee(id) {
   const emp = employees[id];
   if (!confirm(`${id}（${emp?.name||''}）を削除しますか？\nこの操作は取り消せません。`)) return;
   // サーバーで論理削除（isActive=false）
+  showToast('削除中...');
   apiPost('employee-delete', { empId: id }).then(() => {
     return fetchEmployeesFromServer();
   }).then(emps => {
-    if (emps) {
-      Object.keys(employees).forEach(k => delete employees[k]);
-      emps.forEach(e => { employees[e.empId] = e; });
-    }
+    if (!emps) { showToast('⚠️ データ取得に失敗しました'); return; }
+    Object.keys(employees).forEach(k => delete employees[k]);
+    emps.forEach(e => { employees[e.empId] = e; });
     delete empData[id];
+    rebuildEmpData();
     renderIdList();
+    renderEmployeeList();
     initBizIQMasterUI();
-    if (document.getElementById('tab-employees').style.display !== 'none') {
-      renderEmployeeList();
-    }
+    showToast('✅ 削除しました');
+  });
+}
+
+function promptChangePassword(empId) {
+  const newPw = prompt(`${empId} の新しいパスワードを入力：`);
+  if (!newPw || !newPw.trim()) return;
+  showToast('パスワード更新中...');
+  apiPost('employee-save', { empId, password: newPw.trim() }).then(res => {
+    if (res?.ok) {
+      showToast('✅ パスワードを更新しました');
+      if (employees[empId]) employees[empId].password = newPw.trim();
+      renderIdList();
+    } else showToast('❌ パスワード更新に失敗しました');
   });
 }
 
@@ -3574,13 +3603,16 @@ function addAdminAccount() {
   const pass = document.getElementById('new-admin-pass')?.value.trim();
   const msg = document.getElementById('admin-add-msg');
   if (!name || !pass) { if(msg){msg.style.color='#dc2626';msg.textContent='表示名とパスワードを入力してください';msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);} return; }
-  const accounts = getAdminAccounts();
-  accounts.push({ id: 'admin', password: pass, name, createdAt: new Date().toISOString().slice(0,10) });
-  saveAdminAccounts(accounts);
-  document.getElementById('new-admin-name').value = '';
-  document.getElementById('new-admin-pass').value = '';
-  if(msg){msg.style.color='#16a34a';msg.textContent='✅ 追加しました';msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);}
-  renderAdminAccountList();
+  // Notion Auth DBとEmployees DBに管理者として登録
+  apiPost('employee-save', { empId: 'admin', name, dept: '管理', role: 'admin', password: pass }).then(res => {
+    if (res?.ok) {
+      document.getElementById('new-admin-name').value = '';
+      document.getElementById('new-admin-pass').value = '';
+      if(msg){msg.style.color='#16a34a';msg.textContent='✅ パスワードを更新しました';msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);}
+    } else {
+      if(msg){msg.style.color='#dc2626';msg.textContent='❌ 保存に失敗しました';msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);}
+    }
+  });
 }
 
 function deleteAdminAccount(idx) {
@@ -3603,7 +3635,7 @@ function reloadDeptList() {
 // クラウド復元後に全設定変数をlocalStorageから再読込
 function reloadAllSettings() {
   try { deptList = JSON.parse(localStorage.getItem('es_dept_list') || '[]'); } catch(e) { deptList = []; }
-  try { surveyPeriod = JSON.parse(localStorage.getItem('es_survey_period') || '{}'); } catch(e) {}
+  try { const sp = JSON.parse(localStorage.getItem('es_survey_period') || '{}'); if (sp.start && sp.end) surveyPeriod = sp; } catch(e) {}
   try {
     const saved = localStorage.getItem('es_cat_thresholds');
     if (saved) Object.assign(categoryThresholds, JSON.parse(saved));
@@ -4848,8 +4880,6 @@ function switchMasterTab(name, btn) {
   if (btn) btn.classList.add('active');
 }
 
-rebuildEmpData();
-
 // セッション復元（sessionStorageベース、サーバー検証済みトークン）
 (function restoreSession() {
   if (!_sessionToken) return;
@@ -4860,14 +4890,17 @@ rebuildEmpData();
     });
     showScreen('admin');
     fetchEmployeesFromServer().then(emps => {
-      if (emps) {
-        Object.keys(employees).forEach(k => delete employees[k]);
-        emps.forEach(e => { employees[e.empId] = e; });
+      if (!emps) {
+        showToast('⚠️ 社員データの読込に失敗しました');
+        return;
       }
+      Object.keys(employees).forEach(k => delete employees[k]);
+      emps.forEach(e => { employees[e.empId] = e; });
       loadAllSettingsFromCloud().then(() => {
         rebuildEmpData();
         renderDashboard();
-        // ローカルのBizIQデータをクラウドに同期（未同期分）
+        renderIdList();
+        renderEmployeeList();
         syncLocalBizIQToCloud();
       });
     });

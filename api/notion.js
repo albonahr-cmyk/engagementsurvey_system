@@ -75,13 +75,21 @@ async function archivePage(pageId) {
 // プロパティ値ヘルパー
 const P = {
   title: (v) => ({ title: [{ text: { content: v || '' } }] }),
-  rich: (v) => ({ rich_text: [{ text: { content: v || '' } }] }),
+  rich: (v) => {
+    const s = v || '';
+    // Notion rich_text は1ブロック2000文字制限。分割して格納
+    const chunks = [];
+    for (let i = 0; i < s.length; i += 2000) {
+      chunks.push({ text: { content: s.slice(i, i + 2000) } });
+    }
+    return { rich_text: chunks.length > 0 ? chunks : [{ text: { content: '' } }] };
+  },
   num: (v) => ({ number: v ?? null }),
   checkbox: (v) => ({ checkbox: !!v }),
   select: (v) => ({ select: v ? { name: v } : null }),
   // プロパティ読み取り
   readTitle: (prop) => prop?.title?.[0]?.plain_text || '',
-  readRich: (prop) => prop?.rich_text?.[0]?.plain_text || '',
+  readRich: (prop) => (prop?.rich_text || []).map(r => r.plain_text || '').join(''),
   readNum: (prop) => prop?.number ?? null,
   readCheckbox: (prop) => prop?.checkbox || false,
   readSelect: (prop) => prop?.select?.name || '',

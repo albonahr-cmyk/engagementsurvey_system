@@ -7,7 +7,9 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
 
   try {
-    const results = await queryDB('employees');
+    const results = await queryDB('employees', {
+      property: 'isActive', checkbox: { equals: true },
+    });
 
     const data = results.map(page => {
       const p = page.properties;
@@ -19,6 +21,7 @@ module.exports = async function handler(req, res) {
         iq: P.readNum(p.iq),
         battlePower: P.readNum(p.battlePower),
         mbti: P.readRich(p.mbti),
+        password: P.readRich(p.password),
         isActive: P.readCheckbox(p.isActive),
         issuedAt: P.readRich(p.issuedAt),
       };

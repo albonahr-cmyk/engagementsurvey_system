@@ -1,4 +1,5 @@
 const { queryDB, createPage, updatePage, P } = require('./notion');
+const crypto = require('crypto');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -8,7 +9,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = req.method === 'POST' ? req.body : req.query;
-    const { empId, name, dept, role, iq, battlePower, mbti } = body;
+    const { empId, name, dept, role, iq, battlePower, mbti, password } = body;
     if (!empId) return res.status(400).json({ ok: false, error: 'empId required' });
 
     // 既存社員を検索
@@ -23,6 +24,7 @@ module.exports = async function handler(req, res) {
     if (iq !== undefined) props.iq = P.num(Number(iq));
     if (battlePower !== undefined) props.battlePower = P.num(Number(battlePower));
     if (mbti !== undefined) props.mbti = P.rich(mbti);
+    if (password) props.password = P.rich(password);
 
     if (existing.length > 0) {
       // 更新
@@ -34,6 +36,27 @@ module.exports = async function handler(req, res) {
       if (!props.name) props.name = P.title('');
       if (!props.issuedAt) props.issuedAt = P.rich(new Date().toISOString());
       await createPage('employees', props);
+    }
+
+    // パスワードが指定されていればAuth DBも更新
+    if (password) {
+      const hash = crypto.createHash('sha256').update(password).digest('hex');
+      const authExisting = await queryDB('auth', {
+        property: 'empId', rich_text: { equals: empId },
+      });
+
+      if (authExisting.length > 0) {
+        const authProps = { passwordHash: P.rich(hash) };
+        if (role) authProps.role = P.select(role);
+        await updatePage(authExisting[0].id, authProps);
+      } else {
+        await createPage('auth', {
+          title: P.title(empId),
+          empId: P.rich(empId),
+          passwordHash: P.rich(hash),
+          role: P.select(role || 'employee'),
+        });
+      }
     }
 
     return res.json({ ok: true });

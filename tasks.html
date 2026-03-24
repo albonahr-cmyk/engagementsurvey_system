@@ -348,9 +348,9 @@ main {
 
 .tag-pill {
   display: inline-flex; align-items: center; gap: 3px;
-  padding: 1px 8px; background: rgba(124,92,252,0.1); color: var(--accent1);
-  border-radius: 5px; font-size: 10px; font-weight: 700; white-space: nowrap;
-  letter-spacing: 0.3px;
+  padding: 1px 8px; border-radius: 5px; font-size: 10px; font-weight: 700;
+  white-space: nowrap; letter-spacing: 0.3px;
+  background: rgba(124,92,252,0.12); color: #7c5cfc;
 }
 .tag-pill .tag-remove { cursor: pointer; font-size: 12px; line-height: 1; opacity: 0.6; }
 .tag-pill .tag-remove:hover { opacity: 1; }
@@ -405,6 +405,30 @@ main {
   font-size: 12px; outline: none; width: 70px; flex: 1;
 }
 .tag-input-wrap input::placeholder { color: var(--text3); }
+.tag-input-wrap { position: relative; }
+.tag-suggestions {
+  display: flex; gap: 4px; flex-wrap: wrap; width: 100%; margin-top: 4px;
+}
+.tag-suggest-pill {
+  display: inline-flex; align-items: center; padding: 2px 10px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  color: var(--text2); border-radius: 6px; font-size: 10px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.tag-suggest-pill:hover { background: rgba(124,92,252,0.15); color: var(--accent1); border-color: var(--accent1); }
+.tag-manage-btn {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  background: transparent; border: 1px dashed var(--glass-border);
+  color: var(--text3); border-radius: 6px; font-size: 10px; cursor: pointer; transition: all 0.2s;
+}
+.tag-manage-btn:hover { border-color: var(--accent1); color: var(--accent1); }
+.custom-tag-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm); margin-bottom: 6px;
+}
+.custom-tag-item .tag-pill { font-size: 12px; padding: 3px 12px; }
+.custom-tag-item .icon-btn { width: 26px; height: 26px; font-size: 12px; margin-left: auto; }
 
 .memo-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;
@@ -655,6 +679,7 @@ canvas#confetti { position: fixed; inset: 0; z-index: 300; pointer-events: none;
     <button class="tab-btn" data-tab="memos">メモ</button>
   </div>
   <div class="header-right">
+    <button class="hdr-btn" onclick="openTagManager()" title="タグ管理">&#127991;</button>
     <button class="hdr-btn" id="theme-toggle" onclick="toggleTheme()" title="テーマ切替">&#9790;</button>
     <button class="hdr-btn" onclick="openDataModal()" title="データ管理">&#8693;</button>
   </div>
@@ -733,7 +758,7 @@ canvas#confetti { position: fixed; inset: 0; z-index: 300; pointer-events: none;
     <div class="modal-body" style="overflow-y:auto;">
       <div class="task-detail-section"><label>Priority</label><select id="td-priority"><option value="high">高</option><option value="medium" selected>普通</option><option value="low">低</option></select></div>
       <div class="task-detail-section"><label>Due Date</label><input type="date" id="td-due"></div>
-      <div class="task-detail-section"><label>Tags</label><div class="tag-input-wrap" id="td-tags-wrap"><input type="text" placeholder="Enter で追加" id="td-tag-input"></div></div>
+      <div class="task-detail-section"><label>Tags</label><div class="tag-input-wrap" id="td-tags-wrap"><input type="text" placeholder="Enter で追加" id="td-tag-input"></div><div class="tag-suggestions" id="td-tag-suggestions"></div></div>
       <div class="task-detail-section"><label>Notes</label><textarea id="td-notes" placeholder="メモを追加..."></textarea></div>
       <div class="task-detail-section">
         <label>Subtasks</label>
@@ -774,7 +799,7 @@ canvas#confetti { position: fixed; inset: 0; z-index: 300; pointer-events: none;
         <div class="color-dot" data-color="blue" style="background: linear-gradient(135deg,#00d4ff,#0088ff);" title="青"></div>
         <div class="color-dot" data-color="purple" style="background: linear-gradient(135deg,#a78bfa,#7c5cfc);" title="紫"></div>
       </div>
-      <div class="tag-input-wrap" id="memo-tags-wrap" style="flex:1;"><input type="text" placeholder="タグ (Enter)" id="memo-tag-input"></div>
+      <div style="flex:1;"><div class="tag-input-wrap" id="memo-tags-wrap"><input type="text" placeholder="タグ (Enter)" id="memo-tag-input"></div><div class="tag-suggestions" id="memo-tag-suggestions"></div></div>
     </div>
     <div class="memo-tab-bar">
       <button class="memo-tab-btn active" data-memo-tab="edit" onclick="switchMemoTab('edit')">Edit</button>
@@ -805,6 +830,11 @@ canvas#confetti { position: fixed; inset: 0; z-index: 300; pointer-events: none;
         <button class="btn btn-sm btn-ghost" onclick="downloadData()">ファイル保存</button>
         <label class="btn btn-sm btn-ghost" style="cursor:pointer;">ファイル読込<input type="file" accept=".json" onchange="loadFile(event)" style="display:none;"></label>
       </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:500;">ローカル自動保存</p>
+      <div class="data-actions">
+        <span id="backup-status" style="font-size:12px;color:var(--text3);"></span>
+      </div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeDataModal()">閉じる</button></div>
   </div>
@@ -822,6 +852,22 @@ canvas#confetti { position: fixed; inset: 0; z-index: 300; pointer-events: none;
       </div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeProjectManager()">閉じる</button></div>
+  </div>
+</div>
+
+<!-- Tag Manager Modal -->
+<div class="modal-overlay" id="tag-manager-modal">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header"><input type="text" value="タグ管理" readonly style="cursor:default;"></div>
+    <div class="modal-body">
+      <div id="custom-tag-list"></div>
+      <div style="display:flex;gap:8px;margin-top:14px;align-items:center;">
+        <input type="text" id="new-tag-name" placeholder="新しいタグ名" autocomplete="off" style="flex:1;padding:10px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none;">
+        <input type="color" id="new-tag-color" value="#7c5cfc" title="タグの色" style="width:36px;height:36px;border:none;border-radius:8px;cursor:pointer;background:transparent;">
+        <button class="btn btn-sm" onclick="addCustomTag()">追加</button>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeTagManager()">閉じる</button></div>
   </div>
 </div>
 
@@ -949,6 +995,105 @@ function drawConfetti() {
 const PROJECTS_KEY = 'taskmemo_projects';
 const ACTIVE_PROJECT_KEY = 'taskmemo_active_project';
 const THEME_KEY = 'taskmemo_theme';
+const CUSTOM_TAGS_KEY = 'taskmemo_custom_tags';
+
+// ======================== Custom Tags ========================
+function loadCustomTags() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CUSTOM_TAGS_KEY)) || [];
+    // 旧形式（文字列配列）→新形式（オブジェクト配列）に自動変換
+    return raw.map(t => typeof t === 'string' ? { name: t, color: '#7c5cfc' } : t);
+  } catch { return []; }
+}
+function saveCustomTags(tags) { localStorage.setItem(CUSTOM_TAGS_KEY, JSON.stringify(tags)); autoBackup(); }
+
+function getTagColor(tagName) {
+  const t = loadCustomTags().find(t => t.name === tagName);
+  return t ? t.color : '#7c5cfc';
+}
+function tagStyle(tagName) {
+  const c = getTagColor(tagName);
+  return `background:${c}20;color:${c}`;
+}
+
+function openTagManager() {
+  document.getElementById('tag-manager-modal').classList.add('open');
+  renderCustomTagList();
+}
+function closeTagManager() { document.getElementById('tag-manager-modal').classList.remove('open'); }
+
+function addCustomTag() {
+  const input = document.getElementById('new-tag-name');
+  const colorInput = document.getElementById('new-tag-color');
+  const name = input.value.trim();
+  if (!name) return;
+  const tags = loadCustomTags();
+  if (!tags.find(t => t.name === name)) { tags.push({ name, color: colorInput.value }); saveCustomTags(tags); }
+  input.value = '';
+  renderCustomTagList();
+  renderTdTagSuggestions();
+  renderMemoTagSuggestions();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.isComposing && document.activeElement === document.getElementById('new-tag-name')) { e.preventDefault(); addCustomTag(); }
+});
+
+function removeCustomTag(idx) {
+  const tags = loadCustomTags();
+  tags.splice(idx, 1);
+  saveCustomTags(tags);
+  renderCustomTagList();
+  renderTdTagSuggestions();
+  renderMemoTagSuggestions();
+}
+
+function changeTagColor(idx, color) {
+  const tags = loadCustomTags();
+  tags[idx].color = color;
+  saveCustomTags(tags);
+  renderCustomTagList();
+}
+
+function renderCustomTagList() {
+  const list = document.getElementById('custom-tag-list');
+  const tags = loadCustomTags();
+  if (!tags.length) { list.innerHTML = '<p style="color:var(--text3);font-size:12px;text-align:center;padding:12px 0;">タグを追加してください</p>'; return; }
+  list.innerHTML = tags.map((t, i) => `<div class="custom-tag-item">
+    <span class="tag-pill" style="${tagStyle(t.name)}">${escapeHTML(t.name)}</span>
+    <input type="color" value="${t.color}" onchange="changeTagColor(${i},this.value)" style="width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;background:transparent;margin-left:auto;">
+    <button class="icon-btn delete" onclick="removeCustomTag(${i})" title="削除">&#10005;</button>
+  </div>`).join('');
+}
+
+function renderTdTagSuggestions() {
+  const el = document.getElementById('td-tag-suggestions');
+  if (!el) return;
+  const custom = loadCustomTags();
+  const used = editingTaskTags || [];
+  const available = custom.filter(t => !used.includes(t.name));
+  el.innerHTML = available.map(t => `<span class="tag-suggest-pill" style="${tagStyle(t.name)}" onclick="addTdTagFromSuggestion('${escapeHTML(t.name)}')">${escapeHTML(t.name)}</span>`).join('') +
+    ' <span class="tag-manage-btn" onclick="openTagManager()">+ 管理</span>';
+}
+
+function addTdTagFromSuggestion(tag) {
+  if (!editingTaskTags.includes(tag)) { editingTaskTags.push(tag); renderTdTags(); }
+  renderTdTagSuggestions();
+}
+
+function renderMemoTagSuggestions() {
+  const el = document.getElementById('memo-tag-suggestions');
+  if (!el) return;
+  const custom = loadCustomTags();
+  const used = editingMemoTags || [];
+  const available = custom.filter(t => !used.includes(t.name));
+  el.innerHTML = available.map(t => `<span class="tag-suggest-pill" style="${tagStyle(t.name)}" onclick="addMemoTagFromSuggestion('${escapeHTML(t.name)}')">${escapeHTML(t.name)}</span>`).join('') +
+    ' <span class="tag-manage-btn" onclick="openTagManager()">+ 管理</span>';
+}
+
+function addMemoTagFromSuggestion(tag) {
+  if (!editingMemoTags.includes(tag)) { editingMemoTags.push(tag); renderMemoTags(); }
+  renderMemoTagSuggestions();
+}
 
 function getActiveProject() { return localStorage.getItem(ACTIVE_PROJECT_KEY) || 'default'; }
 function setActiveProject(id) { localStorage.setItem(ACTIVE_PROJECT_KEY, id); }
@@ -956,14 +1101,57 @@ function getProjects() {
   try { return JSON.parse(localStorage.getItem(PROJECTS_KEY)) || [{id:'default',name:'Default'}]; }
   catch { return [{id:'default',name:'Default'}]; }
 }
-function saveProjects(p) { localStorage.setItem(PROJECTS_KEY, JSON.stringify(p)); }
+function saveProjects(p) { localStorage.setItem(PROJECTS_KEY, JSON.stringify(p)); autoBackup(); }
 
 function taskKey() { return `taskmemo_tasks_${getActiveProject()}`; }
 function memoKey() { return `taskmemo_memos_${getActiveProject()}`; }
 function loadTasks() { try { return JSON.parse(localStorage.getItem(taskKey())) || []; } catch { return []; } }
-function saveTasks(tasks) { localStorage.setItem(taskKey(), JSON.stringify(tasks)); }
+function saveTasks(tasks) { localStorage.setItem(taskKey(), JSON.stringify(tasks)); autoBackup(); }
 function loadMemos() { try { return JSON.parse(localStorage.getItem(memoKey())) || []; } catch { return []; } }
-function saveMemos(memos) { localStorage.setItem(memoKey(), JSON.stringify(memos)); }
+function saveMemos(memos) { localStorage.setItem(memoKey(), JSON.stringify(memos)); autoBackup(); }
+
+// Auto-save: ローカルサーバーに自動保存
+let _backupTimer = null;
+const _isLocalServer = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+function autoBackup() {
+  if (!_isLocalServer) return;
+  clearTimeout(_backupTimer);
+  _backupTimer = setTimeout(async () => {
+    try {
+      const allData = { savedAt: new Date().toISOString() };
+      // localStorage全体をバックアップ
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('taskmemo_')) allData[key] = localStorage.getItem(key);
+      }
+      const res = await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(allData)
+      });
+      if (res.ok) {
+        const el = document.getElementById('backup-status');
+        if (el) { el.textContent = '✔ 保存済 ' + new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}); el.style.color = 'var(--green)'; }
+      }
+    } catch (e) { console.warn('auto-save failed:', e); }
+  }, 1000);
+}
+
+async function loadFromServer() {
+  if (!_isLocalServer) return false;
+  try {
+    const res = await fetch('/api/data');
+    if (!res.ok) return false;
+    const d = await res.json();
+    if (!d.savedAt) return false;
+    // サーバーデータをlocalStorageに復元
+    for (const [key, val] of Object.entries(d)) {
+      if (key.startsWith('taskmemo_')) localStorage.setItem(key, val);
+    }
+    return true;
+  } catch { return false; }
+}
 
 // Migrate
 (function() {
@@ -1113,7 +1301,7 @@ function renderTasks() {
           <span class="priority-badge priority-${t.priority}">${{high:'HIGH',medium:'MID',low:'LOW'}[t.priority]}</span>
           <span class="task-date">${ds}</span>
           ${dl?`<span class="task-due ${dc}">${dl}</span>`:''}
-          ${(t.tags||[]).length?`<span class="task-tags">${t.tags.map(tag=>`<span class="tag-pill">${escapeHTML(tag)}</span>`).join('')}</span>`:''}
+          ${(t.tags||[]).length?`<span class="task-tags">${t.tags.map(tag=>`<span class="tag-pill" style="${tagStyle(tag)}">${escapeHTML(tag)}</span>`).join('')}</span>`:''}
         </div>
         ${st?`<div class="subtask-bar"><div class="subtask-progress"><div class="subtask-progress-fill" style="width:${sp}%"></div></div><span class="subtask-count">${sd}/${st}</span></div>`:''}
       </div>
@@ -1141,7 +1329,7 @@ function openTaskDetail(id) {
   editingTaskSubtasks=JSON.parse(JSON.stringify(t.subtasks||[])); editingTaskLinkedMemos=[...(t.linkedMemos||[])];
   document.getElementById('td-title').value=t.text; document.getElementById('td-priority').value=t.priority;
   document.getElementById('td-due').value=t.due||''; document.getElementById('td-notes').value=t.notes||'';
-  renderTdTags(); renderTdSubtasks(); renderTdLinkedMemos();
+  renderTdTags(); renderTdSubtasks(); renderTdLinkedMemos(); renderTdTagSuggestions();
   const memos=loadMemos(), sel=document.getElementById('td-link-memo-select');
   sel.innerHTML='<option value="">メモを選択...</option>'+memos.map(m=>`<option value="${m.id}">${escapeHTML(m.title)}</option>`).join('');
   document.getElementById('task-detail-modal').classList.add('open'); document.getElementById('td-title').focus();
@@ -1155,13 +1343,13 @@ function saveTaskDetail() {
   saveTasks(tasks); closeTaskDetail(); renderTasks();
 }
 
-function renderTdTags(){const w=document.getElementById('td-tags-wrap'),i=document.getElementById('td-tag-input');w.querySelectorAll('.tag-pill').forEach(e=>e.remove());editingTaskTags.forEach((tag,idx)=>{const p=document.createElement('span');p.className='tag-pill';p.innerHTML=`${escapeHTML(tag)}<span class="tag-remove" onclick="removeTdTag(${idx})">&#10005;</span>`;w.insertBefore(p,i);});}
-document.getElementById('td-tag-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const v=e.target.value.trim();if(v&&!editingTaskTags.includes(v)){editingTaskTags.push(v);renderTdTags();}e.target.value='';}});
-function removeTdTag(i){editingTaskTags.splice(i,1);renderTdTags();}
+function renderTdTags(){const w=document.getElementById('td-tags-wrap'),i=document.getElementById('td-tag-input');w.querySelectorAll('.tag-pill').forEach(e=>e.remove());editingTaskTags.forEach((tag,idx)=>{const p=document.createElement('span');p.className='tag-pill';p.style.cssText=tagStyle(tag);p.innerHTML=`${escapeHTML(tag)}<span class="tag-remove" onclick="removeTdTag(${idx})">&#10005;</span>`;w.insertBefore(p,i);});}
+document.getElementById('td-tag-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();const v=e.target.value.trim();if(v&&!editingTaskTags.includes(v)){editingTaskTags.push(v);renderTdTags();renderTdTagSuggestions();}e.target.value='';}});
+function removeTdTag(i){editingTaskTags.splice(i,1);renderTdTags();renderTdTagSuggestions();}
 
 function renderTdSubtasks(){document.getElementById('td-subtasks').innerHTML=editingTaskSubtasks.map((s,i)=>`<li class="subtask-item ${s.done?'done':''}"><button class="subtask-check" onclick="toggleSubtask(${i})">${s.done?'&#10003;':''}</button><span class="subtask-text">${escapeHTML(s.text)}</span><button class="subtask-remove" onclick="removeSubtask(${i})">&#10005;</button></li>`).join('');}
 function addSubtask(){const i=document.getElementById('td-subtask-input'),t=i.value.trim();if(!t)return;editingTaskSubtasks.push({text:t,done:false});i.value='';renderTdSubtasks();}
-document.getElementById('td-subtask-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addSubtask();}});
+document.getElementById('td-subtask-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();addSubtask();}});
 function toggleSubtask(i){editingTaskSubtasks[i].done=!editingTaskSubtasks[i].done;renderTdSubtasks();}
 function removeSubtask(i){editingTaskSubtasks.splice(i,1);renderTdSubtasks();}
 
@@ -1177,7 +1365,7 @@ function openMemoEditor(id) {
   const modal=document.getElementById('memo-modal'), ti=document.getElementById('memo-title'), bo=document.getElementById('memo-body');
   if(id){const m=loadMemos().find(m=>m.id===id);if(m){editingMemoId=id;ti.value=m.title;bo.value=m.body;selectedColor=m.color||'';editingMemoTags=[...(m.tags||[])];}}
   else{editingMemoId=null;ti.value='';bo.value='';selectedColor='';editingMemoTags=[];}
-  renderMemoTags(); updateColorPicker(); switchMemoTab('edit'); modal.classList.add('open'); ti.focus();
+  renderMemoTags(); renderMemoTagSuggestions(); updateColorPicker(); switchMemoTab('edit'); modal.classList.add('open'); ti.focus();
 }
 function closeMemoEditor(){document.getElementById('memo-modal').classList.remove('open');editingMemoId=null;}
 function saveMemo() {
@@ -1205,16 +1393,16 @@ function renderMemos() {
       <button class="icon-btn delete delete-memo" onclick="deleteMemo(${m.id},event)">&#10005;</button>
       <div class="memo-card-title">${escapeHTML(m.title)}</div>
       <div class="memo-card-body">${escapeHTML(p)}</div>
-      <div class="memo-card-footer"><span class="memo-card-date">${ds}</span><span class="memo-card-tags">${(m.tags||[]).map(t=>`<span class="tag-pill">${escapeHTML(t)}</span>`).join('')}</span></div>
+      <div class="memo-card-footer"><span class="memo-card-date">${ds}</span><span class="memo-card-tags">${(m.tags||[]).map(t=>`<span class="tag-pill" style="${tagStyle(t)}">${escapeHTML(t)}</span>`).join('')}</span></div>
     </div>`;}).join('');
 }
 
-function renderMemoTags(){const w=document.getElementById('memo-tags-wrap'),i=document.getElementById('memo-tag-input');w.querySelectorAll('.tag-pill').forEach(e=>e.remove());editingMemoTags.forEach((tag,idx)=>{const p=document.createElement('span');p.className='tag-pill';p.innerHTML=`${escapeHTML(tag)}<span class="tag-remove" onclick="removeMemoTag(${idx})">&#10005;</span>`;w.insertBefore(p,i);});}
-document.getElementById('memo-tag-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const v=e.target.value.trim();if(v&&!editingMemoTags.includes(v)){editingMemoTags.push(v);renderMemoTags();}e.target.value='';}});
-function removeMemoTag(i){editingMemoTags.splice(i,1);renderMemoTags();}
+function renderMemoTags(){const w=document.getElementById('memo-tags-wrap'),i=document.getElementById('memo-tag-input');w.querySelectorAll('.tag-pill').forEach(e=>e.remove());editingMemoTags.forEach((tag,idx)=>{const p=document.createElement('span');p.className='tag-pill';p.style.cssText=tagStyle(tag);p.innerHTML=`${escapeHTML(tag)}<span class="tag-remove" onclick="removeMemoTag(${idx})">&#10005;</span>`;w.insertBefore(p,i);});}
+document.getElementById('memo-tag-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();const v=e.target.value.trim();if(v&&!editingMemoTags.includes(v)){editingMemoTags.push(v);renderMemoTags();renderMemoTagSuggestions();}e.target.value='';}});
+function removeMemoTag(i){editingMemoTags.splice(i,1);renderMemoTags();renderMemoTagSuggestions();}
 
-document.getElementById('memo-tag-filter-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const v=e.target.value.trim();if(v&&!memoFilterTags.includes(v)){memoFilterTags.push(v);renderMemoFilterTags();renderMemos();}e.target.value='';}});
-function renderMemoFilterTags(){const w=document.getElementById('memo-tag-filter'),i=document.getElementById('memo-tag-filter-input');w.querySelectorAll('.tag-pill').forEach(e=>e.remove());memoFilterTags.forEach((tag,idx)=>{const p=document.createElement('span');p.className='tag-pill';p.innerHTML=`${escapeHTML(tag)}<span class="tag-remove" onclick="removeMemoFilterTag(${idx})">&#10005;</span>`;w.insertBefore(p,i);});}
+document.getElementById('memo-tag-filter-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();const v=e.target.value.trim();if(v&&!memoFilterTags.includes(v)){memoFilterTags.push(v);renderMemoFilterTags();renderMemos();}e.target.value='';}});
+function renderMemoFilterTags(){const w=document.getElementById('memo-tag-filter'),i=document.getElementById('memo-tag-filter-input');w.querySelectorAll('.tag-pill').forEach(e=>e.remove());memoFilterTags.forEach((tag,idx)=>{const p=document.createElement('span');p.className='tag-pill';p.style.cssText=tagStyle(tag);p.innerHTML=`${escapeHTML(tag)}<span class="tag-remove" onclick="removeMemoFilterTag(${idx})">&#10005;</span>`;w.insertBefore(p,i);});}
 function removeMemoFilterTag(i){memoFilterTags.splice(i,1);renderMemoFilterTags();renderMemos();}
 
 function updateColorPicker(){document.querySelectorAll('.color-dot').forEach(d=>d.classList.toggle('active',d.dataset.color===selectedColor));}
@@ -1289,7 +1477,7 @@ document.querySelectorAll('.filter-chip').forEach(chip=>chip.addEventListener('c
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));chip.classList.add('active');
   currentFilter=chip.dataset.filter; renderTasks();
 }));
-document.getElementById('task-input').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+document.getElementById('task-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing)addTask();});
 document.getElementById('memo-search').addEventListener('input',renderMemos);
 document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 document.addEventListener('keydown',e=>{
@@ -1308,7 +1496,18 @@ document.addEventListener('keydown',e=>{
 function escapeHTML(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
 // ======================== Init ========================
-initTheme(); renderProjectSelect(); renderTasks(); renderMemos(); checkReminders();
+(async function init() {
+  initTheme();
+  const loaded = await loadFromServer();
+  renderProjectSelect(); renderTasks(); renderMemos(); checkReminders();
+  if (_isLocalServer) {
+    const el = document.getElementById('backup-status');
+    if (el) { el.textContent = loaded ? '✔ サーバーから復元済' : '✔ 自動保存ON'; el.style.color = 'var(--green)'; }
+  } else {
+    const el = document.getElementById('backup-status');
+    if (el) { el.textContent = 'サーバー未接続（python3 server.py で起動）'; el.style.color = 'var(--orange)'; }
+  }
+})();
 setInterval(checkReminders, 30*60*1000);
 </script>
 </body>
