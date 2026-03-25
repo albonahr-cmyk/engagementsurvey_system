@@ -2899,7 +2899,6 @@ function doLogin() {
           renderDashboard();
           renderIdList();
           renderEmployeeList();
-          syncLocalBizIQToCloud();
         });
       });
       return;
@@ -4919,11 +4918,12 @@ function switchMasterTab(name, btn) {
       Object.keys(employees).forEach(k => delete employees[k]);
       emps.forEach(e => { employees[e.empId] = e; });
       loadAllSettingsFromCloud().then(() => {
+        reloadAllSettings();
         rebuildEmpData();
         renderDashboard();
         renderIdList();
         renderEmployeeList();
-        syncLocalBizIQToCloud();
+        // syncLocalBizIQToCloudは復元直後に実行するとクラウドデータを空で上書きするため削除
       });
     });
   } else if (_sessionRole === 'employee' && _sessionEmpId) {
