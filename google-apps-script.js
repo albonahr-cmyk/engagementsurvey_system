@@ -156,10 +156,27 @@ function jsonResponse(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// ===== Vercel APIからメール送信対象の社員データを取得 =====
+function fetchEmployeesFromAPI() {
+  var props = PropertiesService.getScriptProperties();
+  var apiBase = props.getProperty('VERCEL_API_BASE') || 'https://albona-survey.vercel.app';
+  var secret = props.getProperty('MAIL_API_SECRET') || '';
+
+  var url = apiBase + '/api/mail-employees?secret=' + encodeURIComponent(secret);
+  var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  var data = JSON.parse(response.getContentText());
+  if (!data.ok || !data.data) return [];
+  return data.data;
+}
+
 // ===== メール一斉送信 =====
-// GASトリガーまたはWebリクエストから呼ばれる
+// Notion連動: Vercel API経由で社員データを取得してメール送信
 function handleSendMails(ss, data) {
   try {
+    // Notion DBから社員リストを取得
+    var empList = fetchEmployeesFromAPI();
+    if (empList.length === 0) return jsonResponse({ error: 'メールアドレスが登録されている社員がいません' });
+
     // 設定を取得
     var settingsSheet = ss.getSheetByName('settings');
     var mailConfig = null;
@@ -178,25 +195,6 @@ function handleSendMails(ss, data) {
 
     var subject = (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
     var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 回答はこちら\nhttps://albona-survey.vercel.app\n\nログインID: {empId}\n\nご協力よろしくお願いいたします。';
-
-    // 社員リスト: dataパラメータで渡された場合はそちらを使用、なければemployeesシート
-    var empList = [];
-    if (data && data.employees) {
-      empList = (typeof data.employees === 'string') ? JSON.parse(data.employees) : data.employees;
-    } else {
-      var empSheet = ss.getSheetByName('employees');
-      if (empSheet) {
-        var empData = empSheet.getDataRange().getValues();
-        var empHeader = empData[0];
-        for (var i = 1; i < empData.length; i++) {
-          var obj = {};
-          for (var j = 0; j < empHeader.length; j++) obj[empHeader[j]] = empData[i][j];
-          if (obj.email) empList.push(obj);
-        }
-      }
-    }
-
-    if (empList.length === 0) return jsonResponse({ error: 'メール送信先がありません' });
 
     // 今月の回答済み社員をチェック
     var now = new Date();
@@ -230,20 +228,6 @@ function handleSendMails(ss, data) {
       } catch(ex) {
         errors.push(emp.empId + ': ' + ex.message);
       }
-    }
-
-    // employeesシートも更新（トリガー用に同期）
-    var empSheet = ss.getSheetByName('employees');
-    if (!empSheet) empSheet = ss.insertSheet('employees');
-    if (data && data.employees && empList.length > 0) {
-      var headers = ['empId', 'name', 'dept', 'email'];
-      var rows = [headers];
-      for (var i = 0; i < empList.length; i++) {
-        rows.push([empList[i].empId || '', empList[i].name || '', empList[i].dept || '', empList[i].email || '']);
-      }
-      empSheet.clear();
-      empSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
-      empSheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#f0f0f0');
     }
 
     return jsonResponse({ ok: true, sent: sentCount, errors: errors });
@@ -321,55 +305,5 @@ function setupSheet() {
   headers.push('freeComment', 'q35', 'q36');
 
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground('#f0f0f0');
-
-  // employeesシート（メール送信用の社員リスト）
-  let empSheet = ss.getSheetByName('employees');
-  if (!empSheet) {
-    empSheet = ss.insertSheet('employees');
-    empSheet.getRange(1, 1, 1, 4).setValues([['empId', 'name', 'dept', 'email']]).setFontWeight('bold').setBackground('#f0f0f0');
-  }
-
-  SpreadsheetApp.getUi().alert('セットアップ完了！\n\nemployeesシートにメール送信先の社員情報を登録してください。\n\n月次トリガー設定: setupMonthlyTrigger() を実行してください。');
-}
-
-// 社員リスト同期（Vercel APIから取得してスプレッドシートに反映）
-function syncEmployeesFromAPI() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var props = PropertiesService.getScriptProperties();
-  var apiBase = props.getProperty('VERCEL_API_BASE');
-  var token = props.getProperty('API_TOKEN');
-
-  if (!apiBase) {
-    SpreadsheetApp.getUi().alert('スクリプトプロパティにVERCEL_API_BASEを設定してください');
-    return;
-  }
-
-  var options = { headers: {} };
-  if (token) options.headers['Authorization'] = 'Bearer ' + token;
-
-  var response = UrlFetchApp.fetch(apiBase + '/api/employees', options);
-  var data = JSON.parse(response.getContentText());
-  if (!data.ok || !data.data) {
-    SpreadsheetApp.getUi().alert('社員データの取得に失敗しました');
-    return;
-  }
-
-  var empSheet = ss.getSheetByName('employees');
-  if (!empSheet) {
-    empSheet = ss.insertSheet('employees');
-  }
-
-  // ヘッダーとデータを書き込み
-  var headers = ['empId', 'name', 'dept', 'email'];
-  var rows = [headers];
-  for (var i = 0; i < data.data.length; i++) {
-    var emp = data.data[i];
-    rows.push([emp.empId || '', emp.name || '', emp.dept || '', emp.email || '']);
-  }
-
-  empSheet.clear();
-  empSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
-  empSheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#f0f0f0');
-
-  SpreadsheetApp.getUi().alert(data.data.length + '名の社員データを同期しました');
+  SpreadsheetApp.getUi().alert('セットアップ完了！\n\n社員データはNotion DBから自動取得されます。');
 }
