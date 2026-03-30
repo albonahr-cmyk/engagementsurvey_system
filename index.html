@@ -1347,6 +1347,7 @@ ALBONA 人事部</textarea>
 
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button class="btn btn-secondary" onclick="testSendMail()">📧 テスト送信（自分宛）</button>
+        <button class="btn btn-primary" onclick="sendMailsNow()">📨 今すぐ全社員に送信</button>
         <span id="mail-test-msg" style="font-size:13px;font-weight:600;display:none"></span>
       </div>
 
@@ -3680,6 +3681,33 @@ function testSendMail() {
     delete window[cbName];
     document.body.removeChild(script);
   };
+  document.body.appendChild(script);
+}
+
+function sendMailsNow() {
+  const withEmail = Object.entries(employees).filter(([,e]) => e.email);
+  if (withEmail.length === 0) { showToast('⚠️ メールアドレスが登録されている社員がいません'); return; }
+  if (!confirm(`メールアドレス登録済みの社員（${withEmail.length}名）にサーベイ案内メールを送信します。\n\n※ 今月の回答済み社員はスキップされます。\n\nよろしいですか？`)) return;
+  const msgEl = document.getElementById('mail-test-msg');
+  msgEl.style.display = 'inline';
+  msgEl.style.color = '#6366f1';
+  msgEl.textContent = '送信中...';
+  const gasUrl = localStorage.getItem('es_gas_url');
+  if (!gasUrl) { msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ GAS URLが未設定です'; return; }
+  const cbName = '_gasSend_' + Date.now();
+  window[cbName] = function(data) {
+    if (data.ok) {
+      msgEl.style.color = '#16a34a';
+      msgEl.textContent = '✅ ' + data.sent + '名に送信しました' + (data.errors && data.errors.length > 0 ? '（エラー: ' + data.errors.length + '件）' : '');
+    } else {
+      msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ ' + (data.error || '送信失敗');
+    }
+    setTimeout(() => msgEl.style.display = 'none', 8000);
+    delete window[cbName];
+  };
+  const script = document.createElement('script');
+  script.src = gasUrl + '?action=sendMails&callback=' + cbName;
+  script.onerror = function() { msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ 通信エラー'; setTimeout(() => msgEl.style.display = 'none', 5000); delete window[cbName]; };
   document.body.appendChild(script);
 }
 

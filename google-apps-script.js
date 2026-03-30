@@ -23,7 +23,7 @@ function doGet(e) {
     if (action === 'check')        return handleCheck(ss, data);
     if (action === 'saveSettings') return handleSaveSettings(ss, data);
     if (action === 'loadSettings') return handleLoadSettings(ss, data);
-    if (action === 'sendMails')    return handleSendMails(ss);
+    if (action === 'sendMails')    return handleSendMails(ss, data);
     if (action === 'testMail')     return handleTestMail(ss, data);
 
     return jsonResponse({ error: 'unknown action: ' + action });
@@ -33,7 +33,16 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  // 後方互換: POSTが来てもdoGetと同じ処理
+  // POSTデータをパース
+  if (e.postData && e.postData.contents) {
+    try {
+      var postBody = JSON.parse(e.postData.contents);
+      // actionをパラメータに設定
+      if (!e.parameter.action && postBody.action) e.parameter.action = postBody.action;
+      // postBodyをdataとして渡す
+      e.parameter.data = JSON.stringify(postBody);
+    } catch(ex) {}
+  }
   return doGet(e);
 }
 
@@ -149,21 +158,20 @@ function jsonResponse(obj) {
 
 // ===== メール一斉送信 =====
 // GASトリガーまたはWebリクエストから呼ばれる
-function handleSendMails(ss) {
+function handleSendMails(ss, data) {
   try {
-    // 社員リスト（emailシート）を取得
-    var empSheet = ss.getSheetByName('employees');
-    if (!empSheet) return jsonResponse({ error: 'employeesシートが見つかりません' });
-
-    // メール設定を取得
+    // 設定を取得
     var settingsSheet = ss.getSheetByName('settings');
     var mailConfig = null;
+    var deadline = '';
     if (settingsSheet) {
       var settingsData = settingsSheet.getDataRange().getValues();
       for (var i = 0; i < settingsData.length; i++) {
         if (settingsData[i][0] === 'es_mail_schedule') {
           try { mailConfig = JSON.parse(settingsData[i][1]); } catch(ex) {}
-          break;
+        }
+        if (settingsData[i][0] === 'es_survey_period') {
+          try { var period = JSON.parse(settingsData[i][1]); if (period.end) deadline = period.end; } catch(ex) {}
         }
       }
     }
@@ -171,33 +179,24 @@ function handleSendMails(ss) {
     var subject = (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
     var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 回答はこちら\nhttps://albona-survey.vercel.app\n\nログインID: {empId}\n\nご協力よろしくお願いいたします。';
 
-    // 回答期間（deadline）を取得
-    var deadline = '';
-    if (settingsSheet) {
-      var allSettings = settingsSheet.getDataRange().getValues();
-      for (var i = 0; i < allSettings.length; i++) {
-        if (allSettings[i][0] === 'es_survey_period') {
-          try {
-            var period = JSON.parse(allSettings[i][1]);
-            if (period.end) deadline = period.end;
-          } catch(ex) {}
-          break;
+    // 社員リスト: dataパラメータで渡された場合はそちらを使用、なければemployeesシート
+    var empList = [];
+    if (data && data.employees) {
+      empList = (typeof data.employees === 'string') ? JSON.parse(data.employees) : data.employees;
+    } else {
+      var empSheet = ss.getSheetByName('employees');
+      if (empSheet) {
+        var empData = empSheet.getDataRange().getValues();
+        var empHeader = empData[0];
+        for (var i = 1; i < empData.length; i++) {
+          var obj = {};
+          for (var j = 0; j < empHeader.length; j++) obj[empHeader[j]] = empData[i][j];
+          if (obj.email) empList.push(obj);
         }
       }
     }
 
-    // 社員データ取得
-    var empData = empSheet.getDataRange().getValues();
-    var empHeader = empData[0];
-    var nameIdx = empHeader.indexOf('name');
-    var empIdIdx = empHeader.indexOf('empId');
-    var emailIdx = empHeader.indexOf('email');
-    var deptIdx = empHeader.indexOf('dept');
-
-    if (emailIdx === -1) return jsonResponse({ error: 'employeesシートにemail列がありません' });
-
-    var sentCount = 0;
-    var errors = [];
+    if (empList.length === 0) return jsonResponse({ error: 'メール送信先がありません' });
 
     // 今月の回答済み社員をチェック
     var now = new Date();
@@ -211,27 +210,40 @@ function handleSendMails(ss) {
       }
     }
 
-    for (var i = 1; i < empData.length; i++) {
-      var email = empData[i][emailIdx];
-      var empId = empData[i][empIdIdx];
-      var name = empData[i][nameIdx] || '';
-      var dept = deptIdx >= 0 ? (empData[i][deptIdx] || '') : '';
+    var sentCount = 0;
+    var errors = [];
 
-      if (!email || !empId) continue;
-      if (submittedIds[empId]) continue; // 回答済みはスキップ
+    for (var i = 0; i < empList.length; i++) {
+      var emp = empList[i];
+      if (!emp.email || !emp.empId) continue;
+      if (submittedIds[emp.empId]) continue;
 
       var body = bodyTemplate
-        .replace(/\{name\}/g, name)
-        .replace(/\{empId\}/g, empId)
-        .replace(/\{dept\}/g, dept)
+        .replace(/\{name\}/g, emp.name || '')
+        .replace(/\{empId\}/g, emp.empId)
+        .replace(/\{dept\}/g, emp.dept || '')
         .replace(/\{deadline\}/g, deadline || '今月末');
 
       try {
-        GmailApp.sendEmail(email, subject, body);
+        GmailApp.sendEmail(emp.email, subject, body);
         sentCount++;
       } catch(ex) {
-        errors.push(empId + ': ' + ex.message);
+        errors.push(emp.empId + ': ' + ex.message);
       }
+    }
+
+    // employeesシートも更新（トリガー用に同期）
+    var empSheet = ss.getSheetByName('employees');
+    if (!empSheet) empSheet = ss.insertSheet('employees');
+    if (data && data.employees && empList.length > 0) {
+      var headers = ['empId', 'name', 'dept', 'email'];
+      var rows = [headers];
+      for (var i = 0; i < empList.length; i++) {
+        rows.push([empList[i].empId || '', empList[i].name || '', empList[i].dept || '', empList[i].email || '']);
+      }
+      empSheet.clear();
+      empSheet.getRange(1, 1, rows.length, headers.length).setValues(rows);
+      empSheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#f0f0f0');
     }
 
     return jsonResponse({ ok: true, sent: sentCount, errors: errors });
