@@ -7,9 +7,9 @@ module.exports = async function handler(req, res) {
 
   // GASからの呼び出し用: シークレットキーで認証
   const secret = req.headers['x-mail-secret'] || req.query.secret || '';
-  const envSecret = process.env.MAIL_API_SECRET || '';
+  const envSecret = (process.env.MAIL_API_SECRET || '').trim();
   if (!envSecret || secret !== envSecret) {
-    return res.status(403).json({ ok: false, error: 'forbidden', debug: { hasEnv: !!envSecret, secretLen: secret.length, envLen: envSecret.length } });
+    return res.status(403).json({ ok: false, error: 'forbidden' });
   }
 
   try {
