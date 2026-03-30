@@ -158,7 +158,7 @@ function jsonResponse(obj) {
 
 // ===== Vercel APIからメール送信対象の社員データを取得 =====
 function fetchEmployeesFromAPI() {
-  var apiBase = 'https://albona-survey.vercel.app';
+  var apiBase = 'https://engagementsurvey-system-nvlq.vercel.app';
   var secret = '7b43146c5b54e222c6fa451d5ed7f074';
 
   var url = apiBase + '/api/mail-employees?secret=' + encodeURIComponent(secret);
@@ -193,7 +193,7 @@ function handleSendMails(ss, data) {
     }
 
     var subject = (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
-    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 回答はこちら\nhttps://albona-survey.vercel.app\n\nログインID: {empId}\n\nご協力よろしくお願いいたします。';
+    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 回答はこちら\nhttps://engagementsurvey-system-nvlq.vercel.app\n\nログインID: {empId}\n\nご協力よろしくお願いいたします。';
 
     // 今月の回答済み社員をチェック
     var now = new Date();
@@ -240,7 +240,7 @@ function handleTestMail(ss, data) {
   try {
     var testTo = 'albonahr@al-bo.io';
     var subject = '[テスト] 【ALBONA】エンゲージメントサーベイ案内';
-    var body = 'テストユーザー さん\n\nお疲れ様です。\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n所要時間は約3〜5分です。\n\n▼ 回答はこちら\nhttps://albona-survey.vercel.app\n\nログインID: EMP000\n\nご協力よろしくお願いいたします。\n\nALBONA 人事部';
+    var body = 'テストユーザー さん\n\nお疲れ様です。\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n所要時間は約3〜5分です。\n\n▼ 回答はこちら\nhttps://engagementsurvey-system-nvlq.vercel.app\n\nログインID: EMP000\n\nご協力よろしくお願いいたします。\n\nALBONA 人事部';
 
     GmailApp.sendEmail(testTo, subject, body);
     return jsonResponse({ ok: true, sentTo: testTo });
