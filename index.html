@@ -2089,18 +2089,20 @@ function getMonthData(month) {
   const cats = {};
   catKeys.forEach(k => {
     const scores = Object.values(empData).map(e => e[month]?.[k] || 0).filter(v => v > 0);
-    cats[k] = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+    cats[k] = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
   });
   const prevCats = prev ? (() => {
     const pc = {};
     catKeys.forEach(k => {
       const scores = Object.values(empData).map(e => e[prev]?.[k] || 0).filter(v => v > 0);
-      pc[k] = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+      pc[k] = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
     });
     return pc;
   })() : null;
-  const total = Math.round(Object.values(cats).reduce((a,b) => a+b, 0) / catKeys.length);
-  const prevTotal = prevCats ? Math.round(Object.values(prevCats).reduce((a,b) => a+b, 0) / catKeys.length) : null;
+  const validCats = Object.values(cats).filter(v => v > 0);
+  const total = validCats.length > 0 ? Math.round(validCats.reduce((a,b) => a+b, 0) / validCats.length) : 0;
+  const prevValidCats = prevCats ? Object.values(prevCats).filter(v => v > 0) : [];
+  const prevTotal = prevCats && prevValidCats.length > 0 ? Math.round(prevValidCats.reduce((a,b) => a+b, 0) / prevValidCats.length) : null;
   return { cats, prevCats, total, prevTotal };
 }
 
@@ -2108,14 +2110,21 @@ function getMonthData(month) {
 function renderDashboard() {
   const month = document.getElementById('month-select').value;
   const { cats, prevCats, total, prevTotal } = getMonthData(month);
-  const respRate = { '2025-10':80, '2025-11':82, '2025-12':84, '2026-01':85, '2026-02':82, '2026-03':87 };
-  const respCount = Math.round(200 * respRate[month] / 100);
-  const prevRate = months[months.indexOf(month)-1] ? respRate[months[months.indexOf(month)-1]] : null;
+
+  // 実データから回答数・回答率を計算
+  const totalEmps = Object.keys(employees).filter(id => employees[id].role !== 'admin').length;
+  const submittedThisMonth = getSubmittedIds(month);
+  const respCount = submittedThisMonth.length;
+  const currentRespRate = totalEmps > 0 ? Math.round(respCount / totalEmps * 100) : 0;
+
+  const prevMonth = months[months.indexOf(month) - 1];
+  const prevSubmitted = prevMonth ? getSubmittedIds(prevMonth) : [];
+  const prevRespRate = prevMonth && totalEmps > 0 ? Math.round(prevSubmitted.length / totalEmps * 100) : null;
 
   // KPI
   const kpi = document.getElementById('kpi-grid');
   const totalDiff = prevTotal !== null ? total - prevTotal : null;
-  const rateDiff = prevRate !== null ? respRate[month] - prevRate : null;
+  const rateDiff = prevRespRate !== null ? currentRespRate - prevRespRate : null;
 
   // アラートカウント
   let alertCount = 0;
@@ -2126,12 +2135,12 @@ function renderDashboard() {
   }
 
   kpi.innerHTML = `
-    <div class="stat-card"><div class="label">回答率</div><div class="value">${respRate[month]}%</div>
+    <div class="stat-card"><div class="label">回答率</div><div class="value">${currentRespRate}%</div>
       <div class="sub ${rateDiff > 0 ? 'up' : rateDiff < 0 ? 'down' : 'neutral'}">${rateDiff !== null ? (rateDiff > 0 ? '↑' : '↓') + ' 前月比 ' + (rateDiff > 0 ? '+' : '') + rateDiff + '%' : '初回データ'}</div></div>
-    <div class="stat-card"><div class="label">総合スコア</div><div class="value">${total}点</div>
-      <div class="sub ${totalDiff > 0 ? 'up' : totalDiff < 0 ? 'down' : 'neutral'}">${totalDiff !== null ? (totalDiff > 0 ? '↑ +' : '↓ ') + totalDiff + '点' : '初回データ'}</div></div>
+    <div class="stat-card"><div class="label">総合スコア</div><div class="value">${isNaN(total) ? '―' : total + '点'}</div>
+      <div class="sub ${totalDiff > 0 ? 'up' : totalDiff < 0 ? 'down' : 'neutral'}">${totalDiff !== null && !isNaN(totalDiff) ? (totalDiff > 0 ? '↑ +' : '↓ ') + totalDiff + '点' : '初回データ'}</div></div>
     <div class="stat-card"><div class="label">回答人数</div><div class="value">${respCount}名</div>
-      <div class="sub neutral">対象 200名</div></div>
+      <div class="sub neutral">対象 ${totalEmps}名</div></div>
     <div class="stat-card"><div class="label">⚠️ アラート件数</div><div class="value" style="color:${alertCount > 0 ? '#dc2626' : '#16a34a'}">${alertCount}件</div>
       <div class="sub ${alertCount > 0 ? 'down' : 'up'}">${alertCount > 0 ? '要対応あり' : '問題なし'}</div></div>
   `;
@@ -2147,7 +2156,7 @@ function renderDashboard() {
 
     unsubSection.style.display = 'block';
     document.getElementById('unsubmitted-count-label').textContent =
-      `（デモ社員 ${submittedIds.length}/${Object.keys(employees).length}名 回答済み）`;
+      `（${submittedIds.length}/${Object.keys(employees).filter(id => employees[id].role !== 'admin').length}名 回答済み）`;
 
     if (unsubmitted.length === 0) {
       document.getElementById('unsubmitted-list').innerHTML =
