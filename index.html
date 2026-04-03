@@ -3081,7 +3081,9 @@ function renderPage() {
         <div class="rating-scale">
           ${[1,2,3,4,5,6,7].map(n => `<button class="rating-btn ${saved===n?'selected':''}" data-val="${n}" onclick="selectRating('${q.id}',${n},this)">${n}</button>`).join('')}
         </div>
-        <div class="rating-labels"><span>全くそう思わない</span><span>強くそう思う</span></div>`;
+        ${q.id === 'q10'
+          ? `<div class="rating-labels"><span>とてもつらい</span><span>決してつらくはない</span></div>`
+          : `<div class="rating-labels"><span>全くそう思わない</span><span>強くそう思う</span></div>`}`;
     } else {
       block.innerHTML = `
         <div class="question">${q.text}</div>
