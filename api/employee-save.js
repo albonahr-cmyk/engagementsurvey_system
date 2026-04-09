@@ -69,6 +69,6 @@ module.exports = async function handler(req, res) {
     return res.json({ ok: true });
   } catch (e) {
     console.error('employee-save error:', e);
-    return res.status(500).json({ ok: false, error: 'internal_error' });
+    return res.status(500).json({ ok: false, error: 'internal_error', detail: e.message });
   }
 };
