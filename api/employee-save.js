@@ -8,7 +8,7 @@ module.exports = async function handler(req, res) {
 
   try {
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
-    const { empId, name, dept, role, iq, battlePower, mbti, email, password } = req.body;
+    const { empId, name, dept, role, iq, battlePower, mbti, email, password, mailExcluded } = req.body;
     if (!empId || typeof empId !== 'string') return res.status(400).json({ ok: false, error: 'empId required' });
     if (empId.length > 20) return res.status(400).json({ ok: false, error: 'empId too long' });
 
@@ -31,6 +31,7 @@ module.exports = async function handler(req, res) {
     if (battlePower !== undefined) props.battlePower = P.num(Number(battlePower) || 0);
     if (mbti !== undefined) props.mbti = P.rich(mbti);
     if (email !== undefined) props.email = P.rich(email);
+    if (mailExcluded !== undefined) props.mailExcluded = P.checkbox(mailExcluded);
     // パスワードはEmployees DBに平文保存しない（Auth DBにハッシュのみ保存）
 
     if (existing.length > 0) {

@@ -16,7 +16,10 @@ module.exports = async function handler(req, res) {
 
   try {
     const results = await queryDB('employees', {
-      property: 'isActive', checkbox: { equals: true },
+      and: [
+        { property: 'isActive', checkbox: { equals: true } },
+        { property: 'mailExcluded', checkbox: { equals: false } },
+      ],
     });
 
     const data = results

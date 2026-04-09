@@ -3505,6 +3505,14 @@ function renderIdList() {
       <td style="font-size:12px;color:#475569">${emp.email ? `<span style="font-family:monospace">${sanitize(emp.email)}</span>` : '<span style="color:#94a3b8">未登録</span>'}</td>
       <td style="font-family:'Inter',monospace;font-size:13px;font-weight:500;color:#6366f1">${emp.hasPassword ? '<span style="color:#16a34a">設定済</span>' : '<span style="color:#94a3b8">未設定</span>'}</td>
       <td style="color:#94a3b8;font-size:13px">${issuedAt}</td>
+      <td style="text-align:center">
+        <label style="position:relative;display:inline-block;width:40px;height:22px;cursor:pointer">
+          <input type="checkbox" ${emp.mailExcluded ? 'checked' : ''} onchange="toggleMailExcluded('${id}', this.checked)" style="opacity:0;width:0;height:0">
+          <span style="position:absolute;inset:0;background:${emp.mailExcluded ? '#ef4444' : '#d1d5db'};border-radius:11px;transition:.2s"></span>
+          <span style="position:absolute;top:2px;left:${emp.mailExcluded ? '20px' : '2px'};width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+        </label>
+        <div style="font-size:10px;color:${emp.mailExcluded ? '#ef4444' : '#94a3b8'};margin-top:2px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
+      </td>
       <td>
         <button class="copy-btn" onclick="copyIdToClipboard('${id}')">📋 ID</button>
         <button class="copy-btn" onclick="promptChangeEmail('${id}')" style="margin-left:6px">✉️ メール</button>
@@ -3514,7 +3522,7 @@ function renderIdList() {
     </tr>`;
   });
   table.innerHTML = `<table>
-    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>発行日</th><th>操作</th></tr></thead>
+    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>発行日</th><th>配信除外</th><th>操作</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
 }
@@ -3536,6 +3544,19 @@ function deleteEmployee(id) {
     renderEmployeeList();
     initBizIQMasterUI();
     showToast('✅ 削除しました');
+  });
+}
+
+function toggleMailExcluded(empId, excluded) {
+  apiPost('employee-save', { empId, mailExcluded: excluded }).then(res => {
+    if (res?.ok) {
+      employees[empId].mailExcluded = excluded;
+      renderIdList();
+      showToast(excluded ? '📧 配信除外に設定しました' : '📧 配信対象に戻しました');
+    } else {
+      showToast('⚠️ 更新に失敗しました');
+      renderIdList();
+    }
   });
 }
 
@@ -3719,8 +3740,11 @@ function testSendMail() {
 
 function sendMailsNow() {
   const withEmail = Object.entries(employees).filter(([,e]) => e.email);
-  if (withEmail.length === 0) { showToast('⚠️ メールアドレスが登録されている社員がいません'); return; }
-  if (!confirm(`メールアドレス登録済みの社員（${withEmail.length}名）にサーベイ案内メールを送信します。\n\n※ 今月の回答済み社員はスキップされます。\n\nよろしいですか？`)) return;
+  const excluded = withEmail.filter(([,e]) => e.mailExcluded);
+  const targets = withEmail.filter(([,e]) => !e.mailExcluded);
+  if (targets.length === 0) { showToast('⚠️ 配信対象の社員がいません'); return; }
+  const excludeNote = excluded.length > 0 ? `\n（配信除外: ${excluded.length}名）` : '';
+  if (!confirm(`配信対象の社員（${targets.length}名）にサーベイ案内メールを送信します。${excludeNote}\n\n※ 今月の回答済み社員はスキップされます。\n\nよろしいですか？`)) return;
   const gasUrl = localStorage.getItem('es_gas_url');
   if (!gasUrl) { showToast('❌ GAS URLが未設定です'); return; }
   // GASのsendMailsを新しいタブで実行（CORS回避）
