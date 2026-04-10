@@ -1397,7 +1397,7 @@ ALBONA 人事部</textarea>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <label style="font-size:13px;font-weight:600;color:#475569">対象月：</label>
-        <select id="action-month-select" onchange="renderActionPlan()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit"></select>
+        <select id="action-month-select" onchange="renderActionPlan()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;min-width:140px"></select>
       </div>
     </div>
     <!-- 2ペインレイアウト -->
@@ -2878,7 +2878,7 @@ function switchTab(name, btn) {
   if (name === 'idmgmt') { renderIdList(); initBizIQMasterUI(); }
   if (name === 'logic') renderLogicTab();
   if (name === 'settings') renderSettingsTab();
-  if (name === 'actions') renderActionPlan();
+  if (name === 'actions') { initMonthSelects(); renderActionPlan(); }
 }
 
 function switchTabById(name) {
