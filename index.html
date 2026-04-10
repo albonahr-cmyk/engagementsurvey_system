@@ -839,7 +839,7 @@ if (typeof pdfjsLib !== 'undefined') {
 <div id="screen-survey" class="screen" data-1p-ignore>
   <div class="card" data-1p-ignore>
     <div class="survey-header">
-      <h2>2026年3月 エンゲージメントサーベイ</h2>
+      <h2 id="survey-title">エンゲージメントサーベイ</h2>
       <p id="survey-user-name"></p>
       <div class="progress-wrap">
         <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
@@ -3071,6 +3071,8 @@ function doLogin() {
       answers = {};
       if (draft) { try { answers = JSON.parse(draft); showToast('前回の途中保存データを復元しました'); } catch(e) {} }
       showScreen('survey');
+      const cm = months[months.length - 1];
+      document.getElementById('survey-title').textContent = `${cm.split('-')[0]}年${parseInt(cm.split('-')[1])}月 エンゲージメントサーベイ`;
       document.getElementById('survey-user-name').textContent = `${sanitize(result.name)}（${sanitize(result.dept)}）`;
       currentPage = 0;
       renderPage();
@@ -5329,6 +5331,8 @@ function switchMasterTab(name, btn) {
       answers = {};
       if (draft) { try { answers = JSON.parse(draft); } catch(e) {} }
       showScreen('survey');
+      const cm2 = months[months.length - 1];
+      document.getElementById('survey-title').textContent = `${cm2.split('-')[0]}年${parseInt(cm2.split('-')[1])}月 エンゲージメントサーベイ`;
       document.getElementById('survey-user-name').textContent = `${sanitize(_sessionName)}（${sanitize(_sessionDept)}）`;
       currentPage = 0;
       renderPage();
