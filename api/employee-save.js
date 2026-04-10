@@ -35,6 +35,7 @@ module.exports = async function handler(req, res) {
     // パスワードはEmployees DBに平文保存しない（Auth DBにハッシュのみ保存）
 
     if (existing.length > 0) {
+      props.isActive = P.checkbox(true);
       await updatePage(existing[0].id, props);
     } else {
       props.empId = P.rich(empId);
