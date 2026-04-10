@@ -913,14 +913,6 @@ if (typeof pdfjsLib !== 'undefined') {
       <button onclick="copyUnsubmittedList()" class="btn btn-secondary btn-sm" style="margin-bottom:12px">📋 リストをコピー</button>
       <div id="unsubmitted-list" style="margin-bottom:32px"></div>
     </div>
-    <div style="background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:24px;border:1px solid rgba(0,0,0,0.04)">
-      <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:12px">🔄 テスト回答リセット</div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input id="reset-emp-id" type="text" placeholder="社員ID（例: EMP011）" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;width:200px">
-        <button class="btn btn-secondary btn-sm" onclick="manualResetSurvey()">回答をリセット</button>
-      </div>
-      <div id="reset-result" style="font-size:12px;margin-top:8px;color:#64748b"></div>
-    </div>
     <div class="section-title">⚠️ アラート</div>
     <div class="alert-section" id="alert-list"></div>
     <div class="section-title">カテゴリ別スコア</div>
@@ -1029,6 +1021,17 @@ if (typeof pdfjsLib !== 'undefined') {
     </div>
     <div class="section-title">👥 社員ID一覧</div>
     <div class="id-table-wrap" id="id-table"></div>
+
+    <!-- 回答リセット（ID入力） -->
+    <div style="background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin:24px 0;border:1px solid rgba(0,0,0,0.04)">
+      <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:4px">🔄 回答リセット（ID入力）</div>
+      <p style="font-size:12px;color:#94a3b8;margin-bottom:12px">一覧に表示されない社員IDの回答もリセットできます</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input id="reset-emp-id" type="text" placeholder="社員ID（例: EMP011）" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;width:200px">
+        <button class="btn btn-secondary btn-sm" onclick="manualResetSurvey()">回答をリセット</button>
+      </div>
+      <div id="reset-result" style="font-size:12px;margin-top:8px;color:#64748b"></div>
+    </div>
 
     <!-- 適性検査マスタ -->
     <div class="section-title" style="margin-top:32px">📋 ビジネスIQ適性検査 マスタ管理</div>
