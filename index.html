@@ -1649,16 +1649,12 @@ function reloadEmployees() {
 }
 
 const categories = ['仕事のやりがい', '上司との関係性', 'チームワーク', '業務量・残業', '会社への信頼', '成長・キャリア'];
-// 月リストを動的生成（2025-10 から現在月まで、最大12ヶ月）
+// 月リスト（2026-03 〜 2027-03）
 const months = (() => {
   const result = [];
-  const now = new Date();
-  const endY = now.getFullYear(), endM = now.getMonth() + 1;
-  let y = 2025, m = 10;
-  while (result.length < 12) {
-    const key = `${y}-${String(m).padStart(2, '0')}`;
-    result.push(key);
-    if (y === endY && m === endM) break;
+  let y = 2026, m = 3;
+  while (y < 2027 || (y === 2027 && m <= 3)) {
+    result.push(`${y}-${String(m).padStart(2, '0')}`);
     m++; if (m > 12) { m = 1; y++; }
   }
   return result;
