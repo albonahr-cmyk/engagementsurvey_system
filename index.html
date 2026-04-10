@@ -1949,13 +1949,17 @@ function saveQuestionCatMap() {
   localStorage.setItem('es_question_cat_map', JSON.stringify(questionCatMap));
 }
 
+// 逆転スコア対象（7が最悪 → 1に変換）
+const reverseScoreQs = new Set(['q8', 'q9', 'q10']);
+
 function calcScoresFromAnswers(answers) {
   const catSums = {}, catCounts = {};
   Object.entries(answers).forEach(([qId, val]) => {
     if (typeof val !== 'number') return;
     const cat = questionCatMap[qId];
     if (!cat) return;
-    catSums[cat] = (catSums[cat] || 0) + val;
+    const adjusted = reverseScoreQs.has(qId) ? (8 - val) : val;
+    catSums[cat] = (catSums[cat] || 0) + adjusted;
     catCounts[cat] = (catCounts[cat] || 0) + 1;
   });
   const scores = {};
@@ -2714,6 +2718,7 @@ function showDetail(empId) {
 
   // 実回答データカード
   const ansColors = ['','#ef4444','#f97316','#f59e0b','#eab308','#22c55e','#16a34a','#059669'];
+  const ansColorsReverse = ['','#059669','#16a34a','#22c55e','#eab308','#f59e0b','#f97316','#ef4444'];
   const rawAnswers = localStorage.getItem(`es_${empId}_${latestMonth}`);
   let answerDetailHtml = '';
   if (rawAnswers) {
@@ -2728,7 +2733,8 @@ function showDetail(empId) {
           if (currentCat) groupsHtml += `<div class="answer-group"><div class="answer-group-title">${currentCat}</div>${groupBuf}</div>`;
           currentCat = q.category; groupBuf = '';
         }
-        const c = ansColors[val] || '#94a3b8';
+        const isReverse = reverseScoreQs.has(q.id);
+        const c = isReverse ? (ansColorsReverse[val] || '#94a3b8') : (ansColors[val] || '#94a3b8');
         groupBuf += `<div class="answer-row">
           <div class="answer-q">${q.text}</div>
           <div class="answer-bar-wrap">
