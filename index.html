@@ -906,6 +906,7 @@ if (typeof pdfjsLib !== 'undefined') {
         <option value="2026-02">2026年2月</option>
         <option value="2026-03" selected>2026年3月</option>
       </select>
+      <button onclick="refreshSurveyData()" class="btn btn-secondary btn-sm">🔄 最新データ取得</button>
     </div>
     <div class="stats-grid" id="kpi-grid"></div>
     <div id="unsubmitted-section" style="display:none">
@@ -947,6 +948,7 @@ if (typeof pdfjsLib !== 'undefined') {
         </select>
       </div>
       <button onclick="exportEmployeeCSV()" class="btn btn-secondary btn-sm">📥 CSV出力</button>
+      <button onclick="refreshSurveyData()" class="btn btn-secondary btn-sm" id="btn-refresh-data">🔄 最新データ取得</button>
     </div>
     <div class="section-title">👥 社員マスタ一覧 <span id="emp-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
     <div class="response-table" id="emp-table"></div>
@@ -3545,6 +3547,19 @@ function renderIdList() {
     <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>発行日</th><th>配信除外</th><th>操作</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
+}
+
+async function refreshSurveyData() {
+  showToast('🔄 最新データを取得中...');
+  try {
+    await restoreSurveyAnswersFromServer();
+    rebuildEmpData();
+    renderDashboard();
+    renderEmployeeList();
+    showToast('✅ 最新データを取得しました');
+  } catch(e) {
+    showToast('⚠️ データ取得に失敗しました');
+  }
 }
 
 function manualResetSurvey() {
