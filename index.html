@@ -5320,11 +5320,19 @@ function switchMasterTab(name, btn) {
       ]).then(() => {
         reloadAllSettings();
         syncDeptListFromEmployees();
+        initMonthSelects();
         rebuildEmpData();
         renderDashboard();
         renderIdList();
         renderEmployeeList();
         renderDeptManager();
+        // 前回のタブを復元
+        const savedTab = localStorage.getItem('es_active_tab');
+        if (savedTab && TAB_NAMES.includes(savedTab)) {
+          const btns = document.querySelectorAll('.tab-btn');
+          const idx = TAB_NAMES.indexOf(savedTab);
+          if (btns[idx]) switchTab(savedTab, btns[idx]);
+        }
       });
     });
   } else if (_sessionRole === 'employee' && _sessionEmpId) {
