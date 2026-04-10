@@ -3523,6 +3523,7 @@ function renderIdList() {
         <button class="copy-btn" onclick="copyIdToClipboard('${id}')">📋 ID</button>
         <button class="copy-btn" onclick="promptChangeEmail('${id}')" style="margin-left:6px">✉️ メール</button>
         <button class="copy-btn" onclick="promptChangePassword('${id}')" style="margin-left:6px">🔑 PW変更</button>
+        <button onclick="resetSurvey('${id}')" class="copy-btn" style="color:#d97706;border-color:#fde68a;margin-left:6px">🔄 回答リセット</button>
         <button onclick="deleteEmployee('${id}')" class="copy-btn" style="color:#dc2626;border-color:#fecaca;margin-left:6px">🗑 削除</button>
       </td>
     </tr>`;
@@ -3531,6 +3532,25 @@ function renderIdList() {
     <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>発行日</th><th>配信除外</th><th>操作</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
+}
+
+function resetSurvey(id) {
+  const emp = employees[id];
+  const currentMonth = months[months.length - 1];
+  if (!confirm(`${id}（${emp?.name||''}）の今月（${currentMonth}）の回答をリセットしますか？\nリセットすると再回答が可能になります。`)) return;
+  showToast('リセット中...');
+  apiPost('survey-reset', { empId: id, month: currentMonth }).then(res => {
+    if (res?.ok) {
+      localStorage.removeItem(`es_${id}_${currentMonth}`);
+      localStorage.removeItem('es_draft_' + id);
+      delete empData[id]?.[currentMonth];
+      rebuildEmpData();
+      renderEmployeeList();
+      showToast('✅ 回答をリセットしました（再回答可能）');
+    } else {
+      showToast('⚠️ リセットに失敗しました');
+    }
+  });
 }
 
 function deleteEmployee(id) {
