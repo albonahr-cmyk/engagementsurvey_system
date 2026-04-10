@@ -66,6 +66,12 @@ module.exports = async function handler(req, res) {
       property: 'empId', rich_text: { equals: empId },
     });
     const emp = empResults[0];
+
+    // 削除済み社員はログイン不可
+    if (emp && P.readCheckbox(emp.properties.isActive) === false) {
+      return res.json({ ok: false, error: 'invalid_credentials' });
+    }
+
     const name = emp ? P.readTitle(emp.properties.name) : '';
     const dept = emp ? P.readSelect(emp.properties.dept) : '';
 
