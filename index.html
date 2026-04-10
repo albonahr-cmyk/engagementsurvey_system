@@ -2743,11 +2743,12 @@ function showDetail(empId) {
         }
         const isReverse = reverseScoreQs.has(q.id);
         const c = isReverse ? (ansColorsReverse[val] || '#94a3b8') : (ansColors[val] || '#94a3b8');
+        const displayVal = isReverse ? (8 - val) : val;
         groupBuf += `<div class="answer-row">
-          <div class="answer-q">${q.text}</div>
+          <div class="answer-q">${q.text}${isReverse ? ' <span style="font-size:10px;color:#94a3b8;font-weight:400">（逆転）</span>' : ''}</div>
           <div class="answer-bar-wrap">
-            <div class="answer-bar"><div class="answer-bar-fill" style="width:${val/7*100}%;background:${c}"></div></div>
-            <div class="answer-val" style="color:${c}">${val}</div>
+            <div class="answer-bar"><div class="answer-bar-fill" style="width:${displayVal/7*100}%;background:${c}"></div></div>
+            <div class="answer-val" style="color:${c}">${displayVal}</div>
           </div>
         </div>`;
       });
