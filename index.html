@@ -913,6 +913,14 @@ if (typeof pdfjsLib !== 'undefined') {
       <button onclick="copyUnsubmittedList()" class="btn btn-secondary btn-sm" style="margin-bottom:12px">📋 リストをコピー</button>
       <div id="unsubmitted-list" style="margin-bottom:32px"></div>
     </div>
+    <div style="background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:24px;border:1px solid rgba(0,0,0,0.04)">
+      <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:12px">🔄 テスト回答リセット</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input id="reset-emp-id" type="text" placeholder="社員ID（例: EMP011）" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;width:200px">
+        <button class="btn btn-secondary btn-sm" onclick="manualResetSurvey()">回答をリセット</button>
+      </div>
+      <div id="reset-result" style="font-size:12px;margin-top:8px;color:#64748b"></div>
+    </div>
     <div class="section-title">⚠️ アラート</div>
     <div class="alert-section" id="alert-list"></div>
     <div class="section-title">カテゴリ別スコア</div>
@@ -3532,6 +3540,27 @@ function renderIdList() {
     <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>発行日</th><th>配信除外</th><th>操作</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
+}
+
+function manualResetSurvey() {
+  var empId = document.getElementById('reset-emp-id').value.trim();
+  if (!empId) { showToast('社員IDを入力してください'); return; }
+  var currentMonth = months[months.length - 1];
+  if (!confirm(empId + ' の今月（' + currentMonth + '）の回答をリセットしますか？')) return;
+  document.getElementById('reset-result').textContent = 'リセット中...';
+  apiPost('survey-reset', { empId: empId, month: currentMonth }).then(function(res) {
+    if (res && res.ok) {
+      localStorage.removeItem('es_' + empId + '_' + currentMonth);
+      localStorage.removeItem('es_draft_' + empId);
+      document.getElementById('reset-result').textContent = '✅ リセット完了（' + empId + ' / ' + currentMonth + '）';
+      document.getElementById('reset-result').style.color = '#16a34a';
+      showToast('✅ 回答をリセットしました');
+    } else {
+      document.getElementById('reset-result').textContent = '❌ リセット失敗';
+      document.getElementById('reset-result').style.color = '#dc2626';
+      showToast('⚠️ リセットに失敗しました');
+    }
+  });
 }
 
 function resetSurvey(id) {
