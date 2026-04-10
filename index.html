@@ -836,8 +836,8 @@ if (typeof pdfjsLib !== 'undefined') {
 </div>
 
 <!-- サーベイ -->
-<div id="screen-survey" class="screen">
-  <div class="card">
+<div id="screen-survey" class="screen" data-1p-ignore>
+  <div class="card" data-1p-ignore>
     <div class="survey-header">
       <h2>2026年3月 エンゲージメントサーベイ</h2>
       <p id="survey-user-name"></p>
@@ -846,7 +846,7 @@ if (typeof pdfjsLib !== 'undefined') {
         <div class="progress-text" id="progress-text">1 / 12</div>
       </div>
     </div>
-    <div id="questions-container"></div>
+    <div id="questions-container" data-1p-ignore></div>
     <div class="survey-footer">
       <button class="btn btn-secondary" id="btn-back" onclick="prevPage()" style="display:none">← 戻る</button>
       <button class="btn btn-primary" id="btn-next" onclick="nextPage()">次へ →</button>
@@ -3104,6 +3104,7 @@ function renderPage() {
       block.innerHTML = `
         <div class="question">${q.text}</div>
         <div class="free-text"><textarea id="ta-${q.id}" placeholder="自由にご記入ください..."
+          autocomplete="off" data-1p-ignore
           onchange="answers['${q.id}']=this.value">${answers[q.id]||''}</textarea></div>`;
     }
     container.appendChild(block);
