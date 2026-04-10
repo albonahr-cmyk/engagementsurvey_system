@@ -898,14 +898,7 @@ if (typeof pdfjsLib !== 'undefined') {
   <div id="tab-dashboard" class="admin-body">
     <div class="month-selector">
       <label>表示月：</label>
-      <select id="month-select" onchange="renderDashboard()">
-        <option value="2025-10">2025年10月</option>
-        <option value="2025-11">2025年11月</option>
-        <option value="2025-12">2025年12月</option>
-        <option value="2026-01">2026年1月</option>
-        <option value="2026-02">2026年2月</option>
-        <option value="2026-03" selected>2026年3月</option>
-      </select>
+      <select id="month-select" onchange="renderDashboard()"></select>
       <button onclick="refreshSurveyData()" class="btn btn-secondary btn-sm">🔄 最新データ取得</button>
     </div>
     <div class="stats-grid" id="kpi-grid"></div>
@@ -942,10 +935,7 @@ if (typeof pdfjsLib !== 'undefined') {
       </select>
       <div class="month-selector" style="margin:0">
         <label>サーベイ月：</label>
-        <select id="emp-month-select" onchange="renderEmployeeList()">
-          <option value="2025-10">10月</option><option value="2025-11">11月</option><option value="2025-12">12月</option>
-          <option value="2026-01">1月</option><option value="2026-02">2月</option><option value="2026-03" selected>3月</option>
-        </select>
+        <select id="emp-month-select" onchange="renderEmployeeList()"></select>
       </div>
       <button onclick="exportEmployeeCSV()" class="btn btn-secondary btn-sm">📥 CSV出力</button>
       <button onclick="refreshSurveyData()" class="btn btn-secondary btn-sm" id="btn-refresh-data">🔄 最新データ取得</button>
@@ -1407,14 +1397,7 @@ ALBONA 人事部</textarea>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <label style="font-size:13px;font-weight:600;color:#475569">対象月：</label>
-        <select id="action-month-select" onchange="renderActionPlan()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
-          <option value="2025-10">2025年10月</option>
-          <option value="2025-11">2025年11月</option>
-          <option value="2025-12">2025年12月</option>
-          <option value="2026-01">2026年1月</option>
-          <option value="2026-02">2026年2月</option>
-          <option value="2026-03" selected>2026年3月</option>
-        </select>
+        <select id="action-month-select" onchange="renderActionPlan()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit"></select>
       </div>
     </div>
     <!-- 2ペインレイアウト -->
@@ -1681,6 +1664,20 @@ const months = (() => {
   return result;
 })();
 const monthLabels = Object.fromEntries(months.map(k => [k, parseInt(k.split('-')[1]) + '月']));
+const monthLabelsFull = Object.fromEntries(months.map(k => [k, k.split('-')[0] + '年' + parseInt(k.split('-')[1]) + '月']));
+
+// 月セレクトボックスを動的に生成
+function initMonthSelects() {
+  const latest = months[months.length - 1];
+  ['month-select', 'emp-month-select', 'action-month-select'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const useFull = (id === 'month-select' || id === 'action-month-select');
+    el.innerHTML = months.map(m =>
+      `<option value="${m}"${m === latest ? ' selected' : ''}>${useFull ? monthLabelsFull[m] : monthLabels[m]}</option>`
+    ).join('');
+  });
+}
 
 // 月次・社員別スコアデータ（responsesシートから動的に構築）
 const empData = {};
@@ -3049,6 +3046,7 @@ function doLogin() {
         ]).then(() => {
           reloadAllSettings();
           syncDeptListFromEmployees();
+          initMonthSelects();
           rebuildEmpData();
           renderDashboard();
           renderIdList();
