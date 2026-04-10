@@ -3506,18 +3506,18 @@ function renderIdList() {
     const mbtiInfo = mbtiType ? mbtiData[mbtiType] : null;
     const issuedAt = emp.issuedAt || '既存';
     const newMark  = emp.isNew ? '<span class="new-badge">NEW</span>' : '';
-    const rankBadge = rank ? `<span class="rank-badge-sm rank-${rank[0].toLowerCase()}" style="margin-left:4px">${rank}</span>` : '';
-    const mbtiBadge = mbtiInfo ? `<span class="mbti-badge mbti-${mbtiInfo.group.toLowerCase()}" style="font-size:11px;padding:2px 8px">${mbtiType}</span>` : '';
-    const statsRow  = (profile.iq || profile.battlePower) ? `
-      <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
-        ${profile.iq ? `<span style="font-size:11px;background:#f5f3ff;color:#7c3aed;padding:2px 7px;border-radius:10px;font-weight:700">🧠 ${profile.iq}</span>` : ''}
-        ${profile.battlePower ? `<span style="font-size:11px;background:#fff7ed;color:#ea580c;padding:2px 7px;border-radius:10px;font-weight:700">⚡ ${profile.battlePower.toLocaleString()}</span>` : ''}
-      </div>` : '';
+    const rankBadge = rank ? `<span style="font-size:10px;font-weight:700;color:#64748b;background:#f1f5f9;padding:1px 6px;border-radius:4px">${rank}</span>` : '';
+    const mbtiBadge = mbtiInfo ? `<span style="font-size:10px;font-weight:600;color:#64748b;background:#f1f5f9;padding:1px 6px;border-radius:4px">${mbtiType}</span>` : '';
+    const statsItems = [
+      profile.iq ? `IQ ${profile.iq}` : '',
+      profile.battlePower ? `BP ${profile.battlePower.toLocaleString()}` : '',
+    ].filter(Boolean).join(' / ');
+    const statsRow = statsItems ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px">${statsItems}</div>` : '';
     return `<tr>
       <td><span class="id-badge">${id}</span>${newMark}</td>
       <td>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <span style="font-weight:600;color:#1e293b">${sanitize(emp.name)}</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span style="font-weight:600;color:#1e293b;font-size:13px">${sanitize(emp.name)}</span>
           ${rankBadge}${mbtiBadge}
         </div>
         ${statsRow}
