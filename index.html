@@ -1664,13 +1664,16 @@ const monthLabelsFull = Object.fromEntries(months.map(k => [k, k.split('-')[0] +
 
 // 月セレクトボックスを動的に生成
 function initMonthSelects() {
-  const latest = months[months.length - 1];
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const defaultMonth = months.includes(currentMonth) ? currentMonth : months[months.length - 1];
   ['month-select', 'emp-month-select', 'action-month-select'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
+    const prev = el.value;
     const useFull = (id === 'month-select' || id === 'action-month-select');
     el.innerHTML = months.map(m =>
-      `<option value="${m}"${m === latest ? ' selected' : ''}>${useFull ? monthLabelsFull[m] : monthLabels[m]}</option>`
+      `<option value="${m}"${m === (prev && months.includes(prev) ? prev : defaultMonth) ? ' selected' : ''}>${useFull ? monthLabelsFull[m] : monthLabels[m]}</option>`
     ).join('');
   });
 }
