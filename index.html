@@ -3536,11 +3536,11 @@ function renderIdList() {
       </td>
       <td>
         <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <button class="copy-btn" onclick="copyIdToClipboard('${id}')">📋</button>
-          <button class="copy-btn" onclick="promptChangeEmail('${id}')">✉️</button>
-          <button class="copy-btn" onclick="promptChangePassword('${id}')">🔑</button>
-          <button onclick="resetSurvey('${id}')" class="copy-btn" style="color:#d97706;border-color:#fde68a">🔄</button>
-          <button onclick="deleteEmployee('${id}')" class="copy-btn" style="color:#dc2626;border-color:#fecaca">🗑</button>
+          <button class="copy-btn" onclick="copyIdToClipboard('${id}')" title="IDをコピー">📋</button>
+          <button class="copy-btn" onclick="promptChangeEmail('${id}')" title="メールアドレス変更">✉️</button>
+          <button class="copy-btn" onclick="promptChangePassword('${id}')" title="パスワード変更">🔑</button>
+          <button onclick="resetSurvey('${id}')" class="copy-btn" style="color:#d97706;border-color:#fde68a" title="回答リセット">🔄</button>
+          <button onclick="deleteEmployee('${id}')" class="copy-btn" style="color:#dc2626;border-color:#fecaca" title="削除">🗑</button>
         </div>
       </td>
     </tr>`;
