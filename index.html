@@ -1938,15 +1938,14 @@ const catNames = { やりがい:'職務', 成長:'自己成長', 健康:'健康'
 
 const _defaultQuestionCatMap = {
   q1:'やりがい', q2:'やりがい', q3:'やりがい', q4:'やりがい',
-  q5:'成長', q6:'成長', q7:'成長', q33:'成長',
-  q8:'健康', q9:'健康', q10:'健康',
-  q11:'上司', q12:'上司', q13:'上司', q14:'上司',
-  q17:'チーム', q18:'チーム', q19:'チーム', q37:'チーム',
-  q20:'承認', q21:'承認',
-  q22:'信頼', q23:'信頼', q24:'信頼', q25:'信頼',
-  q26:'組織', q27:'組織', q28:'組織', q29:'組織',
-  q30:'業務', q31:'業務', q32:'業務',
-  q35:'承認',
+  q5:'成長', q6:'成長', q7:'成長', q8:'成長',
+  q9:'健康', q10:'健康', q11:'健康',
+  q12:'上司', q13:'上司', q14:'上司', q15:'上司',
+  q16:'チーム', q17:'チーム', q18:'チーム', q19:'チーム',
+  q20:'承認', q21:'承認', q22:'承認',
+  q23:'信頼', q24:'信頼', q25:'信頼', q26:'信頼',
+  q27:'組織', q28:'組織', q29:'組織', q30:'組織',
+  q31:'業務', q32:'業務', q33:'業務',
 };
 const questionCatMap = (() => {
   try {
@@ -1959,7 +1958,7 @@ function saveQuestionCatMap() {
 }
 
 // 逆転スコア対象（7が最悪 → 1に変換）
-const reverseScoreQs = new Set(['q8', 'q9', 'q10']);
+const reverseScoreQs = new Set(['q9', 'q10', 'q11']);
 
 function calcScoresFromAnswers(answers) {
   const catSums = {}, catCounts = {};
@@ -2957,50 +2956,48 @@ const questions = [
     { id:'q5', category:'自己成長', text:'仕事を通じて自分の能力やスキルを高められていますか？', type:'rating' },
     { id:'q6', category:'自己成長', text:'最近仕事をする中で、達成感を得ていますか？', type:'rating' },
     { id:'q7', category:'自己成長', text:'仕事をする中で、自身の能力を活用できていると感じますか？', type:'rating' },
-    { id:'q33', category:'自己成長', text:'仕事をする中で、自分の強みを活かせていると感じていますか？', type:'rating' },
+    { id:'q8', category:'自己成長', text:'仕事をする中で、自分の強みを活かせていると感じていますか？', type:'rating' },
   ]},
   { page:3, items:[
-    { id:'q8', category:'健康', text:'最近些細なことでイライラするときがありますか？', type:'rating' },
-    { id:'q9', category:'健康', text:'最近頭が重いと感じるときがありますか？', type:'rating' },
-    { id:'q10', category:'健康', text:'最近、自身の仕事量についてどう感じていますか？', type:'rating' },
+    { id:'q9', category:'健康', text:'最近些細なことでイライラするときがありますか？', type:'rating' },
+    { id:'q10', category:'健康', text:'最近頭が重いと感じるときがありますか？', type:'rating' },
+    { id:'q11', category:'健康', text:'最近、自身の仕事量についてどう感じていますか？', type:'rating' },
   ]},
   { page:4, items:[
-    { id:'q11', category:'支援', text:'上司は自分が職務を遂行する上で、必要な手助けをしてくれていると感じますか？', type:'rating' },
-    { id:'q12', category:'支援', text:'上司は自分の成長の手助けをしてくれていますか？', type:'rating' },
-    { id:'q13', category:'支援', text:'上司は部署やチームの使命や目標を分かりやすく伝えてくれていますか？', type:'rating' },
+    { id:'q12', category:'支援', text:'上司は自分が職務を遂行する上で、必要な手助けをしてくれていると感じますか？', type:'rating' },
+    { id:'q13', category:'支援', text:'上司は自分の成長の手助けをしてくれていますか？', type:'rating' },
+    { id:'q14', category:'支援', text:'上司は部署やチームの使命や目標を分かりやすく伝えてくれていますか？', type:'rating' },
+    { id:'q15', category:'支援', text:'自分が困っている時、仕事仲間は助けてくれると思いますか？', type:'rating' },
   ]},
   { page:5, items:[
-    { id:'q14', category:'支援', text:'自分が困っている時、仕事仲間は助けてくれると思いますか？', type:'rating' },
+    { id:'q16', category:'人間関係', text:'仕事仲間とは仕事をする上で良好な関係ですか？', type:'rating' },
+    { id:'q17', category:'人間関係', text:'仕事仲間と仕事以外の事でも、気軽に話すことができますか？', type:'rating' },
+    { id:'q18', category:'人間関係', text:'最近仕事仲間から仕事の成果を認められたり、褒められたりしましたか？', type:'rating' },
+    { id:'q19', category:'人間関係', text:'（カスタマイズ可能）', type:'rating' },
   ]},
   { page:6, items:[
-    { id:'q17', category:'人間関係', text:'仕事仲間とは仕事をする上で良好な関係ですか？', type:'rating' },
-    { id:'q18', category:'人間関係', text:'仕事仲間と仕事以外の事でも、気軽に話すことができますか？', type:'rating' },
-    { id:'q19', category:'人間関係', text:'最近仕事仲間から仕事の成果を認められたり、褒められたりしましたか？', type:'rating' },
-    { id:'q37', category:'人間関係', text:'（カスタマイズ可能）', type:'rating' },
-  ]},
-  { page:7, items:[
     { id:'q20', category:'承認', text:'自分の意見や提案に対して、仕事仲間がちゃんと耳を傾けてくれていると感じますか？', type:'rating' },
     { id:'q21', category:'承認', text:'あなたの成果や貢献に見合った評価がされていますか？', type:'rating' },
-    { id:'q35', category:'承認', text:'日頃の仕事ぶりや努力に対して、上司や同僚から感謝や認知を感じることがありますか？', type:'rating' },
+    { id:'q22', category:'承認', text:'日頃の仕事ぶりや努力に対して、上司や同僚から感謝や認知を感じることがありますか？', type:'rating' },
+  ]},
+  { page:7, items:[
+    { id:'q23', category:'理念戦略', text:'あなたは会社のミッション・ビジョンに共感していますか？', type:'rating' },
+    { id:'q24', category:'理念戦略', text:'会社の事業戦略や方針に納得していますか？', type:'rating' },
+    { id:'q25', category:'理念戦略', text:'経営陣は、誠実で論理的に仕事を行っていると思いますか？', type:'rating' },
+    { id:'q26', category:'理念戦略', text:'自分が携わっている事業やサービスを親しい友人に進めることができますか？', type:'rating' },
   ]},
   { page:8, items:[
-    { id:'q22', category:'理念戦略', text:'あなたは会社のミッション・ビジョンに共感していますか？', type:'rating' },
-    { id:'q23', category:'理念戦略', text:'会社の事業戦略や方針に納得していますか？', type:'rating' },
-    { id:'q24', category:'理念戦略', text:'経営陣は、誠実で論理的に仕事を行っていると思いますか？', type:'rating' },
-    { id:'q25', category:'理念戦略', text:'自分が携わっている事業やサービスを親しい友人に進めることができますか？', type:'rating' },
+    { id:'q27', category:'組織風土', text:'社内で誰かが称賛されたとき、それが適切であると感じていますか？', type:'rating' },
+    { id:'q28', category:'組織風土', text:'（会社・事業の）目標を遂行する上で、他の部署の人達は協力的だと感じますか？', type:'rating' },
+    { id:'q29', category:'組織風土', text:'自分が意欲的であれば、会社はチャンスを与えてくれていると感じますか？', type:'rating' },
+    { id:'q30', category:'組織風土', text:'この会社は例え失敗したとしても、挑戦したことを讃えられる会社だと思いますか？', type:'rating' },
   ]},
   { page:9, items:[
-    { id:'q26', category:'組織風土', text:'社内で誰かが称賛されたとき、それが適切であると感じていますか？', type:'rating' },
-    { id:'q27', category:'組織風土', text:'（会社・事業の）目標を遂行する上で、他の部署の人達は協力的だと感じますか？', type:'rating' },
-    { id:'q28', category:'組織風土', text:'自分が意欲的であれば、会社はチャンスを与えてくれていると感じますか？', type:'rating' },
-    { id:'q29', category:'組織風土', text:'この会社は例え失敗したとしても、挑戦したことを讃えられる会社だと思いますか？', type:'rating' },
+    { id:'q31', category:'環境', text:'あなたにとって職場の環境（場所・オフィス等）は働きやすいですか？', type:'rating' },
+    { id:'q32', category:'環境', text:'この会社では、必要に応じて仕事と生活のバランスが取れると感じていますか？', type:'rating' },
+    { id:'q33', category:'環境', text:'この会社では、働きに見合った報酬が支払われていますか？', type:'rating' },
   ]},
   { page:10, items:[
-    { id:'q30', category:'環境', text:'あなたにとって職場の環境（場所・オフィス等）は働きやすいですか？', type:'rating' },
-    { id:'q31', category:'環境', text:'この会社では、必要に応じて仕事と生活のバランスが取れると感じていますか？', type:'rating' },
-    { id:'q32', category:'環境', text:'この会社では、働きに見合った報酬が支払われていますか？', type:'rating' },
-  ]},
-  { page:11, items:[
     { id:'q34', category:'自由記述', text:'職場環境や業務について、感じていることを自由に教えてください（任意）', type:'text' },
   ]},
 ];
