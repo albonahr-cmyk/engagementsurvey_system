@@ -5302,6 +5302,19 @@ function switchMasterTab(name, btn) {
       el.textContent = sanitize(_sessionName);
     });
     showScreen('admin');
+    // データ取得前にタブ表示だけ先に切替（ちらつき防止）
+    {
+      const savedTab = localStorage.getItem('es_active_tab');
+      if (savedTab && TAB_NAMES.includes(savedTab)) {
+        const btns = document.querySelectorAll('.tab-btn');
+        const idx = TAB_NAMES.indexOf(savedTab);
+        if (btns[idx]) {
+          btns.forEach(b => b.classList.remove('active'));
+          btns[idx].classList.add('active');
+          switchTabById(savedTab);
+        }
+      }
+    }
     fetchEmployeesFromServer().then(emps => {
       if (!emps) {
         showToast('⚠️ 社員データの読込に失敗しました');
@@ -5321,7 +5334,7 @@ function switchMasterTab(name, btn) {
         renderIdList();
         renderEmployeeList();
         renderDeptManager();
-        // 前回のタブを復元
+        // データ取得後にタブ描画処理を実行
         const savedTab = localStorage.getItem('es_active_tab');
         if (savedTab && TAB_NAMES.includes(savedTab)) {
           const btns = document.querySelectorAll('.tab-btn');
