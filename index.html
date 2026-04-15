@@ -3746,8 +3746,48 @@ function saveMailSchedule() {
     const msg = document.getElementById('mail-schedule-msg');
     if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
     renderMailScheduleStatus(config);
-    showToast('✅ メール配信設定を保存しました');
+    showToast('✅ 設定を保存しました');
+    // GASに配信予約リクエストを送信
+    scheduleSendToGas(date, Number(hour), subject, body);
   });
+}
+
+function scheduleSendToGas(date, hour, subject, body) {
+  const gasUrl = localStorage.getItem('es_gas_url');
+  if (!gasUrl) { showToast('⚠️ GAS URLが未設定のため配信予約はスキップされました'); return; }
+  const gasToken = localStorage.getItem('es_gas_token') || '';
+  const cbName = '_gasScheduleCb_' + Date.now();
+  let resolved = false;
+  const cleanup = () => { delete window[cbName]; if (script.parentNode) document.body.removeChild(script); };
+  window[cbName] = (data) => {
+    if (resolved) return; resolved = true;
+    if (data && data.ok) showToast('📅 配信予約を登録しました');
+    else showToast('⚠ 配信予約失敗: ' + (data?.error || ''));
+    cleanup();
+  };
+  // payloadをURL safeにエンコード
+  const params = new URLSearchParams({
+    action: 'scheduleSend',
+    token: gasToken,
+    date: date,
+    hour: String(hour),
+    subject: subject || '',
+    body: body || '',
+    callback: cbName,
+  });
+  const script = document.createElement('script');
+  script.src = gasUrl + '?' + params.toString();
+  script.onerror = () => {
+    if (resolved) return; resolved = true;
+    showToast('📅 配信予約リクエストを送信しました');
+    cleanup();
+  };
+  setTimeout(() => {
+    if (resolved) return; resolved = true;
+    showToast('📅 配信予約リクエストを送信しました');
+    cleanup();
+  }, 8000);
+  document.body.appendChild(script);
 }
 
 function loadMailSchedule() {
