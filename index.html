@@ -1293,7 +1293,7 @@ if (typeof pdfjsLib !== 'undefined') {
     <!-- メール配信設定 -->
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
       <div class="section-title" style="margin-bottom:8px">✉️ サーベイ案内メール配信</div>
-      <p style="font-size:13px;color:#64748b;margin-bottom:20px">毎月指定した日時に、メールアドレスが登録されている社員へサーベイの案内メールを自動送信します。<br>送信元: <strong>albonahr@al-bo.io</strong>（GAS設置先のアカウント）</p>
+      <p style="font-size:13px;color:#64748b;margin-bottom:20px">指定した日時に1回、配信対象の全社員にサーベイ案内メールを自動送信します。<br>送信元: <strong>albonahr@al-bo.io</strong>（GAS設置先のアカウント）</p>
 
       <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px">
         <div>
@@ -3544,6 +3544,7 @@ function renderIdList() {
           <button class="copy-btn" onclick="copyIdToClipboard('${id}')" title="IDをコピー">📋</button>
           <button class="copy-btn" onclick="promptChangeEmail('${id}')" title="メールアドレス変更">✉️</button>
           <button class="copy-btn" onclick="promptChangePassword('${id}')" title="パスワード変更">🔑</button>
+          <button onclick="sendMailToEmployee('${id}')" class="copy-btn" style="color:#059669;border-color:#a7f3d0" title="この社員にサーベイ案内メール送信">📨</button>
           <button onclick="resetSurvey('${id}')" class="copy-btn" style="color:#d97706;border-color:#fde68a" title="回答リセット">🔄</button>
           <button onclick="deleteEmployee('${id}')" class="copy-btn" style="color:#dc2626;border-color:#fecaca" title="削除">🗑</button>
         </div>
@@ -3841,6 +3842,40 @@ function testSendMail() {
     setTimeout(() => msgEl.style.display = 'none', 5000);
     cleanup();
   }, 6000);
+  document.body.appendChild(script);
+}
+
+function sendMailToEmployee(empId) {
+  const emp = employees[empId];
+  if (!emp) { showToast('社員が見つかりません'); return; }
+  if (!emp.email) { showToast('⚠️ メールアドレスが未登録です'); return; }
+  if (!confirm(`${emp.name}（${empId}）にサーベイ案内メールを送信しますか？\n\n送信先: ${emp.email}`)) return;
+  const gasUrl = localStorage.getItem('es_gas_url');
+  if (!gasUrl) { showToast('❌ GAS URLが未設定です（設定 → GAS URL）'); return; }
+  const gasToken = localStorage.getItem('es_gas_token') || '';
+  showToast('📨 送信中...');
+  // JSONP
+  const cbName = '_gasSendOneCb_' + Date.now();
+  let resolved = false;
+  const cleanup = () => { delete window[cbName]; if (script.parentNode) document.body.removeChild(script); };
+  window[cbName] = (data) => {
+    if (resolved) return; resolved = true;
+    if (data && data.ok) showToast(`✅ ${emp.name} に送信しました`);
+    else showToast('⚠ ' + (data?.error || '送信失敗'));
+    cleanup();
+  };
+  const script = document.createElement('script');
+  script.src = gasUrl + '?action=sendToOne&empId=' + encodeURIComponent(empId) + '&token=' + encodeURIComponent(gasToken) + '&callback=' + cbName;
+  script.onerror = () => {
+    if (resolved) return; resolved = true;
+    showToast(`✅ ${emp.name} に送信処理を実行しました（メール到達を確認してください）`);
+    cleanup();
+  };
+  setTimeout(() => {
+    if (resolved) return; resolved = true;
+    showToast(`✅ ${emp.name} に送信処理を実行しました（メール到達を確認してください）`);
+    cleanup();
+  }, 8000);
   document.body.appendChild(script);
 }
 
