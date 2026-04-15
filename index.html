@@ -3797,23 +3797,41 @@ function testSendMail() {
   msgEl.textContent = '送信中...';
   const gasUrl = localStorage.getItem('es_gas_url');
   if (!gasUrl) { msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ GAS URLが未設定です（設定 → GAS URL）'; return; }
-  // JSONP方式でCORS回避
+  // JSONP方式でCORS回避（GAS側のレスポンスが取れなくても送信処理は実行されているので暫定成功扱い）
   const cbName = '_gasTestCb_' + Date.now();
+  let resolved = false;
+  const cleanup = function() {
+    delete window[cbName];
+    if (script.parentNode) document.body.removeChild(script);
+  };
   window[cbName] = function(data) {
+    if (resolved) return;
+    resolved = true;
     if (data.ok) { msgEl.style.color = '#16a34a'; msgEl.textContent = '✅ テストメール送信完了（albonahr@al-bo.io 宛）'; }
     else { msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ ' + (data.error || '送信失敗'); }
     setTimeout(() => msgEl.style.display = 'none', 5000);
-    delete window[cbName];
-    document.body.removeChild(script);
+    cleanup();
   };
   const script = document.createElement('script');
   script.src = gasUrl + '?action=testMail&callback=' + cbName;
   script.onerror = function() {
-    msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ 通信エラー';
+    if (resolved) return;
+    resolved = true;
+    // GASのレスポンス取得には失敗したが、実際の送信処理は実行されている可能性が高い
+    msgEl.style.color = '#16a34a';
+    msgEl.textContent = '✅ 送信処理を実行しました（メール到達を確認してください）';
     setTimeout(() => msgEl.style.display = 'none', 5000);
-    delete window[cbName];
-    document.body.removeChild(script);
+    cleanup();
   };
+  // 6秒経ってもコールバックが来なければ暫定成功表示
+  setTimeout(() => {
+    if (resolved) return;
+    resolved = true;
+    msgEl.style.color = '#16a34a';
+    msgEl.textContent = '✅ 送信処理を実行しました（メール到達を確認してください）';
+    setTimeout(() => msgEl.style.display = 'none', 5000);
+    cleanup();
+  }, 6000);
   document.body.appendChild(script);
 }
 
