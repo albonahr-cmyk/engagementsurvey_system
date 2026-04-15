@@ -1297,15 +1297,18 @@ if (typeof pdfjsLib !== 'undefined') {
 
       <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px">
         <div>
-          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">送信日（毎月）</label>
-          <select id="mail-send-day" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
-            ${Array.from({length:28},(_,i)=>`<option value="${i+1}">${i+1}日</option>`).join('')}
-          </select>
+          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">送信日</label>
+          <input type="date" id="mail-send-date" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
         </div>
         <div>
           <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">送信時刻</label>
           <select id="mail-send-hour" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
-            ${Array.from({length:24},(_,i)=>`<option value="${i}">${String(i).padStart(2,'0')}:00</option>`).join('')}
+            <option value="0">00:00</option><option value="1">01:00</option><option value="2">02:00</option><option value="3">03:00</option>
+            <option value="4">04:00</option><option value="5">05:00</option><option value="6">06:00</option><option value="7">07:00</option>
+            <option value="8">08:00</option><option value="9" selected>09:00</option><option value="10">10:00</option><option value="11">11:00</option>
+            <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option><option value="15">15:00</option>
+            <option value="16">16:00</option><option value="17">17:00</option><option value="18">18:00</option><option value="19">19:00</option>
+            <option value="20">20:00</option><option value="21">21:00</option><option value="22">22:00</option><option value="23">23:00</option>
           </select>
         </div>
         <button class="btn btn-primary" onclick="saveMailSchedule()">💾 保存</button>
@@ -3730,11 +3733,12 @@ function saveSurveyPeriod() {
 
 // ===== メール配信設定 =====
 function saveMailSchedule() {
-  const day = document.getElementById('mail-send-day').value;
+  const date = document.getElementById('mail-send-date').value;
   const hour = document.getElementById('mail-send-hour').value;
   const subject = document.getElementById('mail-subject').value.trim();
   const body = document.getElementById('mail-body-template').value;
-  const config = { day: Number(day), hour: Number(hour), subject, bodyTemplate: body };
+  if (!date) { showToast('⚠️ 送信日を選択してください'); return; }
+  const config = { date: date, hour: Number(hour), subject, bodyTemplate: body };
   const configStr = JSON.stringify(config);
   localStorage.setItem('es_mail_schedule', configStr);
   apiPost('settings-save', { key: 'es_mail_schedule', value: configStr }).then(() => {
@@ -3764,8 +3768,9 @@ function loadMailSchedule() {
 
 function applyMailScheduleConfig(config) {
   if (!config) return;
-  document.getElementById('mail-send-day').value = config.day || 1;
-  document.getElementById('mail-send-hour').value = config.hour || 9;
+  const dateEl = document.getElementById('mail-send-date');
+  if (dateEl && config.date) dateEl.value = config.date;
+  document.getElementById('mail-send-hour').value = config.hour != null ? config.hour : 9;
   if (config.subject) document.getElementById('mail-subject').value = config.subject;
   if (config.bodyTemplate) document.getElementById('mail-body-template').value = config.bodyTemplate;
   renderMailScheduleStatus(config);
@@ -3787,7 +3792,11 @@ function saveGasToken() {
 
 function renderMailScheduleStatus(config) {
   const el = document.getElementById('mail-schedule-current');
-  if (el) el.innerHTML = `現在の設定：毎月 <strong>${config.day}日 ${String(config.hour).padStart(2,'0')}:00</strong> に自動送信`;
+  if (!el) return;
+  if (!config || !config.date) { el.innerHTML = '現在の設定：<span style="color:#94a3b8">未設定</span>'; return; }
+  const d = new Date(config.date);
+  const ymd = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  el.innerHTML = `現在の設定：<strong>${ymd} ${String(config.hour).padStart(2,'0')}:00</strong> に自動送信`;
 }
 
 function testSendMail() {
