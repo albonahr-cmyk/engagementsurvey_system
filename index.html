@@ -447,6 +447,14 @@ if (typeof pdfjsLib !== 'undefined') {
   .copy-btn { padding: 5px 10px; background: linear-gradient(180deg, #fff, #f1f5f9); border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; box-shadow: 0 2px 0 #cbd5e1; transition: all 0.1s; white-space: nowrap; }
   .copy-btn:hover { background: linear-gradient(180deg, #f5f3ff, #ede9fe); color: #6366f1; border-color: #c4b5fd; box-shadow: 0 2px 0 #c4b5fd; }
   .copy-btn:active { transform: translateY(2px); box-shadow: 0 0 0 #cbd5e1; }
+  .action-label-btn { padding: 4px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; font-weight: 600; color: #475569; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+  .action-label-btn:hover { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
+  .action-btn-green { color: #059669; border-color: #a7f3d0; background: #f0fdf4; }
+  .action-btn-green:hover { background: #dcfce7; color: #047857; border-color: #6ee7b7; }
+  .action-btn-amber { color: #d97706; border-color: #fde68a; background: #fffbeb; }
+  .action-btn-amber:hover { background: #fef3c7; color: #b45309; border-color: #fbbf24; }
+  .action-btn-red { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+  .action-btn-red:hover { background: #fee2e2; color: #b91c1c; border-color: #f87171; }
   .id-table-wrap { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 32px; border: 1px solid rgba(0,0,0,0.04); }
   .id-table-wrap table { width: 100%; border-collapse: collapse; }
   .id-table-wrap th { background: #f8fafc; padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
@@ -3599,7 +3607,6 @@ function renderIdList() {
       <td><span class="dept-chip">${sanitize(emp.dept)}</span></td>
       <td style="font-size:12px;color:#475569">${emp.email ? `<span style="font-family:monospace">${sanitize(emp.email)}</span>` : '<span style="color:#94a3b8">未登録</span>'}</td>
       <td style="font-size:12px;font-weight:600;white-space:nowrap">${emp.hasPassword ? '<span style="color:#16a34a">設定済</span>' : '<span style="color:#94a3b8">未設定</span>'}</td>
-      <td style="color:#94a3b8;font-size:12px;white-space:nowrap">${issuedAt}</td>
       <td style="text-align:center;white-space:nowrap">
         <label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">
           <input type="checkbox" ${emp.mailExcluded ? 'checked' : ''} onchange="toggleMailExcluded('${id}', this.checked)" style="opacity:0;width:0;height:0">
@@ -3610,18 +3617,18 @@ function renderIdList() {
       </td>
       <td>
         <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <button class="copy-btn" onclick="copyIdToClipboard('${id}')" title="IDをコピー">📋</button>
-          <button class="copy-btn" onclick="promptChangeEmail('${id}')" title="メールアドレス変更">✉️</button>
-          <button class="copy-btn" onclick="promptChangePassword('${id}')" title="パスワード変更">🔑</button>
-          <button onclick="sendMailToEmployee('${id}')" class="copy-btn" style="color:#059669;border-color:#a7f3d0" title="この社員にサーベイ案内メール送信">📨</button>
-          <button onclick="resetSurvey('${id}')" class="copy-btn" style="color:#d97706;border-color:#fde68a" title="回答リセット">🔄</button>
-          <button onclick="deleteEmployee('${id}')" class="copy-btn" style="color:#dc2626;border-color:#fecaca" title="削除">🗑</button>
+          <button class="action-label-btn" onclick="copyIdToClipboard('${id}')">ID複写</button>
+          <button class="action-label-btn" onclick="promptChangeEmail('${id}')">メール</button>
+          <button class="action-label-btn" onclick="promptChangePassword('${id}')">PW変更</button>
+          <button class="action-label-btn action-btn-green" onclick="sendMailToEmployee('${id}')">送信</button>
+          <button class="action-label-btn action-btn-amber" onclick="resetSurvey('${id}')">リセット</button>
+          <button class="action-label-btn action-btn-red" onclick="deleteEmployee('${id}')">削除</button>
         </div>
       </td>
     </tr>`;
   });
   table.innerHTML = `<table>
-    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>発行日</th><th>配信除外</th><th>操作</th></tr></thead>
+    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th>操作</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
 }
