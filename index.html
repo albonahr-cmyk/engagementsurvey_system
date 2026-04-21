@@ -919,7 +919,7 @@ if (typeof pdfjsLib !== 'undefined') {
     <div class="already-icon">📋</div>
     <h2><span id="already-name"></span> さん</h2>
     <p>今月のサーベイはすでに回答済みです。</p>
-    <p style="margin-top:8px;color:#94a3b8;font-size:13px">2026年3月のサーベイへのご協力ありがとうございました。<br>来月もよろしくお願いします。</p>
+    <p style="margin-top:8px;color:#94a3b8;font-size:13px" id="already-month-msg"></p>
     <button class="btn btn-primary" style="margin-top:28px;width:100%" onclick="goToLogin()">ログアウト</button>
   </div>
 </div>
@@ -3228,6 +3228,8 @@ function doLogin() {
     checkSubmittedOnline(result.empId, currentMonth).then(submitted => {
       if (submitted || hasSubmittedThisMonth(result.empId)) {
         document.getElementById('already-name').textContent = sanitize(result.name);
+        const sm = getSurveyMonth();
+        document.getElementById('already-month-msg').innerHTML = `${sm.split('-')[0]}年${parseInt(sm.split('-')[1])}月のサーベイへのご協力ありがとうございました。<br>来月もよろしくお願いします。`;
         showScreen('already');
         return;
       }
@@ -5674,6 +5676,8 @@ function switchMasterTab(name, btn) {
     checkSubmittedOnline(_sessionEmpId, currentMonth).then(submitted => {
       if (submitted || hasSubmittedThisMonth(_sessionEmpId)) {
         document.getElementById('already-name').textContent = sanitize(_sessionName);
+        const sm2 = getSurveyMonth();
+        document.getElementById('already-month-msg').innerHTML = `${sm2.split('-')[0]}年${parseInt(sm2.split('-')[1])}月のサーベイへのご協力ありがとうございました。<br>来月もよろしくお願いします。`;
         showScreen('already');
         return;
       }
