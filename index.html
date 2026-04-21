@@ -3223,9 +3223,11 @@ function doLogin() {
 
     // 社員ログイン
     currentEmpId = result.empId;
-    // サーバー側で提出済みチェック（localStorageが空でも正しく判定）
-    const currentMonth = getSurveyMonth();
-    checkSubmittedOnline(result.empId, currentMonth).then(submitted => {
+    // クラウドからサーベイ期間を取得してから判定
+    loadAllSettingsFromCloud().catch(() => {}).then(() => {
+      reloadAllSettings();
+      const currentMonth = getSurveyMonth();
+      return checkSubmittedOnline(result.empId, currentMonth).then(submitted => {
       if (submitted || hasSubmittedThisMonth(result.empId)) {
         document.getElementById('already-name').textContent = sanitize(result.name);
         const sm = getSurveyMonth();
@@ -3242,6 +3244,7 @@ function doLogin() {
       document.getElementById('survey-user-name').textContent = `${sanitize(result.name)}（${sanitize(result.dept)}）`;
       currentPage = 0;
       renderPage();
+      });
     });
   });
 }
@@ -5672,24 +5675,27 @@ function switchMasterTab(name, btn) {
     });
   } else if (_sessionRole === 'employee' && _sessionEmpId) {
     currentEmpId = _sessionEmpId;
-    const currentMonth = getSurveyMonth();
-    checkSubmittedOnline(_sessionEmpId, currentMonth).then(submitted => {
-      if (submitted || hasSubmittedThisMonth(_sessionEmpId)) {
-        document.getElementById('already-name').textContent = sanitize(_sessionName);
-        const sm2 = getSurveyMonth();
-        document.getElementById('already-month-msg').innerHTML = `${sm2.split('-')[0]}年${parseInt(sm2.split('-')[1])}月のサーベイへのご協力ありがとうございました。<br>来月もよろしくお願いします。`;
-        showScreen('already');
-        return;
-      }
-      const draft = localStorage.getItem('es_draft_' + _sessionEmpId);
-      answers = {};
-      if (draft) { try { answers = JSON.parse(draft); } catch(e) {} }
-      showScreen('survey');
-      const cm2 = getSurveyMonth();
-      document.getElementById('survey-title').textContent = `${cm2.split('-')[0]}年${parseInt(cm2.split('-')[1])}月 エンゲージメントサーベイ`;
-      document.getElementById('survey-user-name').textContent = `${sanitize(_sessionName)}（${sanitize(_sessionDept)}）`;
-      currentPage = 0;
-      renderPage();
+    loadAllSettingsFromCloud().catch(() => {}).then(() => {
+      reloadAllSettings();
+      const currentMonth = getSurveyMonth();
+      checkSubmittedOnline(_sessionEmpId, currentMonth).then(submitted => {
+        if (submitted || hasSubmittedThisMonth(_sessionEmpId)) {
+          document.getElementById('already-name').textContent = sanitize(_sessionName);
+          const sm2 = getSurveyMonth();
+          document.getElementById('already-month-msg').innerHTML = `${sm2.split('-')[0]}年${parseInt(sm2.split('-')[1])}月のサーベイへのご協力ありがとうございました。<br>来月もよろしくお願いします。`;
+          showScreen('already');
+          return;
+        }
+        const draft = localStorage.getItem('es_draft_' + _sessionEmpId);
+        answers = {};
+        if (draft) { try { answers = JSON.parse(draft); } catch(e) {} }
+        showScreen('survey');
+        const cm2 = getSurveyMonth();
+        document.getElementById('survey-title').textContent = `${cm2.split('-')[0]}年${parseInt(cm2.split('-')[1])}月 エンゲージメントサーベイ`;
+        document.getElementById('survey-user-name').textContent = `${sanitize(_sessionName)}（${sanitize(_sessionDept)}）`;
+        currentPage = 0;
+        renderPage();
+      });
     });
   }
 })();
