@@ -3626,19 +3626,13 @@ function renderIdList() {
         </label>
         <div style="font-size:9px;color:${emp.mailExcluded ? '#ef4444' : '#94a3b8'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
       </td>
-      <td>
-        <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <button class="action-label-btn" onclick="promptChangeEmail('${id}')">メール</button>
-          <button class="action-label-btn" onclick="promptChangePassword('${id}')">PW変更</button>
-          <button class="action-label-btn action-btn-green" onclick="sendMailToEmployee('${id}')">送信</button>
-          <button class="action-label-btn action-btn-amber" onclick="resetSurvey('${id}')">リセット</button>
-          <button class="action-label-btn action-btn-red" onclick="deleteEmployee('${id}')">削除</button>
-        </div>
+      <td style="text-align:center">
+        <button class="action-label-btn" onclick="resetSurvey('${id}')" title="回答リセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>リセット</button>
       </td>
     </tr>`;
   });
   table.innerHTML = `<table>
-    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th>操作</th></tr></thead>
+    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th>リセット</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
 }
