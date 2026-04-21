@@ -2474,7 +2474,7 @@ function renderDashboard() {
               <stop offset="100%" stop-color="#2dd4bf"/>
             </linearGradient>
           </defs>
-          ${dataPoints.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#14b8a6" stroke="white" stroke-width="2" opacity="0.9"/>`).join('')}
+          ${dataPoints.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#0d9488" stroke="white" stroke-width="2" opacity="0.9"/>`).join('')}
           ${labels}
           <text x="${cx}" y="${cy-10}" font-size="26" font-weight="900" fill="${totalColor}" text-anchor="middle">${totalScore}</text>
           <text x="${cx}" y="${cy+12}" font-size="11" fill="#64748b" text-anchor="middle">総合スコア</text>
@@ -3344,7 +3344,7 @@ function nextPage() {
 function prevPage() { _slideDir = 'prev'; currentPage--; renderPage(); window.scrollTo(0,0); }
 
 function launchConfetti() {
-  const colors = ['#14b8a6','#a855f7','#ec4899','#f59e0b','#22c55e','#06b6d4','#ef4444','#8b5cf6','#10b981'];
+  const colors = ['#0d9488','#14b8a6','#2dd4bf','#5eead4','#f59e0b','#22c55e','#06b6d4','#10b981','#99f6e4'];
   const shapes = ['square','circle'];
   for (let i = 0; i < 90; i++) {
     setTimeout(() => {
