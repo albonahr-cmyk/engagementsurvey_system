@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
     if (mbti !== undefined) props.mbti = P.rich(mbti);
     if (email !== undefined) props.email = P.rich(email);
     if (mailExcluded !== undefined) props.mailExcluded = P.checkbox(mailExcluded);
-    // パスワードはEmployees DBに平文保存しない（Auth DBにハッシュのみ保存）
+    if (password) props.password = P.rich(password);
 
     if (existing.length > 0) {
       props.isActive = P.checkbox(true);
