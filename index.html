@@ -326,25 +326,25 @@ if (typeof pdfjsLib !== 'undefined') {
   .month-selector select:focus { outline: none; border-color: #4f46e5; }
 
   /* KPIカード */
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-  .stat-card { background: white; border-radius: 14px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.15s; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.15s; }
   .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-  .stat-card .label { font-size: 12px; color: #94a3b8; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-card .value { font-size: 30px; font-weight: 800; color: #1e293b; letter-spacing: -1px; }
-  .stat-card .sub { font-size: 12px; margin-top: 6px; font-weight: 600; }
+  .stat-card .label { font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.3px; }
+  .stat-card .value { font-size: 34px; font-weight: 800; color: #1e293b; letter-spacing: -1px; }
+  .stat-card .sub { font-size: 13px; margin-top: 6px; font-weight: 600; }
   .stat-card .sub.up { color: #16a34a; }
   .stat-card .sub.down { color: #dc2626; }
   .stat-card .sub.neutral { color: #94a3b8; }
 
-  .section-title { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 16px; letter-spacing: -0.2px; }
+  .section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 14px; letter-spacing: -0.2px; }
 
   /* カテゴリスコア */
-  .category-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
-  .score-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.15s; }
+  .category-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .score-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.15s; }
   .score-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-  .score-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .score-card-header .cat-name { font-size: 14px; font-weight: 700; color: #475569; }
-  .score-card-header .score-num { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+  .score-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .score-card-header .cat-name { font-size: 16px; font-weight: 700; color: #334155; }
+  .score-card-header .score-num { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
   .score-card-header .score-num.alert { color: #dc2626; }
   .score-card-header .score-num.warn { color: #d97706; }
   .score-card-header .score-num.ok { color: #16a34a; }
@@ -353,19 +353,19 @@ if (typeof pdfjsLib !== 'undefined') {
   .score-bar.alert { background: linear-gradient(90deg, #f87171, #ef4444); }
   .score-bar.warn { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
   .score-bar.ok { background: linear-gradient(90deg, #4ade80, #22c55e); }
-  .score-trend { font-size: 12px; color: #94a3b8; margin-top: 8px; font-weight: 500; }
+  .score-trend { font-size: 13px; color: #64748b; margin-top: 8px; font-weight: 500; }
   .score-trend .down { color: #dc2626; font-weight: 700; }
   .score-trend .up { color: #16a34a; font-weight: 700; }
   .mini-chart { display: flex; align-items: flex-end; gap: 4px; height: 40px; margin-top: 10px; }
   .mini-bar { flex: 1; border-radius: 3px 3px 0 0; }
 
   /* アラート */
-  .alert-section { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 32px; border: 1px solid rgba(0,0,0,0.04); }
-  .alert-item { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f8fafc; transition: background 0.15s; }
+  .alert-section { background: white; border-radius: 14px; padding: 20px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 28px; border: 1px solid rgba(0,0,0,0.04); }
+  .alert-item { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid #f8fafc; transition: background 0.15s; }
   .alert-item:last-child { border-bottom: none; }
   .alert-icon { font-size: 22px; flex-shrink: 0; }
-  .alert-content .title { font-size: 14px; font-weight: 700; color: #1e293b; }
-  .alert-content .detail { font-size: 12px; color: #94a3b8; margin-top: 3px; font-weight: 500; }
+  .alert-content .title { font-size: 15px; font-weight: 700; color: #1e293b; }
+  .alert-content .detail { font-size: 13px; color: #64748b; margin-top: 3px; font-weight: 500; }
   .no-alert { text-align: center; padding: 24px; color: #94a3b8; font-size: 14px; font-weight: 500; }
 
   /* 回答一覧テーブル */
@@ -2370,7 +2370,7 @@ function renderDashboard() {
   // ===== レーダーチャート =====
   const radarEl = document.getElementById('radar-chart-section');
   if (radarEl) {
-    const radarSize = 280, cx = radarSize/2, cy = radarSize/2, R = 110;
+    const radarSize = 340, cx = radarSize/2, cy = radarSize/2, R = 135;
     const keys = catKeys;
     const n = keys.length;
     const angleStep = (2 * Math.PI) / n;
@@ -2411,14 +2411,14 @@ function renderDashboard() {
     // ラベル
     const labels = keys.map((k, i) => {
       const a = startAngle + i * angleStep;
-      const lr = R + 22;
+      const lr = R + 28;
       const lx = cx + lr * Math.cos(a);
       const ly = cy + lr * Math.sin(a);
       const anchor = lx < cx - 5 ? 'end' : lx > cx + 5 ? 'start' : 'middle';
       const score = cats[k] || 0;
       const col = score < 60 ? '#dc2626' : score < 70 ? '#d97706' : '#16a34a';
-      return `<text x="${lx}" y="${ly}" font-size="10" font-weight="700" fill="${col}" text-anchor="${anchor}" dominant-baseline="middle">${catNames[k]}</text>
-              <text x="${lx}" y="${ly + 13}" font-size="9" fill="#94a3b8" text-anchor="${anchor}">${score}点</text>`;
+      return `<text x="${lx}" y="${ly}" font-size="13" font-weight="700" fill="${col}" text-anchor="${anchor}" dominant-baseline="middle">${catNames[k]}</text>
+              <text x="${lx}" y="${ly + 15}" font-size="11" fill="#64748b" text-anchor="${anchor}">${score}点</text>`;
     }).join('');
 
     // 中心スコア
@@ -2428,7 +2428,7 @@ function renderDashboard() {
     radarEl.innerHTML = `
       <div class="section-title">📡 カテゴリ別レーダーチャート</div>
       <div class="radar-wrap">
-        <svg width="${radarSize+80}" height="${radarSize+60}" viewBox="-40 -30 ${radarSize+80} ${radarSize+60}" style="overflow:visible">
+        <svg width="${radarSize+100}" height="${radarSize+70}" viewBox="-50 -35 ${radarSize+100} ${radarSize+70}" style="overflow:visible">
           ${gridPolygons}
           ${axisLines}
           ${prevDataPoints ? `<polygon points="${prevDataPoints}" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>` : ''}
@@ -2445,9 +2445,9 @@ function renderDashboard() {
           </defs>
           ${dataPoints.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#6366f1" stroke="white" stroke-width="2" opacity="0.9"/>`).join('')}
           ${labels}
-          <text x="${cx}" y="${cy-8}" font-size="20" font-weight="900" fill="${totalColor}" text-anchor="middle">${totalScore}</text>
-          <text x="${cx}" y="${cy+10}" font-size="9" fill="#94a3b8" text-anchor="middle">総合スコア</text>
-          ${prevDataPoints ? `<text x="${radarSize-10}" y="${radarSize+20}" font-size="9" fill="#94a3b8">── 今月　- - 前月</text>` : ''}
+          <text x="${cx}" y="${cy-10}" font-size="26" font-weight="900" fill="${totalColor}" text-anchor="middle">${totalScore}</text>
+          <text x="${cx}" y="${cy+12}" font-size="11" fill="#64748b" text-anchor="middle">総合スコア</text>
+          ${prevDataPoints ? `<text x="${radarSize-10}" y="${radarSize+20}" font-size="11" fill="#64748b">── 今月　- - 前月</text>` : ''}
         </svg>
       </div>`;
   }
