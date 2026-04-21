@@ -3817,7 +3817,7 @@ function _renderAccountView(empId) {
       <div class="section-label">ログイン情報</div>
       <div class="account-info-row"><div class="label">サーベイURL</div><div class="value"><a href="${surveyUrl}" target="_blank">${surveyUrl}</a></div></div>
       <div class="account-info-row"><div class="label">社員ID</div><div class="value" style="font-family:monospace;font-size:17px;letter-spacing:1px">${empId}</div></div>
-      <div class="account-info-row"><div class="label">パスワード</div><div class="value">${emp.hasPassword ? '設定済' : '<span style="color:#94a3b8">未設定</span>'}</div></div>
+      <div class="account-info-row"><div class="label">パスワード</div><div class="value" style="font-family:monospace;letter-spacing:0.5px">${emp.password ? sanitize(emp.password) : '<span style="color:#94a3b8">未設定</span>'}</div></div>
     </div>`;
   document.getElementById('account-info-buttons').innerHTML = `
     <div style="display:flex;gap:10px;margin-top:16px">

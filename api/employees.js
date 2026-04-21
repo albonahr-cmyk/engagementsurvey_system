@@ -22,6 +22,7 @@ module.exports = async function handler(req, res) {
         mbti: P.readRich(p.mbti),
         email: P.readRich(p.email),
         hasPassword: !!P.readRich(p.password),
+        password: P.readRich(p.password) || '',
         isActive: P.readCheckbox(p.isActive),
         mailExcluded: P.readCheckbox(p.mailExcluded),
         issuedAt: P.readRich(p.issuedAt),
