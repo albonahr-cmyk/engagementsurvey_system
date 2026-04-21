@@ -2623,36 +2623,22 @@ async function exportToSpreadsheet() {
 
   const month = document.getElementById('emp-month-select')?.value || months[months.length-1];
 
-  // GASのresponsesシートから直接全回答を取得
-  showToast('📤 GASからデータを取得中...');
+  // Notionから全回答を取得
+  showToast('📤 データを取得中...');
   let allResponses = [];
   try {
-    allResponses = await new Promise((resolve, reject) => {
-      const cbName = '_gasLoadCb_' + Date.now();
-      const params = new URLSearchParams({ action: 'load', token: gasToken || '', month: month, callback: cbName });
-      window[cbName] = function(res) {
-        delete window[cbName];
-        resolve(res?.ok ? (res.data || []) : []);
-      };
-      const script = document.createElement('script');
-      script.src = gasUrl + '?' + params.toString();
-      script.onerror = () => { delete window[cbName]; resolve([]); };
-      document.body.appendChild(script);
-      setTimeout(() => { try { document.body.removeChild(script); } catch(e){} }, 15000);
-    });
-  } catch(e) { allResponses = []; }
+    const raw = await loadAllFromGoogleSheets(month);
+    if (raw) allResponses = raw;
+  } catch(e) {}
 
   // 社員ごとに回答をグループ化（時系列順）
   const responsesByEmp = {};
   allResponses.forEach(entry => {
     if (!entry.empId) return;
     if (!responsesByEmp[entry.empId]) responsesByEmp[entry.empId] = [];
-    // GASの生データからanswersオブジェクトを構築
-    const ans = {};
-    for (let i = 1; i <= 33; i++) {
-      const v = entry['q' + i];
-      if (v !== '' && v !== undefined && v !== null) ans['q' + i] = Number(v);
-    }
+    // answersオブジェクトを取得
+    let ans = entry.answers || {};
+    if (typeof ans === 'string') { try { ans = JSON.parse(ans); } catch(e) { ans = {}; } }
     responsesByEmp[entry.empId].push(ans);
   });
 
