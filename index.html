@@ -2616,24 +2616,67 @@ function exportEmployeeCSV() {
   showToast('📥 CSVをダウンロードしました');
 }
 
-function exportToSpreadsheet() {
+async function exportToSpreadsheet() {
   const gasUrl = localStorage.getItem('es_gas_url');
   const gasToken = localStorage.getItem('es_gas_token');
   if (!gasUrl) { showToast('⚠️ 設定タブでGAS URLを登録してください'); return; }
 
   const month = document.getElementById('emp-month-select')?.value || months[months.length-1];
-  const headers = ['社員ID','氏名','所属','ランク','MBTI','IQ','戦闘力','総合スコア','職務','自己成長','健康','支援','人間関係','承認','理念戦略','組織風土','環境'];
-  const rows = Object.entries(empData).map(([id, data]) => {
+
+  // GASから全回答を取得して、社員ごとに回答回数を把握
+  showToast('📤 データを取得中...');
+  let allResponses = [];
+  try {
+    const raw = await loadAllFromGoogleSheets(month);
+    if (raw) allResponses = raw;
+  } catch(e) {}
+
+  // 社員ごとに回答をグループ化（時系列順）
+  const responsesByEmp = {};
+  allResponses.forEach(entry => {
+    if (!entry.empId || entry.month !== month) return;
+    if (!responsesByEmp[entry.empId]) responsesByEmp[entry.empId] = [];
+    // GASの生データからanswersオブジェクトを構築
+    const ans = {};
+    for (let i = 1; i <= 33; i++) {
+      const v = entry['q' + i];
+      if (v !== '' && v !== undefined && v !== null) ans['q' + i] = Number(v);
+    }
+    responsesByEmp[entry.empId].push(ans);
+  });
+
+  // 最大回答回数を取得
+  const maxRounds = Math.max(1, ...Object.values(responsesByEmp).map(r => r.length));
+
+  // ヘッダー構築
+  const scoreCols = ['総合スコア','職務','自己成長','健康','支援','人間関係','承認','理念戦略','組織風土','環境'];
+  const baseHeaders = ['社員ID','氏名','所属','ランク','MBTI','IQ','戦闘力'];
+  const headers = [...baseHeaders];
+  for (let r = 1; r <= maxRounds; r++) {
+    const prefix = maxRounds > 1 ? `${r}回目_` : '';
+    scoreCols.forEach(c => headers.push(prefix + c));
+  }
+
+  const rows = Object.keys(employees).map(id => {
     const emp = employees[id] || {};
+    if (emp.role === 'admin') return null;
     const profile = getProfile(id);
     const rank = calcRank(profile.iq, profile.battlePower) || '';
-    const scores = data[month] || {};
-    const total = Object.keys(scores).length > 0 ? getTotal(scores) : '';
-    return [id, emp.name||'', emp.dept||'', rank, profile.mbti||'', profile.iq||'', profile.battlePower||'', total,
-      scores['やりがい']||'', scores['成長']||'', scores['健康']||'', scores['上司']||'',
-      scores['チーム']||'', scores['承認']||'', scores['信頼']||'', scores['組織']||'', scores['業務']||''
-    ];
-  });
+    const row = [id, emp.name||'', emp.dept||'', rank, profile.mbti||'', profile.iq||'', profile.battlePower||''];
+
+    const empResponses = responsesByEmp[id] || [];
+    for (let r = 0; r < maxRounds; r++) {
+      if (empResponses[r]) {
+        const scores = calcScoresFromAnswers(empResponses[r]);
+        const total = Object.keys(scores).length > 0 ? getTotal(scores) : '';
+        row.push(total, scores['やりがい']||'', scores['成長']||'', scores['健康']||'', scores['上司']||'',
+          scores['チーム']||'', scores['承認']||'', scores['信頼']||'', scores['組織']||'', scores['業務']||'');
+      } else {
+        row.push('','','','','','','','','','');
+      }
+    }
+    return row;
+  }).filter(Boolean);
 
   if (!rows.length) { showToast('⚠️ 出力するデータがありません'); return; }
 
