@@ -181,12 +181,13 @@ if (typeof pdfjsLib !== 'undefined') {
     background: url('login-bg.png') center/cover no-repeat;
     opacity: 0.12; filter: blur(8px);
   }
+  #screen-survey { background: #f5f5f5 !important; }
+  #screen-survey::before { display: none; }
   #screen-survey .card {
     width: 100%; max-width: 660px; border-radius: 20px;
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     position: relative; z-index: 1;
     animation: surveyCardIn 0.8s cubic-bezier(0.16,1,0.3,1) both;
   }
@@ -194,13 +195,13 @@ if (typeof pdfjsLib !== 'undefined') {
     from { opacity: 0; transform: translateY(30px) scale(0.97); }
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
-  .survey-header { margin-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 24px; }
-  .survey-header h2 { font-size: 18px; color: rgba(255,255,255,0.9); font-weight: 700; letter-spacing: 1px; }
-  .survey-header p { color: rgba(255,255,255,0.5); font-size: 13px; margin-top: 4px; font-weight: 500; }
+  .survey-header { margin-bottom: 32px; border-bottom: 1px solid #e5e7eb; padding-bottom: 24px; }
+  .survey-header h2 { font-size: 18px; color: #1e293b; font-weight: 700; letter-spacing: 1px; }
+  .survey-header p { color: #64748b; font-size: 13px; margin-top: 4px; font-weight: 500; }
   .progress-wrap { margin-top: 18px; }
-  .progress-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #4a7a3a, #7abc5a); border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
-  .progress-text { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 6px; text-align: right; font-weight: 600; }
+  .progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .progress-text { font-size: 13px; color: #64748b; margin-top: 6px; text-align: right; font-weight: 600; }
   .question-block {
     margin-bottom: 36px;
     animation: questionFadeIn 0.5s ease both;
@@ -216,24 +217,24 @@ if (typeof pdfjsLib !== 'undefined') {
     border: 1px solid rgba(122,188,90,0.2);
   }
   .question-block .question {
-    font-size: 15px; font-weight: 500; margin-bottom: 22px;
-    color: rgba(255,255,255,0.85); line-height: 1.7;
+    font-size: 15px; font-weight: 600; margin-bottom: 22px;
+    color: #1e293b; line-height: 1.7;
   }
   .rating-scale { display: flex; gap: 8px; }
   .rating-btn {
     flex: 1; padding: 14px 4px; border: none; border-radius: 10px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
     cursor: pointer; text-align: center; font-size: 15px; font-weight: 700;
-    color: rgba(255,255,255,0.4);
+    color: #64748b;
     transform: translateY(0);
     transition: all 0.15s ease;
   }
   .rating-btn:hover {
-    background: rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.8);
+    background: #e2e8f0;
+    color: #334155;
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   .rating-btn:active { transform: translateY(1px); }
   .rating-btn[data-val="1"].selected { background: linear-gradient(180deg, #f87171, #ef4444); border-color: #ef4444; color: white; box-shadow: 0 0 20px rgba(239,68,68,0.3); }
@@ -252,25 +253,25 @@ if (typeof pdfjsLib !== 'undefined') {
   .rating-btn.reverse-color[data-val="6"].selected { background: linear-gradient(180deg, #fb923c, #f97316); border-color: #f97316; color: white; box-shadow: 0 0 20px rgba(249,115,22,0.3); }
   .rating-btn.reverse-color[data-val="7"].selected { background: linear-gradient(180deg, #f87171, #ef4444); border-color: #ef4444; color: white; box-shadow: 0 0 20px rgba(239,68,68,0.3); }
   .rating-labels { display: flex; justify-content: space-between; margin-top: 10px; }
-  .rating-labels span { font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 600; }
+  .rating-labels span { font-size: 13px; color: #64748b; font-weight: 600; }
   .free-text textarea {
-    width: 100%; padding: 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+    width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px;
     font-size: 14px; resize: vertical; min-height: 110px; font-family: inherit;
-    transition: all 0.3s; color: rgba(255,255,255,0.85); line-height: 1.6;
-    background: rgba(255,255,255,0.04);
+    transition: all 0.3s; color: #1e293b; line-height: 1.6;
+    background: #f8fafc;
   }
-  .free-text textarea::placeholder { color: rgba(255,255,255,0.25); }
-  .free-text textarea:focus { outline: none; border-color: rgba(122,188,90,0.4); box-shadow: 0 0 20px rgba(122,188,90,0.08); background: rgba(255,255,255,0.06); }
-  .survey-footer { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .free-text textarea::placeholder { color: #94a3b8; }
+  .free-text textarea:focus { outline: none; border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,0.15); background: #fff; }
+  .survey-footer { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
   .survey-footer .btn-primary {
-    background: linear-gradient(135deg, #4a7a3a, #5a8a4a);
-    box-shadow: 0 4px 0 #3a6a2a, 0 4px 16px rgba(74,122,58,0.3);
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    box-shadow: 0 4px 0 #3730a3, 0 4px 16px rgba(79,70,229,0.3);
   }
   .survey-footer .btn-secondary {
-    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.1); box-shadow: none;
+    background: #f1f5f9; color: #475569;
+    border: 1px solid #e2e8f0; box-shadow: none;
   }
-  .survey-footer .btn-secondary:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+  .survey-footer .btn-secondary:hover { background: #e2e8f0; color: #334155; }
 
   /* 完了 */
   #screen-done { align-items: center; justify-content: center; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%); }
