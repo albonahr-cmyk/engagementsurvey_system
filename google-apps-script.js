@@ -48,13 +48,20 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  // POSTデータをパース
-  if (e.postData && e.postData.contents) {
+  // フォーム送信（payloadパラメータ）の場合
+  if (e.parameter && e.parameter.payload) {
+    try {
+      var formBody = JSON.parse(e.parameter.payload);
+      if (!e.parameter.action && formBody.action) e.parameter.action = formBody.action;
+      if (!e.parameter.token && formBody.token) e.parameter.token = formBody.token;
+      e.parameter.data = JSON.stringify(formBody);
+    } catch(ex) {}
+  }
+  // JSON body の場合
+  else if (e.postData && e.postData.contents) {
     try {
       var postBody = JSON.parse(e.postData.contents);
-      // actionをパラメータに設定
       if (!e.parameter.action && postBody.action) e.parameter.action = postBody.action;
-      // postBodyをdataとして渡す
       e.parameter.data = JSON.stringify(postBody);
     } catch(ex) {}
   }

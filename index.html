@@ -2640,17 +2640,34 @@ function exportToSpreadsheet() {
     rows: rows
   };
 
-  fetch(gasUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-    mode: 'no-cors'
-  }).then(() => {
-    // no-corsではレスポンスが読めないので成功前提で通知
+  // 隠しiframe+フォームでPOST送信（CORS回避）
+  let iframe = document.getElementById('gas-export-iframe');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'gas-export-iframe';
+    iframe.name = 'gas-export-iframe';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = gasUrl;
+  form.target = 'gas-export-iframe';
+  form.style.display = 'none';
+
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'payload';
+  input.value = JSON.stringify(payload);
+  form.appendChild(input);
+
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => { try { document.body.removeChild(form); } catch(e){} }, 1000);
+  setTimeout(() => {
     showToast('✅ スプレッドシートに出力しました（GASのスプレッドシートを確認してください）');
-  }).catch(err => {
-    showToast('⚠️ 出力に失敗しました: ' + err.message);
-  });
+  }, 5000);
 }
 
 // ===== 社員詳細 =====
