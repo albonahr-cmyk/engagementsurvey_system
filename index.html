@@ -2259,7 +2259,7 @@ function renderDashboard() {
   `;
 
   // 未回答者一覧（当月のみ）
-  const currentMonth = months[months.length - 1];
+  const currentMonth = getSurveyMonth();
   const unsubSection = document.getElementById('unsubmitted-section');
   if (month === currentMonth) {
     const submittedIds = getSubmittedIds(month);
@@ -2690,7 +2690,7 @@ function showDetail(empId) {
   const empRank = getBizIQData(empId)?.rank16 || calcRank(empProfile.iq, empProfile.battlePower);
 
   const data = empData[empId] || {};
-  const latestMonth = months[months.length - 1];
+  const latestMonth = getSurveyMonth();
   const latestScores = data[latestMonth] || null;
   const latestTotal = latestScores ? getTotal(latestScores) : null;
   const prevMonth = months[months.length - 2];
