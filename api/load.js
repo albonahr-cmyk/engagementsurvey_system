@@ -6,11 +6,14 @@ module.exports = async function handler(req, res) {
   if (!user) return;
 
   try {
-    const { month } = req.method === 'POST' ? req.body : req.query;
+    const { month, all } = req.method === 'POST' ? req.body : req.query;
 
-    const filter = month
-      ? { property: 'month', rich_text: { equals: month } }
-      : undefined;
+    const conditions = [];
+    if (month) conditions.push({ property: 'month', rich_text: { equals: month } });
+    // all=1 でない場合は最新（superseded=false）のみ
+    if (!all || all !== '1') conditions.push({ property: 'superseded', checkbox: { equals: false } });
+
+    const filter = conditions.length > 1 ? { and: conditions } : conditions.length === 1 ? conditions[0] : undefined;
 
     const results = await queryDB('surveys', filter);
 
@@ -22,6 +25,7 @@ module.exports = async function handler(req, res) {
         empId: P.readRich(props.empId),
         month: P.readRich(props.month),
         answers,
+        superseded: P.readCheckbox(props.superseded),
       };
     });
 

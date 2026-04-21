@@ -2627,16 +2627,20 @@ async function exportToSpreadsheet() {
   showToast('📤 データを取得中...');
   let allResponses = [];
   try {
-    const raw = await loadAllFromGoogleSheets(month);
-    if (raw) allResponses = raw;
+    const raw = await apiGet('load', { month, all: '1' });
+    const rawData = raw?.ok ? raw.data : null;
+    const raw2 = rawData;
+    if (raw2) allResponses = raw2;
   } catch(e) {}
 
-  // 社員ごとに回答をグループ化（時系列順）
+  // superseded（古い回答）を先に、最新を後にソート
+  allResponses.sort((a, b) => (b.superseded ? 0 : 1) - (a.superseded ? 0 : 1));
+
+  // 社員ごとに回答をグループ化（古い順→最新）
   const responsesByEmp = {};
   allResponses.forEach(entry => {
     if (!entry.empId) return;
     if (!responsesByEmp[entry.empId]) responsesByEmp[entry.empId] = [];
-    // answersオブジェクトを取得
     let ans = entry.answers || {};
     if (typeof ans === 'string') { try { ans = JSON.parse(ans); } catch(e) { ans = {}; } }
     responsesByEmp[entry.empId].push(ans);

@@ -12,11 +12,12 @@ module.exports = async function handler(req, res) {
     if (!empId || !month) return res.status(400).json({ ok: false, error: 'empId and month required' });
     if (!/^\d{4}-\d{2}$/.test(month)) return res.status(400).json({ ok: false, error: 'invalid month format' });
 
-    // 重複チェック
+    // 重複チェック（supersededでない有効な回答のみ）
     const existing = await queryDB('surveys', {
       and: [
         { property: 'empId', rich_text: { equals: empId } },
         { property: 'month', rich_text: { equals: month } },
+        { property: 'superseded', checkbox: { equals: false } },
       ],
     });
     if (existing.length > 0) return res.json({ ok: false, error: 'already_submitted' });
@@ -28,6 +29,7 @@ module.exports = async function handler(req, res) {
       empId: P.rich(empId),
       month: P.rich(month),
       answers: P.rich(answersStr),
+      superseded: P.checkbox(false),
       submittedAt: { date: { start: new Date().toISOString() } },
     });
 

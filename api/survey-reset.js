@@ -1,4 +1,4 @@
-const { queryDB, archivePage } = require('../lib/notion');
+const { queryDB, updatePage, P } = require('../lib/notion');
 const { requireAuth } = require('../lib/auth');
 
 module.exports = async function handler(req, res) {
@@ -11,7 +11,7 @@ module.exports = async function handler(req, res) {
     if (!empId || !month) return res.status(400).json({ ok: false, error: 'empId and month required' });
     if (!/^\d{4}-\d{2}$/.test(month)) return res.status(400).json({ ok: false, error: 'invalid month format' });
 
-    // surveys DBから該当レコードを検索してアーカイブ
+    // surveys DBから該当レコードを検索して superseded フラグを立てる（削除しない）
     const existing = await queryDB('surveys', {
       and: [
         { property: 'empId', rich_text: { equals: empId } },
@@ -20,10 +20,10 @@ module.exports = async function handler(req, res) {
     });
 
     for (const page of existing) {
-      await archivePage(page.id);
+      await updatePage(page.id, { superseded: P.checkbox(true) });
     }
 
-    return res.json({ ok: true, deleted: existing.length });
+    return res.json({ ok: true, superseded: existing.length });
   } catch (e) {
     console.error('survey-reset error:', e);
     return res.status(500).json({ ok: false, error: 'internal_error' });

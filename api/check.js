@@ -11,10 +11,12 @@ module.exports = async function handler(req, res) {
     if (!empId || !month) return res.status(400).json({ ok: false, error: 'empId and month required' });
     if (!/^\d{4}-\d{2}$/.test(month)) return res.status(400).json({ ok: false, error: 'invalid month format' });
 
+    // supersededでない有効な回答のみチェック
     const results = await queryDB('surveys', {
       and: [
         { property: 'empId', rich_text: { equals: empId } },
         { property: 'month', rich_text: { equals: month } },
+        { property: 'superseded', checkbox: { equals: false } },
       ],
     });
 
