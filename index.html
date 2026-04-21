@@ -3698,10 +3698,10 @@ function renderIdList() {
       <td style="text-align:center;white-space:nowrap">
         <label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">
           <input type="checkbox" ${emp.mailExcluded ? 'checked' : ''} onchange="toggleMailExcluded('${id}', this.checked)" style="opacity:0;width:0;height:0">
-          <span style="position:absolute;inset:0;background:${emp.mailExcluded ? '#ef4444' : '#d1d5db'};border-radius:10px;transition:.2s"></span>
+          <span style="position:absolute;inset:0;background:${emp.mailExcluded ? '#d1d5db' : '#ef4444'};border-radius:10px;transition:.2s"></span>
           <span style="position:absolute;top:2px;left:${emp.mailExcluded ? '18px' : '2px'};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
         </label>
-        <div style="font-size:9px;color:${emp.mailExcluded ? '#ef4444' : '#94a3b8'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
+        <div style="font-size:9px;color:${emp.mailExcluded ? '#94a3b8' : '#ef4444'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
       </td>
       <td style="text-align:center">
         <button class="action-label-btn" onclick="resetSurvey('${id}')" title="回答リセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>リセット</button>
