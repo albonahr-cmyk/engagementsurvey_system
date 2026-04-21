@@ -2623,18 +2623,29 @@ async function exportToSpreadsheet() {
 
   const month = document.getElementById('emp-month-select')?.value || months[months.length-1];
 
-  // GASから全回答を取得して、社員ごとに回答回数を把握
-  showToast('📤 データを取得中...');
+  // GASのresponsesシートから直接全回答を取得
+  showToast('📤 GASからデータを取得中...');
   let allResponses = [];
   try {
-    const raw = await loadAllFromGoogleSheets(month);
-    if (raw) allResponses = raw;
-  } catch(e) {}
+    allResponses = await new Promise((resolve, reject) => {
+      const cbName = '_gasLoadCb_' + Date.now();
+      const params = new URLSearchParams({ action: 'load', token: gasToken || '', month: month, callback: cbName });
+      window[cbName] = function(res) {
+        delete window[cbName];
+        resolve(res?.ok ? (res.data || []) : []);
+      };
+      const script = document.createElement('script');
+      script.src = gasUrl + '?' + params.toString();
+      script.onerror = () => { delete window[cbName]; resolve([]); };
+      document.body.appendChild(script);
+      setTimeout(() => { try { document.body.removeChild(script); } catch(e){} }, 15000);
+    });
+  } catch(e) { allResponses = []; }
 
   // 社員ごとに回答をグループ化（時系列順）
   const responsesByEmp = {};
   allResponses.forEach(entry => {
-    if (!entry.empId || entry.month !== month) return;
+    if (!entry.empId) return;
     if (!responsesByEmp[entry.empId]) responsesByEmp[entry.empId] = [];
     // GASの生データからanswersオブジェクトを構築
     const ans = {};
