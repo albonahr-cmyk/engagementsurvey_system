@@ -39,6 +39,7 @@ function doGet(e) {
     if (action === 'loadSettings') return handleLoadSettings(ss, data);
     if (action === 'sendMails')    return handleSendMails(ss, data);
     if (action === 'testMail')     return handleTestMail(ss, data);
+    if (action === 'exportSheet')  return handleExportSheet(ss, data);
 
     return jsonResponse({ error: 'unknown action: ' + action });
   } catch (err) {
@@ -323,4 +324,58 @@ function setupSheet() {
 
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground('#f0f0f0');
   SpreadsheetApp.getUi().alert('セットアップ完了！\n\n社員データはNotion DBから自動取得されます。');
+}
+
+// ===== スプレッドシートへエクスポート =====
+function handleExportSheet(ss, data) {
+  var rows = data.rows;
+  if (typeof rows === 'string') {
+    try { rows = JSON.parse(rows); } catch(ex) { return jsonResponse({ error: 'rows parse error' }); }
+  }
+  if (!rows || !rows.length) return jsonResponse({ error: 'no data' });
+
+  var sheetName = data.sheetName || 'サーベイ結果';
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+  } else {
+    sheet.clear();
+  }
+
+  var headers = data.headers;
+  if (typeof headers === 'string') {
+    try { headers = JSON.parse(headers); } catch(ex) {}
+  }
+
+  // ヘッダー行
+  if (headers && headers.length) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground('#eef2ff');
+  }
+
+  // データ行
+  var startRow = headers ? 2 : 1;
+  var values = rows.map(function(row) {
+    if (Array.isArray(row)) return row;
+    // オブジェクトの場合はheaders順で配列化
+    return headers.map(function(h) { return row[h] !== undefined ? row[h] : ''; });
+  });
+
+  if (values.length) {
+    sheet.getRange(startRow, 1, values.length, values[0].length).setValues(values);
+  }
+
+  // 列幅自動調整
+  for (var c = 1; c <= (headers || values[0]).length; c++) {
+    sheet.autoResizeColumn(c);
+  }
+
+  // フィルター設定
+  var lastRow = startRow + values.length - 1;
+  var lastCol = (headers || values[0]).length;
+  var range = sheet.getRange(1, 1, lastRow, lastCol);
+  if (sheet.getFilter()) sheet.getFilter().remove();
+  range.createFilter();
+
+  var sheetUrl = ss.getUrl() + '#gid=' + sheet.getSheetId();
+  return jsonResponse({ ok: true, url: sheetUrl, count: values.length });
 }

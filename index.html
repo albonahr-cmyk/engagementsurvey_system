@@ -1027,6 +1027,7 @@ if (typeof pdfjsLib !== 'undefined') {
         <select id="emp-month-select" onchange="renderEmployeeList()"></select>
       </div>
       <button onclick="exportEmployeeCSV()" class="btn btn-secondary btn-sm">📥 CSV出力</button>
+      <button onclick="exportToSpreadsheet()" class="btn btn-secondary btn-sm" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7">📊 スプレッドシートに出力</button>
       <button onclick="refreshSurveyData()" class="btn btn-secondary btn-sm" id="btn-refresh-data">🔄 最新データ取得</button>
     </div>
     <div class="section-title">👥 社員マスタ一覧 <span id="emp-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
@@ -2607,6 +2608,49 @@ function exportEmployeeCSV() {
   a.href = url; a.download = `engagement_${month}.csv`; a.click();
   URL.revokeObjectURL(url);
   showToast('📥 CSVをダウンロードしました');
+}
+
+function exportToSpreadsheet() {
+  const gasUrl = localStorage.getItem('es_gas_url');
+  const gasToken = localStorage.getItem('es_gas_token');
+  if (!gasUrl) { showToast('⚠️ 設定タブでGAS URLを登録してください'); return; }
+
+  const month = document.getElementById('emp-month-select')?.value || months[months.length-1];
+  const headers = ['社員ID','氏名','所属','ランク','MBTI','IQ','戦闘力','総合スコア','職務','自己成長','健康','支援','人間関係','承認','理念戦略','組織風土','環境'];
+  const rows = Object.entries(empData).map(([id, data]) => {
+    const emp = employees[id] || {};
+    const profile = getProfile(id);
+    const rank = calcRank(profile.iq, profile.battlePower) || '';
+    const scores = data[month] || {};
+    const total = Object.keys(scores).length > 0 ? getTotal(scores) : '';
+    return [id, emp.name||'', emp.dept||'', rank, profile.mbti||'', profile.iq||'', profile.battlePower||'', total,
+      scores['やりがい']||'', scores['成長']||'', scores['健康']||'', scores['上司']||'',
+      scores['チーム']||'', scores['承認']||'', scores['信頼']||'', scores['組織']||'', scores['業務']||''
+    ];
+  });
+
+  if (!rows.length) { showToast('⚠️ 出力するデータがありません'); return; }
+
+  showToast('📤 スプレッドシートに出力中...');
+  const payload = {
+    action: 'exportSheet',
+    token: gasToken,
+    sheetName: 'サーベイ結果_' + month,
+    headers: headers,
+    rows: rows
+  };
+
+  fetch(gasUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    mode: 'no-cors'
+  }).then(() => {
+    // no-corsではレスポンスが読めないので成功前提で通知
+    showToast('✅ スプレッドシートに出力しました（GASのスプレッドシートを確認してください）');
+  }).catch(err => {
+    showToast('⚠️ 出力に失敗しました: ' + err.message);
+  });
 }
 
 // ===== 社員詳細 =====
