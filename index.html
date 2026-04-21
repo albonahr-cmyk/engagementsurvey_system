@@ -6,7 +6,7 @@
 <title>エンゲージメントサーベイ</title>
 <meta name="description" content="チームの声を可視化するエンゲージメントサーベイツール">
 <!-- Favicon (SVG emoji) -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><path d='M9 22V14' stroke='white' stroke-width='2.2' stroke-linecap='round'/><path d='M13 22V11' stroke='white' stroke-width='2.2' stroke-linecap='round'/><path d='M17 22V16' stroke='white' stroke-width='2.2' stroke-linecap='round'/><path d='M21 22V9' stroke='white' stroke-width='2.2' stroke-linecap='round'/><circle cx='9' cy='12' r='1.5' fill='white'/><circle cx='13' cy='9' r='1.5' fill='white'/><circle cx='17' cy='14' r='1.5' fill='white'/><circle cx='21' cy='7' r='1.5' fill='white'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230d9488'/><path d='M9 22V14' stroke='white' stroke-width='2.2' stroke-linecap='round'/><path d='M13 22V11' stroke='white' stroke-width='2.2' stroke-linecap='round'/><path d='M17 22V16' stroke='white' stroke-width='2.2' stroke-linecap='round'/><path d='M21 22V9' stroke='white' stroke-width='2.2' stroke-linecap='round'/><circle cx='9' cy='12' r='1.5' fill='white'/><circle cx='13' cy='9' r='1.5' fill='white'/><circle cx='17' cy='14' r='1.5' fill='white'/><circle cx='21' cy='7' r='1.5' fill='white'/></svg>">
 <!-- OGP -->
 <meta property="og:title" content="エンゲージメントサーベイ">
 <meta property="og:description" content="チームの声を可視化するエンゲージメントサーベイツール">
@@ -35,9 +35,9 @@ if (typeof pdfjsLib !== 'undefined') {
   .screen.active { display: flex; }
   .card { background: white; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); padding: 40px; }
   .btn { padding: 12px 28px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: 0.3px; }
-  .btn-primary { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; box-shadow: 0 4px 0 #3730a3, 0 6px 16px rgba(79,70,229,0.3); transform: translateY(0); }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #3730a3, 0 8px 20px rgba(79,70,229,0.35); }
-  .btn-primary:active { transform: translateY(3px); box-shadow: 0 1px 0 #3730a3, 0 2px 8px rgba(79,70,229,0.2); }
+  .btn-primary { background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; box-shadow: 0 4px 0 #115e59, 0 6px 16px rgba(13,148,136,0.3); transform: translateY(0); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #115e59, 0 8px 20px rgba(13,148,136,0.35); }
+  .btn-primary:active { transform: translateY(3px); box-shadow: 0 1px 0 #115e59, 0 2px 8px rgba(13,148,136,0.2); }
   .btn-secondary { background: linear-gradient(180deg, #ffffff, #f1f5f9); color: #475569; box-shadow: 0 3px 0 #cbd5e1, 0 4px 10px rgba(0,0,0,0.06); transform: translateY(0); border: 1px solid #e2e8f0; }
   .btn-secondary:hover { transform: translateY(-1px); box-shadow: 0 4px 0 #cbd5e1, 0 6px 14px rgba(0,0,0,0.08); }
   .btn-secondary:active { transform: translateY(3px); box-shadow: 0 1px 0 #cbd5e1; }
@@ -200,7 +200,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .survey-header p { color: #64748b; font-size: 13px; margin-top: 4px; font-weight: 500; }
   .progress-wrap { margin-top: 18px; }
   .progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #0d9488, #2dd4bf); border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
   .progress-text { font-size: 13px; color: #64748b; margin-top: 6px; text-align: right; font-weight: 600; }
   .question-block {
     margin-bottom: 36px;
@@ -261,11 +261,11 @@ if (typeof pdfjsLib !== 'undefined') {
     background: #f8fafc;
   }
   .free-text textarea::placeholder { color: #94a3b8; }
-  .free-text textarea:focus { outline: none; border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,0.15); background: #fff; }
+  .free-text textarea:focus { outline: none; border-color: #2dd4bf; box-shadow: 0 0 0 3px rgba(45,212,191,0.15); background: #fff; }
   .survey-footer { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
   .survey-footer .btn-primary {
-    background: linear-gradient(135deg, #4f46e5, #6366f1);
-    box-shadow: 0 4px 0 #3730a3, 0 4px 16px rgba(79,70,229,0.3);
+    background: linear-gradient(135deg, #0d9488, #14b8a6);
+    box-shadow: 0 4px 0 #115e59, 0 4px 16px rgba(13,148,136,0.3);
   }
   .survey-footer .btn-secondary {
     background: #f1f5f9; color: #475569;
@@ -274,7 +274,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .survey-footer .btn-secondary:hover { background: #e2e8f0; color: #334155; }
 
   /* 完了 */
-  #screen-done { align-items: center; justify-content: center; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%); }
+  #screen-done { align-items: center; justify-content: center; background: linear-gradient(135deg, #0d9488 0%, #7c3aed 50%, #9333ea 100%); }
   #screen-done .card { width: 420px; text-align: center; border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); }
   .done-icon { font-size: 72px; margin-bottom: 16px; animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); }
   @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -282,7 +282,7 @@ if (typeof pdfjsLib !== 'undefined') {
   #screen-done p { color: #6b7280; font-size: 14px; line-height: 1.7; }
 
   /* 回答済み */
-  #screen-already { align-items: center; justify-content: center; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%); }
+  #screen-already { align-items: center; justify-content: center; background: linear-gradient(135deg, #0d9488 0%, #7c3aed 50%, #9333ea 100%); }
   #screen-already .card { width: 420px; text-align: center; border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); }
   .already-icon { font-size: 72px; margin-bottom: 16px; }
   #screen-already h2 { font-size: 22px; color: #1e1b4b; margin-bottom: 8px; font-weight: 800; }
@@ -311,7 +311,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .sidebar-section-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px 4px; }
   .tab-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; background: none; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.15s; letter-spacing: 0.1px; text-align: left; margin: 2px 0; }
   .tab-btn:hover { background: #f1f5f9; color: #334155; }
-  .tab-btn.active { background: #eef2ff; color: #4f46e5; font-weight: 600; }
+  .tab-btn.active { background: #f0fdfa; color: #0d9488; font-weight: 600; }
   .tab-btn .tab-icon { width: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .tab-btn .tab-icon svg { display: block; }
 
@@ -324,7 +324,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .month-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
   .month-selector label { font-size: 14px; font-weight: 600; color: #374151; }
   .month-selector select { padding: 8px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; color: #374151; cursor: pointer; }
-  .month-selector select:focus { outline: none; border-color: #4f46e5; }
+  .month-selector select:focus { outline: none; border-color: #0d9488; }
 
   /* KPIカード */
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
@@ -374,19 +374,19 @@ if (typeof pdfjsLib !== 'undefined') {
   .response-table table { width: 100%; border-collapse: collapse; }
   .response-table th { background: #f8fafc; padding: 13px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
   .response-table td { padding: 13px 16px; font-size: 14px; border-top: 1px solid #f8fafc; color: #334155; }
-  .response-table tr.clickable:hover td { background: #f5f3ff; cursor: pointer; }
-  .detail-link { color: #6366f1; font-size: 13px; font-weight: 700; background: none; border: none; cursor: pointer; text-decoration: none; padding: 5px 12px; background: #eef2ff; border-radius: 8px; transition: background 0.15s; }
-  .detail-link:hover { background: #e0e7ff; }
+  .response-table tr.clickable:hover td { background: #f0fdfa; cursor: pointer; }
+  .detail-link { color: #14b8a6; font-size: 13px; font-weight: 700; background: none; border: none; cursor: pointer; text-decoration: none; padding: 5px 12px; background: #f0fdfa; border-radius: 8px; transition: background 0.15s; }
+  .detail-link:hover { background: #ccfbf1; }
 
   /* 社員詳細画面 */
   #screen-detail { flex-direction: column; }
   .detail-body { padding: 32px; max-width: 1000px; margin: 0 auto; width: 100%; }
   .detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
   .detail-header .back-btn { background: linear-gradient(180deg, #ffffff, #f1f5f9); border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 18px; font-size: 14px; cursor: pointer; color: #475569; font-weight: 600; box-shadow: 0 2px 0 #cbd5e1; transition: all 0.1s; }
-  .detail-header .back-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 0 #cbd5e1; color: #6366f1; }
+  .detail-header .back-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 0 #cbd5e1; color: #14b8a6; }
   .detail-header .back-btn:active { transform: translateY(2px); box-shadow: 0 0px 0 #cbd5e1; }
   .detail-header h2 { font-size: 22px; font-weight: 800; color: #1e293b; }
-  .detail-header .dept-badge { background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #7c3aed; padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+  .detail-header .dept-badge { background: linear-gradient(135deg, #ccfbf1, #ddd6fe); color: #7c3aed; padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; }
 
   /* SVGライングラフ */
   .chart-card { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
@@ -428,7 +428,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .guide-diff { font-size: 12px; margin-top: 4px; font-weight: 600; }
   .guide-card-body { flex: 1; }
   .guide-eval { font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 10px; }
-  .guide-action-label { font-size: 11px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .guide-action-label { font-size: 11px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
   .guide-action-text { font-size: 13px; color: #6b7280; line-height: 1.7; }
   .no-guide { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 32px; }
 
@@ -439,14 +439,14 @@ if (typeof pdfjsLib !== 'undefined') {
   .form-group { flex: 1; min-width: 160px; }
   .form-group label { display: block; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
   .form-group input, .form-group select { width: 100%; padding: 11px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; font-family: inherit; transition: all 0.2s; color: #1e293b; font-weight: 500; }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.1); }
   .issued-result { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #86efac; border-radius: 12px; padding: 20px 24px; margin-top: 20px; display: none; animation: fadeSlideIn 0.3s ease; }
   @keyframes fadeSlideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
   .issued-result-label { font-size: 13px; color: #16a34a; font-weight: 700; margin-bottom: 10px; }
   .issued-id-big { font-size: 34px; font-weight: 800; color: #15803d; letter-spacing: 3px; font-family: 'Inter', monospace; }
   .issued-sub { font-size: 14px; color: #374151; margin-top: 4px; font-weight: 500; }
   .copy-btn { padding: 5px 10px; background: linear-gradient(180deg, #fff, #f1f5f9); border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; box-shadow: 0 2px 0 #cbd5e1; transition: all 0.1s; white-space: nowrap; }
-  .copy-btn:hover { background: linear-gradient(180deg, #f5f3ff, #ede9fe); color: #6366f1; border-color: #c4b5fd; box-shadow: 0 2px 0 #c4b5fd; }
+  .copy-btn:hover { background: linear-gradient(180deg, #f0fdfa, #ccfbf1); color: #14b8a6; border-color: #99f6e4; box-shadow: 0 2px 0 #99f6e4; }
   .copy-btn:active { transform: translateY(2px); box-shadow: 0 0 0 #cbd5e1; }
   .account-info-modal { background: white; border-radius: 16px; max-width: 480px; width: 100%; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
   .account-info-section { background: #f8fafc; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
@@ -455,10 +455,10 @@ if (typeof pdfjsLib !== 'undefined') {
   .account-info-row:last-child { margin-bottom: 0; }
   .account-info-row .label { font-size: 11px; color: #94a3b8; font-weight: 500; }
   .account-info-row .value { font-size: 15px; font-weight: 700; color: #1e293b; word-break: break-all; }
-  .account-info-row .value a { color: #4f46e5; text-decoration: none; }
+  .account-info-row .value a { color: #0d9488; text-decoration: none; }
   .account-info-row .value a:hover { text-decoration: underline; }
   .action-label-btn { padding: 4px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; font-weight: 600; color: #475569; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
-  .action-label-btn:hover { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
+  .action-label-btn:hover { background: #f0fdfa; color: #0d9488; border-color: #99f6e4; }
   .action-btn-green { color: #059669; border-color: #a7f3d0; background: #f0fdf4; }
   .action-btn-green:hover { background: #dcfce7; color: #047857; border-color: #6ee7b7; }
   .action-btn-amber { color: #d97706; border-color: #fde68a; background: #fffbeb; }
@@ -469,9 +469,9 @@ if (typeof pdfjsLib !== 'undefined') {
   .id-table-wrap table { width: 100%; border-collapse: collapse; }
   .id-table-wrap th { background: #f8fafc; padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
   .id-table-wrap td { padding: 10px 12px; font-size: 13px; border-top: 1px solid #f8fafc; color: #334155; vertical-align: middle; }
-  .id-badge { font-size: 14px; font-weight: 800; color: #6366f1; background: #eef2ff; padding: 4px 10px; border-radius: 8px; font-family: 'Inter', monospace; letter-spacing: 1px; }
+  .id-badge { font-size: 14px; font-weight: 800; color: #14b8a6; background: #f0fdfa; padding: 4px 10px; border-radius: 8px; font-family: 'Inter', monospace; letter-spacing: 1px; }
   .id-link { cursor: pointer; transition: all 0.15s; }
-  .id-link:hover { background: #e0e7ff; color: #4338ca; }
+  .id-link:hover { background: #ccfbf1; color: #0f766e; }
   .dept-chip { background: #f1f5f9; padding: 3px 10px; border-radius: 20px; font-size: 12px; color: #64748b; font-weight: 600; }
   .new-badge { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-left: 6px; }
   /* トースト通知 */
@@ -481,7 +481,7 @@ if (typeof pdfjsLib !== 'undefined') {
   /* ランクバッジ */
   .rank-badge-lg { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 16px; font-size: 22px; font-weight: 900; color: white; flex-shrink: 0; letter-spacing: -0.5px; }
   .rank-badge-sm { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 8px; font-size: 12px; font-weight: 900; color: white; }
-  .rank-s { background: linear-gradient(135deg, #7c3aed, #4f46e5); box-shadow: 0 4px 14px rgba(124,58,237,0.4); }
+  .rank-s { background: linear-gradient(135deg, #7c3aed, #0d9488); box-shadow: 0 4px 14px rgba(124,58,237,0.4); }
   .rank-a { background: linear-gradient(135deg, #1d4ed8, #0284c7); box-shadow: 0 4px 14px rgba(29,78,216,0.4); }
   .rank-b { background: linear-gradient(135deg, #15803d, #059669); box-shadow: 0 4px 14px rgba(21,128,61,0.4); }
   .rank-c { background: linear-gradient(135deg, #b45309, #dc2626); box-shadow: 0 4px 14px rgba(180,83,9,0.4); }
@@ -490,7 +490,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .rank-label { font-size: 12px; color: #94a3b8; font-weight: 500; }
   .rank-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
   .rank-info-item { background: #f8fafc; border-radius: 10px; padding: 12px 14px; }
-  .rank-info-item .ri-label { font-size: 11px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .rank-info-item .ri-label { font-size: 11px; font-weight: 700; color: #14b8a6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
   .rank-info-item .ri-text { font-size: 13px; color: #374151; line-height: 1.6; }
   .rank-info-item.full { grid-column: 1 / -1; }
   .rank-info-item.growth { background: linear-gradient(135deg, #fefce8, #fef9c3); }
@@ -502,7 +502,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .mbti-nf { background: #d4f0b0; color: #2d6a1f; border: 1px solid #96d468; }   /* 外交官：薄い黄緑 */
   .mbti-sj { background: #c0d8f0; color: #1a3a6e; border: 1px solid #7ab0d8; }   /* 番人：薄い青 */
   .mbti-sp { background: #fde5c0; color: #7c3100; border: 1px solid #f5a855; }   /* 探検家：薄いオレンジ */
-  .persona-card { background: linear-gradient(135deg, #fafafa, #f5f3ff); border: 1px solid #e0e7ff; border-radius: 12px; padding: 16px 18px; margin-top: 16px; }
+  .persona-card { background: linear-gradient(135deg, #fafafa, #f0fdfa); border: 1px solid #ccfbf1; border-radius: 12px; padding: 16px 18px; margin-top: 16px; }
   .persona-title { font-size: 16px; font-weight: 800; color: #1e1b4b; margin-bottom: 6px; }
   .persona-desc { font-size: 13px; color: #374151; line-height: 1.75; margin-bottom: 10px; }
   .persona-watch { background: #fef2f2; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #dc2626; font-weight: 600; line-height: 1.6; }
@@ -512,24 +512,24 @@ if (typeof pdfjsLib !== 'undefined') {
   .mbti-detail-item .mdi-text { font-size: 12px; color: #374151; line-height: 1.5; }
 
   /* 適性検査アップロード */
-  .kensa-upload-zone { border: 2px dashed #c7d2fe; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafbff; margin-top: 16px; position: relative; }
-  .kensa-upload-zone:hover { border-color: #6366f1; background: #eef2ff; }
-  .kensa-upload-zone.dragging { border-color: #4f46e5; background: #e0e7ff; transform: scale(1.01); }
+  .kensa-upload-zone { border: 2px dashed #99f6e4; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafbff; margin-top: 16px; position: relative; }
+  .kensa-upload-zone:hover { border-color: #14b8a6; background: #f0fdfa; }
+  .kensa-upload-zone.dragging { border-color: #0d9488; background: #ccfbf1; transform: scale(1.01); }
   .kensa-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
   .kensa-upload-icon { font-size: 32px; margin-bottom: 8px; }
   .kensa-upload-text { font-size: 13px; color: #6b7280; font-weight: 500; }
-  .kensa-upload-text strong { color: #4f46e5; }
+  .kensa-upload-text strong { color: #0d9488; }
   .kensa-result-card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.04); }
   .kensa-result-card h3 { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 16px; }
   .kensa-section { margin-bottom: 20px; }
-  .kensa-section-title { font-size: 12px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #eef2ff; }
+  .kensa-section-title { font-size: 12px; font-weight: 700; color: #14b8a6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #f0fdfa; }
   .kensa-scores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
   .kensa-score-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border-radius: 8px; }
   .kensa-score-label { font-size: 13px; color: #374151; font-weight: 500; }
   .kensa-score-value { font-size: 16px; font-weight: 800; min-width: 36px; text-align: right; }
   .kensa-score-bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 4px; flex: 1; margin-left: 12px; margin-right: 8px; }
   .kensa-score-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
-  .kensa-comment { background: #f8fafc; border-left: 3px solid #6366f1; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 13px; color: #374151; line-height: 1.75; margin-top: 8px; }
+  .kensa-comment { background: #f8fafc; border-left: 3px solid #14b8a6; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 13px; color: #374151; line-height: 1.75; margin-top: 8px; }
   .kensa-meta { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
   .kensa-meta-item { background: #f1f5f9; padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #475569; font-weight: 600; }
   .kensa-bp-highlight { background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 1px solid #fed7aa; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
@@ -539,7 +539,7 @@ if (typeof pdfjsLib !== 'undefined') {
   /* ビジネスIQ適性検査 */
   .scouter-result-card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.04); }
   .scouter-result-card h3 { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 16px; }
-  .scouter-iq-highlight { background: linear-gradient(135deg, #f5f3ff, #ede9fe); border: 1px solid #ddd6fe; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .scouter-iq-highlight { background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #ddd6fe; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
   .scouter-iq-highlight .iq-num { font-size: 34px; font-weight: 800; color: #4c1d95; }
   .scouter-iq-highlight .iq-label { font-size: 12px; color: #6d28d9; font-weight: 700; }
   .scouter-iq-highlight .iq-rank { font-size: 13px; color: #7c3aed; font-weight: 600; }
@@ -564,7 +564,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .scouter-job-label { font-size: 12px; color: #374151; font-weight: 500; flex: 1; }
   .scouter-job-score { font-size: 16px; font-weight: 800; min-width: 28px; text-align: right; }
   .scouter-comment-block { margin-top: 12px; }
-  .scouter-comment-title { font-size: 12px; font-weight: 700; color: #6366f1; margin-bottom: 6px; }
+  .scouter-comment-title { font-size: 12px; font-weight: 700; color: #14b8a6; margin-bottom: 6px; }
   .scouter-comment-text { font-size: 12px; color: #475569; line-height: 1.7; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border-left: 3px solid #a78bfa; }
 
   /* ビジネスIQ適性検査カード */
@@ -600,7 +600,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .profile-card h3 { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 16px; }
   .profile-display { display: flex; gap: 16px; margin-bottom: 18px; }
   .profile-stat { flex: 1; border-radius: 12px; padding: 14px 18px; }
-  .profile-stat.iq-stat { background: linear-gradient(135deg, #f5f3ff, #ede9fe); border: 1px solid #ddd6fe; }
+  .profile-stat.iq-stat { background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border: 1px solid #ddd6fe; }
   .profile-stat.bp-stat { background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 1px solid #fed7aa; }
   .profile-stat .ps-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
   .profile-stat.iq-stat .ps-label { color: #7c3aed; }
@@ -612,14 +612,14 @@ if (typeof pdfjsLib !== 'undefined') {
   .profile-edit-field { flex: 1; }
   .profile-edit-field label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; }
   .profile-edit-field input { width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; font-weight: 700; font-family: 'Inter', monospace; transition: all 0.2s; color: #1e293b; }
-  .profile-edit-field input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+  .profile-edit-field input:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.1); }
 
   /* 実回答データカード */
   .answer-detail-card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; }
   .answer-detail-card h3 { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
   .answer-submitted-at { font-size: 12px; color: #94a3b8; font-weight: 500; margin-bottom: 20px; }
   .answer-group { margin-bottom: 18px; }
-  .answer-group-title { font-size: 11px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px; background: #eef2ff; display: inline-block; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+  .answer-group-title { font-size: 11px; font-weight: 700; color: #14b8a6; text-transform: uppercase; letter-spacing: 1px; background: #f0fdfa; display: inline-block; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
   .answer-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f8fafc; }
   .answer-row:last-child { border-bottom: none; }
   .answer-q { flex: 1; font-size: 13px; color: #475569; line-height: 1.4; }
@@ -634,7 +634,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .threshold-table td { padding: 10px 14px; font-size: 13px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
   .threshold-table tr:hover td { background: #f9fafb; }
   .threshold-input { width: 64px; padding: 5px 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 700; text-align: center; color: #1e293b; }
-  .threshold-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
+  .threshold-input:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 2px rgba(20,184,166,0.15); }
   .th-badge-alert { background: #fee2e2; color: #dc2626; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
   .th-badge-warn  { background: #fef9c3; color: #ca8a04; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
   .th-badge-ok    { background: #dcfce7; color: #16a34a; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
@@ -642,15 +642,15 @@ if (typeof pdfjsLib !== 'undefined') {
   .action-plan-card.done { opacity: 0.65; }
   .action-rec-box { background: #f8fafc; border-left: 3px solid #94a3b8; padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 13px; color: #475569; line-height: 1.6; margin-bottom: 16px; }
   .action-rec-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-  .action-actual-label { font-size: 11px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .action-actual-label { font-size: 11px; font-weight: 700; color: #14b8a6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
   .action-textarea { width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 72px; color: #1e293b; transition: border-color 0.15s; }
-  .action-textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+  .action-textarea:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 3px rgba(20,184,166,0.1); }
   .action-status-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
   .status-select { padding: 6px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
   .status-select.pending { border-color: #e2e8f0; color: #64748b; background: #f8fafc; }
   .status-select.in_progress { border-color: #f59e0b; color: #d97706; background: #fffbeb; }
   .status-select.done { border-color: #22c55e; color: #16a34a; background: #f0fdf4; }
-  .action-save-btn { padding: 6px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg,#6366f1,#4f46e5); color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .action-save-btn { padding: 6px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg,#14b8a6,#0d9488); color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
   .action-saved-chip { font-size: 12px; color: #16a34a; font-weight: 700; display: none; }
   .logic-section { background: white; border-radius: 14px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 28px; border: 1px solid rgba(0,0,0,0.04); }
   .logic-section h3 { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
@@ -660,7 +660,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .rank-matrix-table th { background: #f8fafc; font-weight: 700; color: #475569; font-size: 12px; }
   .rank-matrix-table .axis-label { background: #f1f5f9; font-weight: 700; color: #334155; font-size: 12px; }
   .rank-cell { border-radius: 8px; padding: 6px 10px; font-weight: 900; font-size: 14px; color: white; display: inline-block; min-width: 44px; }
-  .rank-cell-s { background: linear-gradient(135deg,#7c3aed,#4f46e5); }
+  .rank-cell-s { background: linear-gradient(135deg,#7c3aed,#0d9488); }
   .rank-cell-a { background: linear-gradient(135deg,#1d4ed8,#0284c7); }
   .rank-cell-b { background: linear-gradient(135deg,#15803d,#059669); }
   .rank-cell-c { background: linear-gradient(135deg,#b45309,#dc2626); }
@@ -702,8 +702,8 @@ if (typeof pdfjsLib !== 'undefined') {
   .master-table .scale-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
   .master-tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; }
   .master-tab { padding: 10px 20px; font-size: 13px; font-weight: 700; color: #94a3b8; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; }
-  .master-tab.active { color: #6366f1; border-bottom-color: #6366f1; }
-  .master-tab:hover { color: #6366f1; }
+  .master-tab.active { color: #14b8a6; border-bottom-color: #14b8a6; }
+  .master-tab:hover { color: #14b8a6; }
 
   /* 社員詳細：推奨対応 */
   .recommend-section { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
@@ -718,11 +718,11 @@ if (typeof pdfjsLib !== 'undefined') {
   .recommend-item-header .score.warn { color: #d97706; }
   .recommend-eval { font-size: 13px; color: #374151; margin-bottom: 10px; }
   .recommend-action { font-size: 12px; color: #6b7280; line-height: 1.7; }
-  .recommend-action::before { content: '▶ '; color: #4f46e5; font-weight: 700; }
+  .recommend-action::before { content: '▶ '; color: #0d9488; font-weight: 700; }
   .personalized-action-wrap { margin-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; }
   .personalized-tags { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
   .personalized-tag { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-  .ptag-rank-s { background:#f5f3ff; color:#7c3aed; border:1px solid #ddd6fe; }
+  .ptag-rank-s { background:#f0fdfa; color:#7c3aed; border:1px solid #ddd6fe; }
   .ptag-rank-a { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
   .ptag-rank-b { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
   .ptag-rank-c { background:#fffbeb; color:#b45309; border:1px solid #fde68a; }
@@ -773,7 +773,7 @@ if (typeof pdfjsLib !== 'undefined') {
 .score-card:nth-child(9){animation-delay:0.72s}
 
 /* Progress bar glow + shimmer */
-.progress-fill { box-shadow: 0 0 12px rgba(99,102,241,0.55), 0 0 5px rgba(168,85,247,0.3); position:relative; overflow:hidden; }
+.progress-fill { box-shadow: 0 0 12px rgba(20,184,166,0.55), 0 0 5px rgba(168,85,247,0.3); position:relative; overflow:hidden; }
 .progress-fill::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.45) 50%,transparent 100%); background-size:200% 100%; animation:shimmerBar 1.8s infinite; }
 @keyframes shimmerBar { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
@@ -850,7 +850,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .admin-mobile-tabs { display: flex !important; background: white; border-bottom: 1px solid #e5e7eb; padding: 0 8px; overflow-x: auto; white-space: nowrap; flex-shrink: 0; }
   .admin-mobile-tabs .tab-btn { padding: 14px 12px; font-size: 12px; border-radius: 0; flex-direction: row; margin: 0; }
   .admin-mobile-tabs .tab-btn .tab-icon { font-size: 14px; }
-  .admin-mobile-tabs .tab-btn.active { background: none; border-bottom: 3px solid #4f46e5; }
+  .admin-mobile-tabs .tab-btn.active { background: none; border-bottom: 3px solid #0d9488; }
   .detail-body { padding: 16px; }
   .form-row { flex-direction: column; }
   .profile-display { flex-direction: column; }
@@ -948,7 +948,7 @@ if (typeof pdfjsLib !== 'undefined') {
   <aside class="admin-sidebar">
     <div class="sidebar-logo">
       <svg class="sidebar-logo-icon" width="38" height="38" viewBox="0 0 32 32" fill="none">
-        <rect width="32" height="32" rx="8" fill="#4f46e5"/>
+        <rect width="32" height="32" rx="8" fill="#0d9488"/>
         <path d="M9 22V14" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
         <path d="M13 22V11" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
         <path d="M17 22V16" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
@@ -1092,7 +1092,7 @@ if (typeof pdfjsLib !== 'undefined') {
         <div style="display:flex;align-items:center;gap:20px;margin-top:6px;flex-wrap:wrap">
           <div>
             <div class="issued-id-big" id="issued-id-value"></div>
-            <div style="font-size:15px;font-weight:700;color:#6366f1;margin-top:4px;font-family:'Inter',monospace;letter-spacing:1px" id="issued-pw-value"></div>
+            <div style="font-size:15px;font-weight:700;color:#14b8a6;margin-top:4px;font-family:'Inter',monospace;letter-spacing:1px" id="issued-pw-value"></div>
             <div class="issued-sub" id="issued-name-value"></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px">
@@ -1161,11 +1161,11 @@ if (typeof pdfjsLib !== 'undefined') {
 
       <!-- データフロー図 -->
       <div class="master-flow">
-        <div class="master-flow-box" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);color:#4c1d95;border:1px solid #ddd6fe">
+        <div class="master-flow-box" style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);color:#4c1d95;border:1px solid #ddd6fe">
           📋 ビジネスIQ適性検査<br><span style="font-size:11px;font-weight:500">IQ + 戦闘力 + ランク</span>
         </div>
         <div class="master-flow-arrow">→</div>
-        <div class="master-flow-box" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#3730a3;border:1px solid #c7d2fe">
+        <div class="master-flow-box" style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);color:#115e59;border:1px solid #99f6e4">
           🏆 ランク算出<br><span style="font-size:11px;font-weight:500">S1〜C4（16段階）</span>
         </div>
         <div class="master-flow-arrow">×</div>
@@ -2292,7 +2292,7 @@ function renderDashboard() {
             <tbody>${unsubmitted.map(emp => `
               <tr>
                 <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;color:#334155">
-                  <span style="font-size:13px;font-weight:800;color:#6366f1;background:#eef2ff;padding:3px 8px;border-radius:6px;font-family:'Inter',monospace">${emp.id}</span>
+                  <span style="font-size:13px;font-weight:800;color:#14b8a6;background:#f0fdfa;padding:3px 8px;border-radius:6px;font-family:'Inter',monospace">${emp.id}</span>
                 </td>
                 <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;font-weight:600;color:#1e293b">${sanitize(emp.name)}</td>
                 <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc">
@@ -2356,13 +2356,13 @@ function renderDashboard() {
           <span class="cat-name">${catNames[k]}</span>
           <span class="score-num ${status}">${score}点${alert}</span>
         </div>
-        <div class="score-bar-wrap" style="position:relative;overflow:visible"><div class="score-bar ${status}" style="width:${score}%"></div>${categoryTargets[k] ? `<div style="position:absolute;top:0;bottom:0;left:${Math.min(categoryTargets[k],100)}%;width:2px;background:#6366f1;opacity:0.8;border-radius:1px"></div>` : ''}</div>
+        <div class="score-bar-wrap" style="position:relative;overflow:visible"><div class="score-bar ${status}" style="width:${score}%"></div>${categoryTargets[k] ? `<div style="position:absolute;top:0;bottom:0;left:${Math.min(categoryTargets[k],100)}%;width:2px;background:#14b8a6;opacity:0.8;border-radius:1px"></div>` : ''}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0">
           <div class="score-trend" style="margin:0">前月比 ${diff !== null ? `<span class="${diff >= 0 ? 'up' : 'down'}">${diff > 0 ? '+' : ''}${diff}点</span>` : '初回'}</div>
-          ${categoryTargets[k] ? `<div style="font-size:10px;font-weight:700;color:${score>=categoryTargets[k]?'#16a34a':'#6366f1'}">目標${categoryTargets[k]}点 ${score>=categoryTargets[k]?'✅':'▲'+(categoryTargets[k]-score)}</div>` : ''}
+          ${categoryTargets[k] ? `<div style="font-size:10px;font-weight:700;color:${score>=categoryTargets[k]?'#16a34a':'#14b8a6'}">目標${categoryTargets[k]}点 ${score>=categoryTargets[k]?'✅':'▲'+(categoryTargets[k]-score)}</div>` : ''}
         </div>
         <div class="mini-chart">${pastScores.map(v => `<div class="mini-bar" style="height:${(v/maxS)*100}%;background:${status==='alert'?'#ef4444':status==='warn'?'#f59e0b':'#22c55e'};opacity:0.7"></div>`).join('')}</div>
-        ${(() => { const pred = predictNextScore(pastScores); return pred !== null ? `<div style="font-size:10px;color:#6366f1;font-weight:700;margin-top:4px;text-align:right">予測 ${pred}点 →</div>` : ''; })()}
+        ${(() => { const pred = predictNextScore(pastScores); return pred !== null ? `<div style="font-size:10px;color:#14b8a6;font-weight:700;margin-top:4px;text-align:right">予測 ${pred}点 →</div>` : ''; })()}
       </div>`;
   }).join('');
 
@@ -2466,15 +2466,15 @@ function renderDashboard() {
           <polygon class="radar-polygon" points="${polygonPts}" fill="url(#radarGrad)" stroke="url(#radarStroke)" stroke-width="2.5" stroke-linejoin="round"/>
           <defs>
             <linearGradient id="radarGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.25"/>
-              <stop offset="100%" stop-color="#a855f7" stop-opacity="0.15"/>
+              <stop offset="0%" stop-color="#14b8a6" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#2dd4bf" stop-opacity="0.15"/>
             </linearGradient>
             <linearGradient id="radarStroke" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#6366f1"/>
-              <stop offset="100%" stop-color="#a855f7"/>
+              <stop offset="0%" stop-color="#0d9488"/>
+              <stop offset="100%" stop-color="#2dd4bf"/>
             </linearGradient>
           </defs>
-          ${dataPoints.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#6366f1" stroke="white" stroke-width="2" opacity="0.9"/>`).join('')}
+          ${dataPoints.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#14b8a6" stroke="white" stroke-width="2" opacity="0.9"/>`).join('')}
           ${labels}
           <text x="${cx}" y="${cy-10}" font-size="26" font-weight="900" fill="${totalColor}" text-anchor="middle">${totalScore}</text>
           <text x="${cx}" y="${cy+12}" font-size="11" fill="#64748b" text-anchor="middle">総合スコア</text>
@@ -2581,7 +2581,7 @@ function renderEmployeeList() {
         <td>
           <div style="font-weight:600;color:#1e293b">${sanitize(r.name)}</div>
           <div style="display:flex;gap:4px;margin-top:2px">
-            <span style="font-size:11px;color:#6366f1;background:#eef2ff;padding:1px 6px;border-radius:4px;font-family:monospace;font-weight:700">${r.id}</span>
+            <span style="font-size:11px;color:#14b8a6;background:#f0fdfa;padding:1px 6px;border-radius:4px;font-family:monospace;font-weight:700">${r.id}</span>
             <span style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:4px;color:#64748b">${sanitize(r.dept)}</span>
           </div>
         </td>
@@ -2715,7 +2715,7 @@ function showDetail(empId) {
   const chartH = svgH - padT - padB;
   const xStep = chartW / (months.length - 1);
 
-  const colors = ['#4f46e5','#ef4444','#22c55e','#f59e0b','#06b6d4','#ec4899','#8b5cf6','#f97316','#10b981'];
+  const colors = ['#0d9488','#ef4444','#22c55e','#f59e0b','#06b6d4','#ec4899','#8b5cf6','#f97316','#10b981'];
 
   function smoothCurve(pts) {
     if (pts.length < 2) return pts.map((p,i) => i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`).join(' ');
@@ -2830,8 +2830,8 @@ function showDetail(empId) {
           <div class="ps-label">⚡ 戦闘力</div>
           <div class="ps-value" id="pdbp-${empId}">${profile.battlePower ? profile.battlePower.toLocaleString() : '―'}</div>
         </div>
-        <div class="profile-stat" style="background:linear-gradient(135deg,#f8faff,#eef2ff);border-color:#c7d2fe">
-          <div class="ps-label" style="color:#4f46e5">🧬 MBTI</div>
+        <div class="profile-stat" style="background:linear-gradient(135deg,#f8faff,#f0fdfa);border-color:#99f6e4">
+          <div class="ps-label" style="color:#0d9488">🧬 MBTI</div>
           <div id="pmbti-${empId}" style="margin-top:4px">
             ${profile.mbti && mbtiData[profile.mbti]
               ? `<span class="mbti-badge mbti-${mbtiData[profile.mbti].group.toLowerCase()}">${profile.mbti} / ${mbtiData[profile.mbti].name}</span>`
@@ -2923,7 +2923,7 @@ function showDetail(empId) {
       const freeTextHtml = freeText ? `
         <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f1f5f9">
           <div class="answer-group-title">💬 自由記述</div>
-          <div style="background:#f8fafc;border-left:3px solid #6366f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#374151;line-height:1.75;margin-top:8px">${freeText}</div>
+          <div style="background:#f8fafc;border-left:3px solid #14b8a6;padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#374151;line-height:1.75;margin-top:8px">${freeText}</div>
         </div>` : '';
       answerDetailHtml = `
         <div class="answer-detail-card">
@@ -2986,7 +2986,7 @@ function showDetail(empId) {
               <div class="personalized-tags">
                 ${empRank ? `<span class="personalized-tag ${tierClass}">🏆 ${empRank}</span>` : ''}
                 ${empProfile.mbti ? `<span class="personalized-tag ptag-mbti">🧠 ${empProfile.mbti}</span>` : ''}
-                <span style="font-size:10px;font-weight:700;color:#6366f1;align-self:center;letter-spacing:0.3px">個別推奨アクション</span>
+                <span style="font-size:10px;font-weight:700;color:#14b8a6;align-self:center;letter-spacing:0.3px">個別推奨アクション</span>
               </div>
               <div class="personalized-action-text">${guide.action}</div>
             </div>` : `<div class="recommend-action">${guide?.action || ''}</div>`;
@@ -3344,7 +3344,7 @@ function nextPage() {
 function prevPage() { _slideDir = 'prev'; currentPage--; renderPage(); window.scrollTo(0,0); }
 
 function launchConfetti() {
-  const colors = ['#6366f1','#a855f7','#ec4899','#f59e0b','#22c55e','#06b6d4','#ef4444','#8b5cf6','#10b981'];
+  const colors = ['#14b8a6','#a855f7','#ec4899','#f59e0b','#22c55e','#06b6d4','#ef4444','#8b5cf6','#10b981'];
   const shapes = ['square','circle'];
   for (let i = 0; i < 90; i++) {
     setTimeout(() => {
@@ -3547,7 +3547,7 @@ function renderPersonaTable() {
   const mbtiFilter  = (document.getElementById('filter-mbti')  || {}).value || '';
   const rankOrder   = ['S1','S2','S3','S4','A1','A2','A3','A4','B1','B2','B3','B4','C1','C2','C3','C4'];
   const mbtiOrder   = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
-  const tierGrad    = { S:'#7c3aed,#4f46e5', A:'#1d4ed8,#0284c7', B:'#15803d,#059669', C:'#b45309,#dc2626' };
+  const tierGrad    = { S:'#7c3aed,#0d9488', A:'#1d4ed8,#0284c7', B:'#15803d,#059669', C:'#b45309,#dc2626' };
   const groupText   = { NT:'#7c3aed', NF:'#2563eb', SJ:'#16a34a', SP:'#d97706' };
 
   const ranks  = rankFilter  ? [rankFilter]  : rankOrder;
@@ -3837,7 +3837,7 @@ function _renderAccountView(empId) {
     </div>`;
   document.getElementById('account-info-buttons').innerHTML = `
     <div style="display:flex;gap:10px;margin-top:16px">
-      <button onclick="_renderAccountEdit('${empId}')" style="flex:1;padding:12px;background:#4f46e5;border:none;border-radius:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'">編集</button>
+      <button onclick="_renderAccountEdit('${empId}')" style="flex:1;padding:12px;background:#0d9488;border:none;border-radius:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='#0f766e'" onmouseout="this.style.background='#0d9488'">編集</button>
       <button onclick="_accountDelete('${empId}')" style="flex:1;padding:12px;background:#dc2626;border:none;border-radius:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">削除</button>
     </div>
     <button onclick="closeAccountInfo()" style="width:100%;padding:12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-weight:600;color:#475569;cursor:pointer;margin-top:8px;transition:background 0.15s" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">閉じる</button>`;
@@ -3854,7 +3854,7 @@ function _renderAccountEdit(empId) {
     </div>`;
   document.getElementById('account-info-buttons').innerHTML = `
     <div style="display:flex;gap:10px;margin-top:16px">
-      <button onclick="_accountSave('${empId}')" style="flex:1;padding:12px;background:#4f46e5;border:none;border-radius:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#4f46e5'">保存</button>
+      <button onclick="_accountSave('${empId}')" style="flex:1;padding:12px;background:#0d9488;border:none;border-radius:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='#0f766e'" onmouseout="this.style.background='#0d9488'">保存</button>
       <button onclick="_renderAccountView('${empId}')" style="flex:1;padding:12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-weight:600;color:#475569;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">キャンセル</button>
     </div>`;
 }
@@ -4074,7 +4074,7 @@ function renderMailScheduleStatus(config) {
 function testSendMail() {
   const msgEl = document.getElementById('mail-test-msg');
   msgEl.style.display = 'inline';
-  msgEl.style.color = '#6366f1';
+  msgEl.style.color = '#14b8a6';
   msgEl.textContent = '送信中...';
   const gasUrl = localStorage.getItem('es_gas_url');
   if (!gasUrl) { msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ GAS URLが未設定です（設定 → GAS URL）'; return; }
@@ -4254,7 +4254,7 @@ function renderTargetEditor() {
       ${catKeys.map(k => {
         const target = categoryTargets[k] ?? defaultCategoryTargets[k];
         const changed = target !== defaultCategoryTargets[k];
-        return `<div style="background:#f8fafc;border-radius:10px;padding:14px 16px;min-width:130px;border:1.5px solid ${changed?'#6366f1':'#e2e8f0'}">
+        return `<div style="background:#f8fafc;border-radius:10px;padding:14px 16px;min-width:130px;border:1.5px solid ${changed?'#14b8a6':'#e2e8f0'}">
           <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:8px">${catLabelMap[k]||k}</div>
           <div style="display:flex;align-items:center;gap:6px">
             <input class="threshold-input" type="number" min="0" max="100" id="tgt-${k}" value="${target}" style="width:58px">
@@ -4307,7 +4307,7 @@ function renderAdminAccountList() {
     <tbody>${accounts.map((a, i) => `
       <tr style="border-bottom:1px solid #f1f5f9">
         <td style="padding:10px 12px;font-size:13px;font-weight:700;color:#334155">${a.name}</td>
-        <td style="padding:10px 12px;font-size:13px;font-family:monospace;color:#6366f1">${a.hasPassword ? '<span style="color:#16a34a">設定済</span>' : '<span style="color:#94a3b8">未設定</span>'}</td>
+        <td style="padding:10px 12px;font-size:13px;font-family:monospace;color:#14b8a6">${a.hasPassword ? '<span style="color:#16a34a">設定済</span>' : '<span style="color:#94a3b8">未設定</span>'}</td>
         <td style="padding:10px 12px;font-size:12px;color:#94a3b8">${a.createdAt || '—'}</td>
         <td style="padding:10px 12px;text-align:right">${accounts.length > 1 ? `<button onclick="deleteAdminAccount(${i})" style="background:none;border:1px solid #fecaca;color:#dc2626;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer">削除</button>` : ''}</td>
       </tr>`).join('')}
@@ -4473,15 +4473,15 @@ function renderQuestionEditor() {
     const items = groups[catKey];
     if (!items || !items.length) return;
     const catLabel = catNames[catKey] || catKey;
-    html += `<div style="margin-bottom:20px;border:2px solid #e0e7ff;border-radius:12px;overflow:hidden">
-      <div style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #e0e7ff">
-        <span style="font-size:14px;font-weight:800;color:#4f46e5">${catLabel}</span>
+    html += `<div style="margin-bottom:20px;border:2px solid #ccfbf1;border-radius:12px;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#f0fdfa,#f0fdfa);padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #ccfbf1">
+        <span style="font-size:14px;font-weight:800;color:#0d9488">${catLabel}</span>
         <span style="font-size:11px;color:#94a3b8;font-weight:500">${items.map(i=>i.id.toUpperCase()).join(', ')}</span>
       </div>
       <div style="padding:12px;display:flex;flex-direction:column;gap:8px">`;
     items.forEach(item => {
       html += `<div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:#fafbfc;border-radius:8px">
-        <span style="font-size:11px;font-weight:700;color:#6366f1;background:#eef2ff;padding:2px 8px;border-radius:5px;white-space:nowrap">${item.id.toUpperCase()}</span>
+        <span style="font-size:11px;font-weight:700;color:#14b8a6;background:#f0fdfa;padding:2px 8px;border-radius:5px;white-space:nowrap">${item.id.toUpperCase()}</span>
         <input type="text" id="q-edit-${item.id}" value="${(customQuestions[item.id] || item.text).replace(/"/g,'&quot;')}" style="flex:1;padding:7px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;font-family:inherit;color:#1e293b" placeholder="${item.text}">
         <select id="q-cat-${item.id}" onchange="changeQuestionCategory('${item.id}',this.value)" style="padding:5px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:11px;font-weight:600;color:#475569;background:white;cursor:pointer">
           ${catOptions.replace(`value="${questionCatMap[item.id]}"`, `value="${questionCatMap[item.id]}" selected`)}
@@ -4564,7 +4564,7 @@ function renderActionPlan() {
       const isSelected = id === selectedActionEmpId;
       const profile = getProfile(id);
       const rankInfo = calcRank(profile.iq, profile.battlePower) || '';
-      return `<div onclick="selectActionEmployee('${id}')" style="background:${isSelected?'#eef2ff':'white'};border:2px solid ${isSelected?'#6366f1':'#e2e8f0'};border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.15s">
+      return `<div onclick="selectActionEmployee('${id}')" style="background:${isSelected?'#f0fdfa':'white'};border:2px solid ${isSelected?'#14b8a6':'#e2e8f0'};border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.15s">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
           <div>
             <div style="font-size:13px;font-weight:700;color:#1e293b">${sanitize(emp.name)}</div>
@@ -4652,7 +4652,7 @@ function renderActionDetail(empId, month) {
           </div>
           <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:${catStatus==='alert'?'#fef2f2':catStatus==='warn'?'#fffbeb':'#f0fdf4'};color:${catStatus==='alert'?'#dc2626':catStatus==='warn'?'#d97706':'#16a34a'}">${catStatusLabel}</span>
         </div>
-        <div class="action-rec-label">💡 推奨アクション（参考）${isPersonalized ? '<span style="font-size:10px;background:#eef2ff;color:#6366f1;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:700">個別カスタマイズ</span>' : ''}</div>
+        <div class="action-rec-label">💡 推奨アクション（参考）${isPersonalized ? '<span style="font-size:10px;background:#f0fdfa;color:#14b8a6;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:700">個別カスタマイズ</span>' : ''}</div>
         <div class="action-rec-box">${recText.replace(/\n/g, '<br>')}</div>
         <div class="action-actual-label">✏️ 実行内容（自由記入）</div>
         <textarea class="action-textarea" id="action-note-${empId}-${k}" placeholder="実際に行う対応内容を記入してください...">${saved.note || ''}</textarea>
@@ -5349,7 +5349,7 @@ function renderBizIQCard(data, empId) {
 
   // ヒーロー
   const heroHtml = `<div class="biziq-hero">
-    <div class="biziq-hero-item" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe">
+    <div class="biziq-hero-item" style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);border:1px solid #99f6e4">
       <div class="biziq-hero-label" style="color:${rc}">🏆 16ランク</div>
       <div class="biziq-hero-value" style="color:${rc}">${data.rank16 || '―'}</div>
     </div>
@@ -5357,7 +5357,7 @@ function renderBizIQCard(data, empId) {
       <div class="biziq-hero-label" style="color:#9a3412">⚡ ビジネス戦闘力</div>
       <div class="biziq-hero-value" style="color:#ea580c">${data.battlePower ? data.battlePower.toLocaleString() : '―'}</div>
     </div>
-    <div class="biziq-hero-item" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe">
+    <div class="biziq-hero-item" style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);border:1px solid #ddd6fe">
       <div class="biziq-hero-label" style="color:#6d28d9">🧠 IQスコア</div>
       <div class="biziq-hero-value" style="color:#4c1d95">${data.iqScore || '―'}</div>
       <div class="biziq-hero-sub" style="color:#7c3aed">${data.iqRank ? 'ランク ' + data.iqRank : ''}</div>
@@ -5494,7 +5494,7 @@ function renderBizIQCard(data, empId) {
   if (data.comment) {
     commentHtml = `<div class="biziq-section">
       <div class="biziq-section-title">分析コメント</div>
-      <div style="background:#f8fafc;border-left:3px solid #6366f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#374151;line-height:1.75">${data.comment}</div>
+      <div style="background:#f8fafc;border-left:3px solid #14b8a6;padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#374151;line-height:1.75">${data.comment}</div>
     </div>`;
   }
 
