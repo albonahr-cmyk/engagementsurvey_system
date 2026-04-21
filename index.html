@@ -1730,6 +1730,16 @@ let surveyPeriod = (() => {
   } catch(e) { return { start: '2026-03-01', end: '2026-04-30' }; }
 })();
 
+// サーベイ回答期間の開始日から「現在のサーベイ月」を取得
+function getSurveyMonth() {
+  if (surveyPeriod && surveyPeriod.start) {
+    const d = surveyPeriod.start.split('-');
+    if (d.length >= 2) return d[0] + '-' + d[1];
+  }
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
 // ===== マスタデータ（サーバーから取得。HTMLにはハードコードしない） =====
 let employees = {};
 
@@ -2090,7 +2100,7 @@ function rebuildEmpData() {
 
 function hasSubmittedThisMonth(empId) {
   // localStorageで即時チェック + サーバー側で重複防止済み
-  return !!localStorage.getItem(`es_${empId}_${months[months.length - 1]}`);
+  return !!localStorage.getItem(`es_${empId}_${getSurveyMonth()}`);
 }
 // Note: サーバー側(GAS)でも重複送信チェックしているので、
 // localStorageを消しても同じ月に2回送信はできない
@@ -3214,7 +3224,7 @@ function doLogin() {
     // 社員ログイン
     currentEmpId = result.empId;
     // サーバー側で提出済みチェック（localStorageが空でも正しく判定）
-    const currentMonth = months[months.length - 1];
+    const currentMonth = getSurveyMonth();
     checkSubmittedOnline(result.empId, currentMonth).then(submitted => {
       if (submitted || hasSubmittedThisMonth(result.empId)) {
         document.getElementById('already-name').textContent = sanitize(result.name);
@@ -3225,7 +3235,7 @@ function doLogin() {
       answers = {};
       if (draft) { try { answers = JSON.parse(draft); showToast('前回の途中保存データを復元しました'); } catch(e) {} }
       showScreen('survey');
-      const cm = months[months.length - 1];
+      const cm = getSurveyMonth();
       document.getElementById('survey-title').textContent = `${cm.split('-')[0]}年${parseInt(cm.split('-')[1])}月 エンゲージメントサーベイ`;
       document.getElementById('survey-user-name').textContent = `${sanitize(result.name)}（${sanitize(result.dept)}）`;
       currentPage = 0;
@@ -3295,7 +3305,7 @@ function nextPage() {
   if (unanswered.length > 0) { alert('すべての質問に回答してください。'); return; }
   if (currentPage === questions.length - 1) {
     if (!confirm('回答を送信します。月1回のみ回答可能です。よろしいですか？')) return;
-    const currentMonth = months[months.length - 1];
+    const currentMonth = getSurveyMonth();
     localStorage.setItem(`es_${currentEmpId}_${currentMonth}`, JSON.stringify(answers));
     localStorage.removeItem('es_draft_' + currentEmpId);
     // Notionに送信（非同期・失敗してもローカルには保存済み）
@@ -3714,7 +3724,7 @@ async function refreshSurveyData() {
 function manualResetSurvey() {
   var empId = document.getElementById('reset-emp-id').value.trim();
   if (!empId) { showToast('社員IDを入力してください'); return; }
-  var currentMonth = months[months.length - 1];
+  var currentMonth = getSurveyMonth();
   if (!confirm(empId + ' の今月（' + currentMonth + '）の回答をリセットしますか？')) return;
   document.getElementById('reset-result').textContent = 'リセット中...';
   apiPost('survey-reset', { empId: empId, month: currentMonth }).then(function(res) {
@@ -3734,7 +3744,7 @@ function manualResetSurvey() {
 
 function resetSurvey(id) {
   const emp = employees[id];
-  const currentMonth = months[months.length - 1];
+  const currentMonth = getSurveyMonth();
   if (!confirm(`${id}（${emp?.name||''}）の今月（${currentMonth}）の回答をリセットしますか？\nリセットすると再回答が可能になります。`)) return;
   showToast('リセット中...');
   apiPost('survey-reset', { empId: id, month: currentMonth }).then(res => {
@@ -5660,7 +5670,7 @@ function switchMasterTab(name, btn) {
     });
   } else if (_sessionRole === 'employee' && _sessionEmpId) {
     currentEmpId = _sessionEmpId;
-    const currentMonth = months[months.length - 1];
+    const currentMonth = getSurveyMonth();
     checkSubmittedOnline(_sessionEmpId, currentMonth).then(submitted => {
       if (submitted || hasSubmittedThisMonth(_sessionEmpId)) {
         document.getElementById('already-name').textContent = sanitize(_sessionName);
@@ -5671,7 +5681,7 @@ function switchMasterTab(name, btn) {
       answers = {};
       if (draft) { try { answers = JSON.parse(draft); } catch(e) {} }
       showScreen('survey');
-      const cm2 = months[months.length - 1];
+      const cm2 = getSurveyMonth();
       document.getElementById('survey-title').textContent = `${cm2.split('-')[0]}年${parseInt(cm2.split('-')[1])}月 エンゲージメントサーベイ`;
       document.getElementById('survey-user-name').textContent = `${sanitize(_sessionName)}（${sanitize(_sessionDept)}）`;
       currentPage = 0;
