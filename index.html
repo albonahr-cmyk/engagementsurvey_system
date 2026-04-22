@@ -92,16 +92,16 @@ if (typeof pdfjsLib !== 'undefined') {
   }
 
   #screen-login .login-title {
-    position: absolute; top: 48px; left: 52px; z-index: 3;
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%); z-index: 3; text-align: center;
     animation: titleFadeIn 2s cubic-bezier(0.16,1,0.3,1) both;
     animation-delay: 0.3s;
   }
   @keyframes titleFadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translate(-50%, -60%) translateY(-20px); }
+    to { opacity: 1; transform: translate(-50%, -60%) translateY(0); }
   }
   #screen-login .login-title h1 {
-    font-size: 56px; font-weight: 800; letter-spacing: 6px; margin: 0; line-height: 1.15;
+    font-size: 44px; font-weight: 800; letter-spacing: 6px; margin: 0; line-height: 1.15;
     background: linear-gradient(135deg, #f472b6, #a78bfa, #60a5fa, #34d399, #fbbf24, #fb923c, #f472b6);
     background-size: 200% auto;
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
