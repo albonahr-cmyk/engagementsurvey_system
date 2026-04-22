@@ -213,7 +213,7 @@ function handleSendMails(ss, data) {
           try { mailConfig = JSON.parse(settingsData[i][1]); } catch(ex) {}
         }
         if (settingsData[i][0] === 'es_survey_period') {
-          try { var period = JSON.parse(settingsData[i][1]); if (period.end) deadline = period.end; } catch(ex) {}
+          try { var period = JSON.parse(settingsData[i][1]); deadline = period.deadline || period.end || ''; } catch(ex) {}
         }
       }
     }

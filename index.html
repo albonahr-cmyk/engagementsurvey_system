@@ -1346,6 +1346,10 @@ if (typeof pdfjsLib !== 'undefined') {
           <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">終了日</label>
           <input type="date" id="period-end" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
         </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">回答期限（メール記載用）</label>
+          <input type="date" id="period-deadline" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
+        </div>
         <button class="btn btn-primary" onclick="saveSurveyPeriod()">💾 保存</button>
         <span id="period-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
       </div>
@@ -3987,10 +3991,12 @@ function showToast(msg) {
 function renderSettingsTab() {
   const ps = document.getElementById('period-start');
   const pe = document.getElementById('period-end');
+  const pd = document.getElementById('period-deadline');
   if (ps) ps.value = surveyPeriod.start;
   if (pe) pe.value = surveyPeriod.end;
+  if (pd) pd.value = surveyPeriod.deadline || '';
   const cur = document.getElementById('period-current');
-  if (cur) cur.textContent = `現在の期間：${surveyPeriod.start} 〜 ${surveyPeriod.end}`;
+  if (cur) cur.textContent = `現在の期間：${surveyPeriod.start} 〜 ${surveyPeriod.end}${surveyPeriod.deadline ? '　回答期限：' + surveyPeriod.deadline : ''}`;
   renderDeptManager();
   renderQuestionEditor();
   renderAdminAccountList();
@@ -3999,12 +4005,13 @@ function renderSettingsTab() {
 function saveSurveyPeriod() {
   const start = document.getElementById('period-start').value;
   const end   = document.getElementById('period-end').value;
+  const deadline = document.getElementById('period-deadline').value;
   if (!start || !end) { alert('開始日と終了日を入力してください'); return; }
   if (start > end) { alert('開始日は終了日より前にしてください'); return; }
-  surveyPeriod = { start, end };
+  surveyPeriod = { start, end, deadline: deadline || '' };
   localStorage.setItem('es_survey_period', JSON.stringify(surveyPeriod));
   const cur = document.getElementById('period-current');
-  if (cur) cur.textContent = `現在の期間：${surveyPeriod.start} 〜 ${surveyPeriod.end}`;
+  if (cur) cur.textContent = `現在の期間：${surveyPeriod.start} 〜 ${surveyPeriod.end}${surveyPeriod.deadline ? '　回答期限：' + surveyPeriod.deadline : ''}`;
   const msg = document.getElementById('period-save-msg');
   if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
 }
