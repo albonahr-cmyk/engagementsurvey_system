@@ -1373,18 +1373,6 @@ if (typeof pdfjsLib !== 'undefined') {
       </div>
     </div>
 
-    <!-- 質問文カスタマイズ -->
-    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
-      <div class="section-title" style="margin-bottom:8px">📝 サーベイ質問文カスタマイズ</div>
-      <p style="font-size:13px;color:#64748b;margin-bottom:16px">質問文を編集できます。カテゴリ分類・スコア計算のロジックは変わりません。</p>
-      <div id="question-editor-list"></div>
-      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="saveCustomQuestions()">💾 保存</button>
-        <button class="btn btn-secondary" onclick="resetCustomQuestions()">↩️ 初期値に戻す</button>
-        <span id="q-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
-      </div>
-    </div>
-
     <!-- メール配信設定 -->
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
       <div class="section-title" style="margin-bottom:8px">✉️ サーベイ案内メール配信</div>
@@ -1461,6 +1449,18 @@ ALBONA 人事部</textarea>
       </div>
 
       <div id="mail-schedule-current" style="margin-top:16px;font-size:13px;color:#64748b;background:#f8fafc;padding:10px 14px;border-radius:8px;display:inline-block"></div>
+    </div>
+
+    <!-- 質問文カスタマイズ -->
+    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
+      <div class="section-title" style="margin-bottom:8px">📝 サーベイ質問文カスタマイズ</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px">質問文を編集できます。カテゴリ分類・スコア計算のロジックは変わりません。</p>
+      <div id="question-editor-list"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveCustomQuestions()">💾 保存</button>
+        <button class="btn btn-secondary" onclick="resetCustomQuestions()">↩️ 初期値に戻す</button>
+        <span id="q-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
+      </div>
     </div>
 
     <!-- 管理者アカウント管理 -->
