@@ -121,6 +121,19 @@ if (typeof pdfjsLib !== 'undefined') {
     font-size: 10px; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase;
     font-weight: 500; margin-top: 8px;
   }
+  .login-catchcopy {
+    font-size: 20px; font-weight: 800; color: #374151; margin-top: 24px; letter-spacing: 0.5px;
+  }
+  .login-accent { font-style: italic; }
+  .login-highlight {
+    background: linear-gradient(135deg, #a78bfa, #60a5fa, #f472b6, #fb923c);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; padding: 2px 8px;
+    background-color: rgba(167,139,250,0.1);
+    border-radius: 4px;
+    background-size: 200% auto;
+    animation: gradientShift 8s linear infinite;
+  }
   #screen-login .card {
     position: absolute; bottom: 80px; right: 80px; z-index: 2;
     border-radius: 16px;
@@ -875,6 +888,7 @@ if (typeof pdfjsLib !== 'undefined') {
   <div class="login-blob login-blob-5"></div>
   <div class="login-title">
     <h1>ENGAGEMENT<br>SURVEY</h1>
+    <div class="login-catchcopy">世の中に<span class="login-accent"> "+1%" </span>の<span class="login-highlight">新たな幸せを創る</span></div>
   </div>
   <div class="card">
     <div class="login-fields">
