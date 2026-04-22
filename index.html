@@ -48,132 +48,120 @@ if (typeof pdfjsLib !== 'undefined') {
   .badge-warn { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
 
   /* ログイン */
-  /* ===== 庭園テーマ ログイン ===== */
   #screen-login {
     align-items: center; justify-content: center; position: relative; overflow: hidden;
-    background-color: #0a0a0a;
+    background: #f8f8f8;
   }
-  #screen-login .login-bg {
-    position: absolute; inset: 0; background: url('login-bg.png') center/cover no-repeat;
-    animation: kenBurns 25s ease-in-out infinite alternate;
-    transform-origin: center;
+  #screen-login .login-bg { display: none; }
+  .light-ray { display: none; }
+  .garden-particles { display: none; }
+  #screen-login::before { display: none; }
+  #screen-login::after { display: none; }
+
+  /* 虹色のふわふわ図形 */
+  .login-blob {
+    position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+    filter: blur(40px); opacity: 0.5;
+    animation: blobFloat 12s ease-in-out infinite alternate;
   }
-  @keyframes kenBurns {
-    0% { transform: scale(1) translate(0, 0); }
-    100% { transform: scale(1.15) translate(-2%, -2%); }
+  .login-blob-1 {
+    width: 350px; height: 350px; top: -80px; right: -60px;
+    background: radial-gradient(circle, #a78bfa, #60a5fa, #34d399);
+    animation-duration: 14s;
   }
-  #screen-login::before {
-    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
-    background: radial-gradient(ellipse at 50% 30%, transparent 30%, rgba(0,0,0,0.4) 100%);
+  .login-blob-2 {
+    width: 280px; height: 280px; bottom: -60px; right: 20%;
+    background: radial-gradient(circle, #fb923c, #f472b6, #a78bfa);
+    animation-duration: 18s; animation-delay: -4s;
   }
-  #screen-login::after {
-    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 250px; pointer-events: none; z-index: 1;
-    background: linear-gradient(0deg, rgba(0,0,0,0.6), transparent);
+  .login-blob-3 {
+    width: 200px; height: 200px; top: 30%; left: -40px;
+    background: radial-gradient(circle, #34d399, #60a5fa, #a78bfa);
+    animation-duration: 16s; animation-delay: -8s; opacity: 0.35;
   }
-  /* 光の筋 */
-  .light-ray {
-    position: absolute; top: -10%; left: 42%; width: 300px; height: 120%; z-index: 1;
-    background: linear-gradient(180deg, rgba(255,255,200,0.15), transparent 60%);
-    transform: rotate(6deg); pointer-events: none;
-    animation: rayPulse 6s ease-in-out infinite;
+  .login-blob-4 {
+    width: 150px; height: 150px; bottom: 20%; left: 30%;
+    background: radial-gradient(circle, #fbbf24, #f472b6);
+    animation-duration: 20s; animation-delay: -2s; opacity: 0.3;
   }
-  .light-ray::after {
-    content: ''; position: absolute; top: 0; left: -120px; width: 180px; height: 100%;
-    background: linear-gradient(180deg, rgba(255,255,200,0.08), transparent 50%);
-    transform: rotate(-4deg);
-    animation: rayPulse 6s ease-in-out infinite reverse;
+  @keyframes blobFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.1); }
+    66% { transform: translate(-20px, 15px) scale(0.95); }
+    100% { transform: translate(10px, -30px) scale(1.05); }
   }
-  @keyframes rayPulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
-  }
-  /* 蛍のような光粒 */
-  .garden-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
-  .garden-particle {
-    position: absolute; border-radius: 50%;
-    animation: fireflyFloat linear infinite;
-  }
-  @keyframes fireflyFloat {
-    0% { transform: translateY(0) translateX(0); opacity: 0; }
-    5% { opacity: 0; }
-    15% { opacity: 0.9; }
-    85% { opacity: 0.9; }
-    95% { opacity: 0; }
-    100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
-  }
+
   #screen-login .login-title {
-    position: absolute; top: 36px; left: 40px; z-index: 3;
+    position: absolute; top: 48px; left: 52px; z-index: 3;
     animation: titleFadeIn 2s cubic-bezier(0.16,1,0.3,1) both;
-    animation-delay: 0.5s;
+    animation-delay: 0.3s;
   }
   @keyframes titleFadeIn {
-    from { opacity: 0; transform: translateX(-50px) scale(0.95); filter: blur(4px); }
-    to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   #screen-login .login-title h1 {
-    font-size: 28px; font-weight: 800; letter-spacing: 2px; margin: 0;
+    font-size: 32px; font-weight: 800; letter-spacing: 2px; margin: 0;
     background: linear-gradient(135deg, #f472b6, #a78bfa, #60a5fa, #34d399, #fbbf24, #fb923c, #f472b6);
     background-size: 200% auto;
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: gradientShift 8s linear infinite;
-    text-shadow: none;
   }
   @keyframes gradientShift {
     0% { background-position: 0% center; }
     100% { background-position: 200% center; }
   }
   #screen-login .login-title .login-subtitle {
-    font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 4px; text-transform: uppercase;
-    font-weight: 500; margin-top: 6px;
+    font-size: 10px; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase;
+    font-weight: 500; margin-top: 8px;
   }
   #screen-login .card {
-    position: absolute; bottom: 32px; right: 32px; z-index: 2;
+    position: absolute; bottom: 40px; right: 40px; z-index: 2;
     border-radius: 16px;
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
     padding: 16px 20px;
     text-align: left;
-    animation: cardSlideUp 1.8s cubic-bezier(0.16,1,0.3,1) both;
-    animation-delay: 1s;
+    animation: cardSlideUp 1.5s cubic-bezier(0.16,1,0.3,1) both;
+    animation-delay: 0.8s;
   }
   @keyframes cardSlideUp {
-    from { opacity: 0; transform: translateY(60px) scale(0.95); filter: blur(4px); }
-    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .login-fields {
     display: flex; gap: 8px; align-items: center;
   }
   .login-fields input {
-    width: 110px; padding: 10px 12px;
-    border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+    width: 120px; padding: 10px 14px;
+    border: 1px solid #e2e8f0; border-radius: 10px;
     font-size: 13px; text-align: center; letter-spacing: 1px;
     transition: all 0.3s;
     font-family: 'Inter', monospace; font-weight: 600;
-    background: rgba(255,255,255,0.08);
-    color: #fff;
+    background: #fff;
+    color: #1e293b;
   }
-  .login-fields input::placeholder { color: rgba(255,255,255,0.3); letter-spacing: 1px; font-size: 12px; }
+  .login-fields input::placeholder { color: #94a3b8; letter-spacing: 1px; font-size: 12px; }
   .login-fields input:focus {
-    outline: none; border-color: rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.12);
-    box-shadow: 0 0 20px rgba(255,255,255,0.08);
+    outline: none; border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(167,139,250,0.15);
   }
   #screen-login .btn-primary {
     padding: 10px 16px; min-width: 0;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
+    background: #1e293b;
+    border: none;
     box-shadow: none; color: #fff; font-size: 16px;
-    border-radius: 8px;
+    border-radius: 10px;
   }
   #screen-login .btn-primary:hover {
-    background: rgba(255,255,255,0.22);
+    background: #334155;
     transform: none; box-shadow: none;
   }
   #screen-login .btn-primary:active {
-    background: rgba(255,255,255,0.08);
+    background: #0f172a;
     transform: none; box-shadow: none;
   }
   .login-error { color: #ff8a8a; font-size: 11px; margin-top: 6px; font-weight: 500; }
@@ -875,9 +863,10 @@ if (typeof pdfjsLib !== 'undefined') {
 
 <!-- ログイン -->
 <div id="screen-login" class="screen active">
-  <div class="login-bg"></div>
-  <div class="light-ray"></div>
-  <div class="garden-particles" id="garden-particles"></div>
+  <div class="login-blob login-blob-1"></div>
+  <div class="login-blob login-blob-2"></div>
+  <div class="login-blob login-blob-3"></div>
+  <div class="login-blob login-blob-4"></div>
   <div class="login-title">
     <h1>エンゲージメントサーベイ</h1>
     <div class="login-subtitle">E N G A G E M E N T  S U R V E Y</div>
