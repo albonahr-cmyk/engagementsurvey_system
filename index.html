@@ -1356,7 +1356,10 @@ if (typeof pdfjsLib !== 'undefined') {
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
       <div class="section-title" style="margin-bottom:8px">📤 スコアデータ エクスポート</div>
       <p style="font-size:13px;color:#64748b;margin-bottom:16px">全社員・全月のスコアデータをCSVでダウンロードします。</p>
-      <button class="btn btn-primary" onclick="exportScoreCSV()">📤 CSVエクスポート</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="exportScoreCSV()">📤 CSVエクスポート</button>
+        <button class="btn btn-secondary" onclick="exportToSpreadsheet()" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7">📊 スプレッドシートに出力</button>
+      </div>
     </div>
 
     <!-- 部署管理 -->
