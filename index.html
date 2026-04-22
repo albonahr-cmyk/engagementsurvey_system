@@ -4193,15 +4193,24 @@ function sendMailToEmployee(empId) {
   document.body.appendChild(script);
 }
 
-function sendMailsNow() {
+async function sendMailsNow() {
   const withEmail = Object.entries(employees).filter(([,e]) => e.email);
   const excluded = withEmail.filter(([,e]) => e.mailExcluded);
   const targets = withEmail.filter(([,e]) => !e.mailExcluded);
   if (targets.length === 0) { showToast('⚠️ 配信対象の社員がいません'); return; }
   const excludeNote = excluded.length > 0 ? `\n（配信除外: ${excluded.length}名）` : '';
-  if (!confirm(`配信対象の社員（${targets.length}名）にサーベイ案内メールを送信します。${excludeNote}\n\n※ 今月の回答済み社員はスキップされます。\n\nよろしいですか？`)) return;
+  if (!confirm(`配信対象の社員（${targets.length}名）にサーベイ案内メールを送信します。${excludeNote}\n\n※ ワンクリック回答リンク付きで送信されます。\n※ 今月の回答済み社員はスキップされます。\n\nよろしいですか？`)) return;
   const gasUrl = localStorage.getItem('es_gas_url');
   if (!gasUrl) { showToast('❌ GAS URLが未設定です'); return; }
+
+  // まずトークンを生成
+  showToast('🔑 回答リンク用トークンを生成中...');
+  try {
+    const tokenRes = await apiPost('generate-tokens', {});
+    if (!tokenRes?.ok) { showToast('⚠️ トークン生成に失敗しました'); return; }
+    showToast(`✅ ${tokenRes.count}名分のトークンを生成しました。メール送信中...`);
+  } catch(e) { showToast('⚠️ トークン生成に失敗しました'); return; }
+
   // GASのsendMailsを新しいタブで実行（CORS回避）
   const gasToken = localStorage.getItem('es_gas_token') || '';
   const w = window.open(gasUrl + '?action=sendMails&token=' + encodeURIComponent(gasToken), '_blank');
@@ -5668,6 +5677,60 @@ function switchMasterTab(name, btn) {
   if (target) target.style.display = 'block';
   if (btn) btn.classList.add('active');
 }
+
+// トークン自動ログイン（メールのリンクから）
+(async function checkTokenLogin() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const surveyToken = urlParams.get('token');
+  if (!surveyToken) return;
+
+  // URLからtokenパラメータを消す
+  window.history.replaceState({}, '', window.location.pathname);
+
+  try {
+    const res = await fetch(API_BASE + '/api/token-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: surveyToken }),
+    });
+    const data = await res.json();
+    if (data.ok && data.token) {
+      saveSession(data);
+      currentEmpId = data.empId;
+
+      // クラウドからサーベイ期間を取得してから判定
+      try { await loadAllSettingsFromCloud(); reloadAllSettings(); } catch(e) {}
+      const currentMonth = getSurveyMonth();
+
+      const checkRes = await fetch(API_BASE + '/api/check?month=' + currentMonth, {
+        headers: authHeaders(),
+      });
+      const checkData = await checkRes.json();
+
+      if (checkData.submitted || hasSubmittedThisMonth(data.empId)) {
+        document.getElementById('already-name').textContent = sanitize(data.name);
+        const sm = getSurveyMonth();
+        document.getElementById('already-month-msg').innerHTML = `${sm.split('-')[0]}年${parseInt(sm.split('-')[1])}月のサーベイへのご協力ありがとうございました。<br>来月もよろしくお願いします。`;
+        showScreen('already');
+      } else {
+        answers = {};
+        const draft = localStorage.getItem('es_draft_' + data.empId);
+        if (draft) { try { answers = JSON.parse(draft); } catch(e) {} }
+        showScreen('survey');
+        const cm = getSurveyMonth();
+        document.getElementById('survey-title').textContent = `${cm.split('-')[0]}年${parseInt(cm.split('-')[1])}月 エンゲージメントサーベイ`;
+        document.getElementById('survey-user-name').textContent = `${sanitize(data.name)}（${sanitize(data.dept)}）`;
+        currentPage = 0;
+        renderPage();
+      }
+      return;
+    } else {
+      showToast('リンクの有効期限が切れています。ID/PASSでログインしてください。');
+    }
+  } catch(e) {
+    console.warn('token-login error:', e);
+  }
+})();
 
 // セッション復元（sessionStorageベース、サーバー検証済みトークン）
 (function restoreSession() {

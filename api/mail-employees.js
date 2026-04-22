@@ -30,6 +30,7 @@ module.exports = async function handler(req, res) {
           name: P.readTitle(p.name),
           dept: P.readSelect(p.dept),
           email: P.readRich(p.email),
+          surveyToken: P.readRich(p.surveyToken),
         };
       })
       .filter(e => e.email); // メアド登録済みのみ

@@ -219,7 +219,7 @@ function handleSendMails(ss, data) {
     }
 
     var subject = (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
-    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 回答はこちら\nhttps://engagementsurvey-system-nvlq.vercel.app\n\nログインID: {empId}\n\nご協力よろしくお願いいたします。';
+    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 以下のリンクをクリックするだけで回答できます\n{surveyUrl}\n\nご協力よろしくお願いいたします。';
 
     // 今月の回答済み社員をチェック
     var now = new Date();
@@ -241,11 +241,14 @@ function handleSendMails(ss, data) {
       if (!emp.email || !emp.empId) continue;
       if (submittedIds[emp.empId]) continue;
 
+      var surveyBaseUrl = 'https://engagementsurvey-system-nvlq.vercel.app';
+      var surveyLink = emp.surveyToken ? surveyBaseUrl + '?token=' + emp.surveyToken : surveyBaseUrl;
       var body = bodyTemplate
         .replace(/\{name\}/g, emp.name || '')
         .replace(/\{empId\}/g, emp.empId)
         .replace(/\{dept\}/g, emp.dept || '')
-        .replace(/\{deadline\}/g, deadline || '今月末');
+        .replace(/\{deadline\}/g, deadline || '今月末')
+        .replace(/\{surveyUrl\}/g, surveyLink);
 
       try {
         GmailApp.sendEmail(emp.email, subject, body);
