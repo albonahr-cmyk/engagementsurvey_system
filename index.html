@@ -4131,52 +4131,26 @@ function renderMailScheduleStatus(config) {
   el.innerHTML = `現在の設定：<strong>${ymd} ${String(config.hour).padStart(2,'0')}:00</strong> に自動送信`;
 }
 
-function testSendMail() {
+async function testSendMail() {
   const msgEl = document.getElementById('mail-test-msg');
   msgEl.style.display = 'inline';
   msgEl.style.color = '#14b8a6';
   msgEl.textContent = '送信中...';
   const gasUrl = localStorage.getItem('es_gas_url');
   if (!gasUrl) { msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ GAS URLが未設定です（設定 → GAS URL）'; return; }
-  // JSONP方式でCORS回避（GAS側のレスポンスが取れなくても送信処理は実行されているので暫定成功扱い）
-  const cbName = '_gasTestCb_' + Date.now();
-  let resolved = false;
-  const cleanup = function() {
-    delete window[cbName];
-    if (script.parentNode) document.body.removeChild(script);
-  };
-  window[cbName] = function(data) {
-    if (resolved) return;
-    resolved = true;
-    if (data.ok) { msgEl.style.color = '#0f766e'; msgEl.textContent = '✅ テストメール送信完了（albonahr@al-bo.io 宛）'; }
-    else { msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ ' + (data.error || '送信失敗'); }
-    setTimeout(() => msgEl.style.display = 'none', 5000);
-    cleanup();
-  };
-  const script = document.createElement('script');
-  script.src = gasUrl + '?action=testMail&callback=' + cbName;
-  script.onerror = function() {
-    if (resolved) return;
-    resolved = true;
-    // GASのレスポンス取得には失敗したが、実際の送信処理は実行されている可能性が高い
+  // Vercelサーバー経由でGASを呼ぶ（ブラウザのJSONP/CORS問題を回避）
+  const res = await apiPost('gas-proxy', { gasUrl, action: 'testMail' });
+  if (res && res.ok) {
     msgEl.style.color = '#0f766e';
-    msgEl.textContent = '✅ 送信処理を実行しました（メール到達を確認してください）';
-    setTimeout(() => msgEl.style.display = 'none', 5000);
-    cleanup();
-  };
-  // 6秒経ってもコールバックが来なければ暫定成功表示
-  setTimeout(() => {
-    if (resolved) return;
-    resolved = true;
-    msgEl.style.color = '#0f766e';
-    msgEl.textContent = '✅ 送信処理を実行しました（メール到達を確認してください）';
-    setTimeout(() => msgEl.style.display = 'none', 5000);
-    cleanup();
-  }, 6000);
-  document.body.appendChild(script);
+    msgEl.textContent = '✅ テストメール送信完了（albonahr@al-bo.io 宛）';
+  } else {
+    msgEl.style.color = '#dc2626';
+    msgEl.textContent = '❌ ' + (res?.error || '送信失敗') + (res?.preview ? ' / ' + res.preview.substring(0, 100) : '');
+  }
+  setTimeout(() => msgEl.style.display = 'none', 8000);
 }
 
-function sendMailToEmployee(empId) {
+async function sendMailToEmployee(empId) {
   const emp = employees[empId];
   if (!emp) { showToast('社員が見つかりません'); return; }
   if (!emp.email) { showToast('⚠️ メールアドレスが未登録です'); return; }
@@ -4185,29 +4159,9 @@ function sendMailToEmployee(empId) {
   if (!gasUrl) { showToast('❌ GAS URLが未設定です（設定 → GAS URL）'); return; }
   const gasToken = localStorage.getItem('es_gas_token') || '';
   showToast('📨 送信中...');
-  // JSONP
-  const cbName = '_gasSendOneCb_' + Date.now();
-  let resolved = false;
-  const cleanup = () => { delete window[cbName]; if (script.parentNode) document.body.removeChild(script); };
-  window[cbName] = (data) => {
-    if (resolved) return; resolved = true;
-    if (data && data.ok) showToast(`✅ ${emp.name} に送信しました`);
-    else showToast('⚠ ' + (data?.error || '送信失敗'));
-    cleanup();
-  };
-  const script = document.createElement('script');
-  script.src = gasUrl + '?action=sendToOne&empId=' + encodeURIComponent(empId) + '&token=' + encodeURIComponent(gasToken) + '&callback=' + cbName;
-  script.onerror = () => {
-    if (resolved) return; resolved = true;
-    showToast(`✅ ${emp.name} に送信処理を実行しました（メール到達を確認してください）`);
-    cleanup();
-  };
-  setTimeout(() => {
-    if (resolved) return; resolved = true;
-    showToast(`✅ ${emp.name} に送信処理を実行しました（メール到達を確認してください）`);
-    cleanup();
-  }, 8000);
-  document.body.appendChild(script);
+  const res = await apiPost('gas-proxy', { gasUrl, token: gasToken, action: 'sendToOne', params: { empId } });
+  if (res && res.ok) showToast(`✅ ${emp.name} に送信しました`);
+  else showToast('⚠ ' + (res?.error || '送信失敗') + (res?.preview ? ' / ' + res.preview.substring(0, 100) : ''));
 }
 
 async function sendMailsNow() {
@@ -4228,30 +4182,15 @@ async function sendMailsNow() {
     showToast(`✅ ${tokenRes.count}名分のトークンを生成しました。メール送信中...`);
   } catch(e) { showToast('⚠️ トークン生成に失敗しました'); return; }
 
-  // テスト送信と完全に同じJSONP方式
+  // Vercelサーバー経由でGASを呼ぶ（ブラウザのJSONP/CORS問題を回避）
   const gasToken = localStorage.getItem('es_gas_token') || '';
   showToast('📨 メール送信中...（数十秒かかる場合があります）');
-  const cbName = '_gasSendCb_' + Date.now();
-  let resolved = false;
-  window[cbName] = function(data) {
-    if (resolved) return;
-    resolved = true;
-    if (data && data.ok) {
-      showToast('✅ ' + (data.sent || 0) + '名にメールを送信しました');
-    } else {
-      showToast('⚠️ ' + (data?.error || '送信に失敗しました'));
-    }
-    if (script.parentNode) document.body.removeChild(script);
-  };
-  const script = document.createElement('script');
-  script.src = gasUrl + '?action=sendMails&token=' + encodeURIComponent(gasToken) + '&callback=' + cbName;
-  script.onerror = function() {
-    if (resolved) return;
-    resolved = true;
-    showToast('⚠️ 送信できませんでした（GASアクセスエラー）');
-    if (script.parentNode) document.body.removeChild(script);
-  };
-  document.body.appendChild(script);
+  const res = await apiPost('gas-proxy', { gasUrl, token: gasToken, action: 'sendMails' });
+  if (res && res.ok) {
+    showToast('✅ ' + (res.sent || 0) + '名にメールを送信しました');
+  } else {
+    showToast('⚠️ ' + (res?.error || '送信に失敗しました') + (res?.preview ? ' / ' + res.preview.substring(0, 100) : ''));
+  }
 }
 
 function exportScoreCSV() {
