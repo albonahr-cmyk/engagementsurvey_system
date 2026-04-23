@@ -1125,7 +1125,7 @@ if (typeof pdfjsLib !== 'undefined') {
         <div class="form-group" style="max-width:280px;position:relative">
           <label>対象社員</label>
           <input type="text" id="biziq-target-emp-search" placeholder="名前・社員ID・部署で検索..." autocomplete="off"
-            oninput="filterBizIQTargetList()" onfocus="showBizIQTargetList()" onblur="hideBizIQTargetListDelayed()"
+            oninput="filterBizIQTargetList()" onfocus="showBizIQTargetList()" onblur="hideBizIQTargetListDelayed()" onkeydown="handleBizIQTargetKeydown(event)"
             style="width:100%;padding:11px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;color:#1e293b;font-weight:500;background:white">
           <input type="hidden" id="biziq-target-emp" value="">
           <div id="biziq-target-emp-list" style="position:absolute;top:100%;left:0;right:0;max-height:280px;overflow-y:auto;background:white;border:2px solid #e5e7eb;border-radius:10px;margin-top:4px;display:none;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,0.12)"></div>
@@ -5696,14 +5696,13 @@ function initBizIQMasterUI() {
     search.value = item.dataset.label;
     list.style.display = 'none';
   };
-  // 項目ホバー色
+  // マウスホバーでもキーボードハイライトと同じ状態に同期
   list.onmouseover = (ev) => {
     const item = ev.target.closest('.biziq-target-item');
-    if (item) item.style.background = '#f8fafc';
-  };
-  list.onmouseout = (ev) => {
-    const item = ev.target.closest('.biziq-target-item');
-    if (item) item.style.background = '';
+    if (!item) return;
+    const visible = Array.from(list.querySelectorAll('.biziq-target-item')).filter(it => it.style.display !== 'none');
+    const idx = visible.indexOf(item);
+    if (idx >= 0) setBizIQTargetHighlight(idx);
   };
 
   // 入力クリア時の選択解除
@@ -5724,6 +5723,8 @@ function filterBizIQTargetList() {
     const searchText = item.dataset.search || '';
     item.style.display = (!q || searchText.includes(q)) ? 'block' : 'none';
   });
+  // 1件目の可視アイテムをハイライト
+  setBizIQTargetHighlight(0);
 }
 
 function showBizIQTargetList() {
@@ -5736,6 +5737,60 @@ function hideBizIQTargetListDelayed() {
     const list = document.getElementById('biziq-target-emp-list');
     if (list) list.style.display = 'none';
   }, 200);
+}
+
+// ハイライト中のアイテムへ色を付け、範囲外のアイテムからは外す
+function setBizIQTargetHighlight(index) {
+  const list = document.getElementById('biziq-target-emp-list');
+  if (!list) return;
+  const visible = Array.from(list.querySelectorAll('.biziq-target-item')).filter(it => it.style.display !== 'none');
+  visible.forEach((it, i) => {
+    it.classList.toggle('biziq-target-active', i === index);
+    it.style.background = (i === index) ? '#e0f2fe' : '';
+  });
+  // 可視範囲にスクロール
+  if (visible[index]) visible[index].scrollIntoView({ block: 'nearest' });
+}
+
+function moveBizIQTargetHighlight(delta) {
+  const list = document.getElementById('biziq-target-emp-list');
+  if (!list) return;
+  const visible = Array.from(list.querySelectorAll('.biziq-target-item')).filter(it => it.style.display !== 'none');
+  if (visible.length === 0) return;
+  let currentIdx = visible.findIndex(it => it.classList.contains('biziq-target-active'));
+  if (currentIdx < 0) currentIdx = 0;
+  let next = currentIdx + delta;
+  if (next < 0) next = visible.length - 1;
+  if (next >= visible.length) next = 0;
+  setBizIQTargetHighlight(next);
+}
+
+function handleBizIQTargetKeydown(ev) {
+  const list = document.getElementById('biziq-target-emp-list');
+  if (!list) return;
+  const isOpen = list.style.display !== 'none';
+
+  if (ev.key === 'ArrowDown') {
+    ev.preventDefault();
+    if (!isOpen) { showBizIQTargetList(); return; }
+    moveBizIQTargetHighlight(1);
+  } else if (ev.key === 'ArrowUp') {
+    ev.preventDefault();
+    moveBizIQTargetHighlight(-1);
+  } else if (ev.key === 'Enter') {
+    if (!isOpen) return;
+    const active = list.querySelector('.biziq-target-item.biziq-target-active');
+    if (active) {
+      ev.preventDefault();
+      const hidden = document.getElementById('biziq-target-emp');
+      const search = document.getElementById('biziq-target-emp-search');
+      hidden.value = active.dataset.empid;
+      search.value = active.dataset.label;
+      list.style.display = 'none';
+    }
+  } else if (ev.key === 'Escape') {
+    list.style.display = 'none';
+  }
 }
 
 function deleteBizIQData(id) {
