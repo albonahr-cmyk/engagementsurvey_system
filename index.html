@@ -821,7 +821,7 @@ if (typeof pdfjsLib !== 'undefined') {
 @keyframes dotPop { to { opacity:1; transform:scale(1); } }
 
 /* Radar chart */
-.radar-wrap { display:flex; justify-content:center; margin:0 0 20px; }
+.radar-wrap { display:flex; justify-content:center; margin:0; background:white; border-radius:14px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.04); }
 .radar-polygon { transition: all 0.6s ease; }
 
 /* Done screen */
@@ -1007,7 +1007,7 @@ if (typeof pdfjsLib !== 'undefined') {
     <div class="section-title">📋 評価基準・推奨アクション</div>
     <div id="action-guide-list"></div>
     <div class="section-title">📡 カテゴリ別レーダーチャート</div>
-    <div id="radar-chart-section" style="margin-bottom:32px;background:white;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)"></div>
+    <div id="radar-chart-section" style="margin-bottom:32px"></div>
     <div class="section-title">🏢 部署別スコア</div>
     <div id="dept-scores-grid" style="margin-bottom:32px"></div>
   </div>
@@ -2435,7 +2435,7 @@ function renderDashboard() {
   // ===== レーダーチャート =====
   const radarEl = document.getElementById('radar-chart-section');
   if (radarEl && respCount === 0) {
-    radarEl.innerHTML = '<div class="no-alert">今月の回答データがないため判定できません</div>';
+    radarEl.innerHTML = '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
   } else if (radarEl) {
     const radarSize = 340, cx = radarSize/2, cy = radarSize/2, R = 135;
     const keys = catKeys;
