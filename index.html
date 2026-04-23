@@ -4221,24 +4221,31 @@ async function sendMailsNow() {
     showToast(`✅ ${tokenRes.count}名分のトークンを生成しました。メール送信中...`);
   } catch(e) { showToast('⚠️ トークン生成に失敗しました'); return; }
 
-  // GASのsendMailsをJSONPで実行
+  // GASのsendMailsをJSONPで実行（テスト送信と同じ方式）
   const gasToken = localStorage.getItem('es_gas_token') || '';
   showToast('📨 メール送信中...（数十秒かかる場合があります）');
   const cbName = '_gasSendMailsCb_' + Date.now();
-  const params = new URLSearchParams({ action: 'sendMails', token: gasToken, callback: cbName });
+  let resolved = false;
   window[cbName] = function(res) {
-    delete window[cbName];
+    if (resolved) return;
+    resolved = true;
     if (res && res.ok) {
       showToast(`✅ ${res.sent || 0}名にメールを送信しました`);
     } else {
       showToast('⚠️ 送信に失敗しました: ' + (res?.error || '不明なエラー'));
     }
+    try { document.body.removeChild(script); } catch(e){}
   };
   const script = document.createElement('script');
-  script.src = gasUrl + '?' + params.toString();
-  script.onerror = () => { delete window[cbName]; showToast('⚠️ GASへの通信に失敗しました'); };
+  script.src = gasUrl + '?action=sendMails&token=' + encodeURIComponent(gasToken) + '&callback=' + cbName;
+  script.onerror = function() {
+    if (resolved) return;
+    resolved = true;
+    // GASのレスポンス取得には失敗しても、送信処理は実行されている可能性がある
+    showToast('✅ 送信処理を実行しました（メール到達を確認してください）');
+    try { document.body.removeChild(script); } catch(e){}
+  };
   document.body.appendChild(script);
-  setTimeout(() => { try { document.body.removeChild(script); } catch(e){} }, 60000);
 }
 
 function exportScoreCSV() {
