@@ -3789,12 +3789,13 @@ function renderIdList() {
         <div style="font-size:9px;color:${emp.mailExcluded ? '#94a3b8' : '#ef4444'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
       </td>
       <td style="text-align:center">
-        <button class="action-label-btn" onclick="resetSurvey('${id}')" title="回答リセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>リセット</button>
+        <button class="action-label-btn" onclick="resetSurvey('${id}', '${month}')" title="${month} の回答をリセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>${parseInt(month.split('-')[1])}月分をリセット</button>
       </td>
     </tr>`;
   });
+  const resetHeaderLabel = `回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div>`;
   table.innerHTML = `<table>
-    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th>回答リセット</th></tr></thead>
+    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th>${resetHeaderLabel}</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
 }
@@ -3833,19 +3834,19 @@ function manualResetSurvey() {
   });
 }
 
-function resetSurvey(id) {
+function resetSurvey(id, targetMonth) {
   const emp = employees[id];
-  const currentMonth = getSurveyMonth();
-  if (!confirm(`${id}（${emp?.name||''}）の今月（${currentMonth}）の回答をリセットしますか？\nリセットすると再回答が可能になります。`)) return;
+  const month = targetMonth || document.getElementById('emp-month-select')?.value || getSurveyMonth();
+  if (!confirm(`${id}（${emp?.name||''}）の ${month} の回答をリセットしますか？\nリセットすると再回答が可能になります。`)) return;
   showToast('リセット中...');
-  apiPost('survey-reset', { empId: id, month: currentMonth }).then(res => {
+  apiPost('survey-reset', { empId: id, month }).then(res => {
     if (res?.ok) {
-      localStorage.removeItem(`es_${id}_${currentMonth}`);
+      localStorage.removeItem(`es_${id}_${month}`);
       localStorage.removeItem('es_draft_' + id);
-      delete empData[id]?.[currentMonth];
+      delete empData[id]?.[month];
       rebuildEmpData();
       renderEmployeeList();
-      showToast('✅ 回答をリセットしました（再回答可能）');
+      showToast(`✅ ${month} の回答をリセットしました（再回答可能）`);
     } else {
       showToast('⚠️ リセットに失敗しました');
     }
