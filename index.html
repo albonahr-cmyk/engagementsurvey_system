@@ -4222,6 +4222,7 @@ async function sendMailsNow() {
   } catch(e) { showToast('⚠️ トークン生成に失敗しました'); return; }
 
   // テスト送信と完全に同じJSONP方式
+  const gasToken = localStorage.getItem('es_gas_token') || '';
   showToast('📨 メール送信中...（数十秒かかる場合があります）');
   const cbName = '_gasSendCb_' + Date.now();
   let resolved = false;
@@ -4236,11 +4237,11 @@ async function sendMailsNow() {
     if (script.parentNode) document.body.removeChild(script);
   };
   const script = document.createElement('script');
-  script.src = gasUrl + '?action=sendMails&callback=' + cbName;
+  script.src = gasUrl + '?action=sendMails&token=' + encodeURIComponent(gasToken) + '&callback=' + cbName;
   script.onerror = function() {
     if (resolved) return;
     resolved = true;
-    showToast('✅ 送信処理を実行しました（メール到達を確認してください）');
+    showToast('⚠️ 送信できませんでした（GASアクセスエラー）');
     if (script.parentNode) document.body.removeChild(script);
   };
   document.body.appendChild(script);
