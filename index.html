@@ -4984,6 +4984,25 @@ function saveBizIQData(empId, data) {
 function parseBusinessIQText(text) {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
+  // 横並びサマリーテーブル対応: "16ランク ビジネス戦闘力 IQスコア" 行の下に "A4 61,969 115" のような値行がくるフォーマット
+  let summaryRank16 = '';
+  let summaryBattlePower = null;
+  let summaryIqScore = null;
+  for (let i = 0; i < lines.length; i++) {
+    if (/16ランク.*ビジネス戦闘力.*IQスコア/.test(lines[i])) {
+      for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+        const m = lines[j].match(/^([SABCDE]\d)\s+([\d,]+)\s+(\d+)/);
+        if (m) {
+          summaryRank16 = m[1];
+          summaryBattlePower = parseInt(m[2].replace(/,/g, ''));
+          summaryIqScore = parseInt(m[3]);
+          break;
+        }
+      }
+      break;
+    }
+  }
+
   // ヘルパー: ラベルの近くから数値を取得
   function findScore(label, minVal, maxVal) {
     for (let i = 0; i < lines.length; i++) {
@@ -5044,8 +5063,8 @@ function parseBusinessIQText(text) {
     if (m) { examId = m[1]; break; }
   }
 
-  // 16ランク
-  let rank16 = '';
+  // 16ランク（サマリー値を初期値とし、以下の処理で見つかれば上書き）
+  let rank16 = summaryRank16;
   const rank16Val = findScore('16ランク', 0, 99999);
   if (!rank16Val) {
     for (let i = 0; i < lines.length; i++) {
@@ -5063,8 +5082,8 @@ function parseBusinessIQText(text) {
     }
   }
 
-  // ビジネス戦闘力
-  let battlePower = null;
+  // ビジネス戦闘力（サマリー値を初期値とする）
+  let battlePower = summaryBattlePower;
   for (let i = 0; i < lines.length; i++) {
     if (lines[i] === 'ビジネス戦闘力') {
       for (let j = i + 1; j < Math.min(i + 3, lines.length); j++) {
@@ -5075,8 +5094,8 @@ function parseBusinessIQText(text) {
     }
   }
 
-  // IQスコア
-  let iqScore = null;
+  // IQスコア（サマリー値を初期値とする）
+  let iqScore = summaryIqScore;
   for (let i = 0; i < lines.length; i++) {
     if (lines[i] === 'IQスコア') {
       for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
