@@ -1122,11 +1122,13 @@ if (typeof pdfjsLib !== 'undefined') {
     <p style="font-size:13px;color:#64748b;margin-bottom:16px">社員マスタとしてビジネスIQ適性検査の結果を登録します。IQ・戦闘力・ランクは自動反映されます。</p>
     <div class="id-issue-card">
       <div class="form-row" style="margin-bottom:14px;align-items:flex-end">
-        <div class="form-group" style="max-width:200px">
+        <div class="form-group" style="max-width:280px;position:relative">
           <label>対象社員</label>
-          <select id="biziq-target-emp" style="width:100%;padding:11px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;color:#1e293b;font-weight:500;background:white">
-            <option value="">社員を選択...</option>
-          </select>
+          <input type="text" id="biziq-target-emp-search" placeholder="名前・社員ID・部署で検索..." autocomplete="off"
+            oninput="filterBizIQTargetList()" onfocus="showBizIQTargetList()" onblur="hideBizIQTargetListDelayed()"
+            style="width:100%;padding:11px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;color:#1e293b;font-weight:500;background:white">
+          <input type="hidden" id="biziq-target-emp" value="">
+          <div id="biziq-target-emp-list" style="position:absolute;top:100%;left:0;right:0;max-height:280px;overflow-y:auto;background:white;border:2px solid #e5e7eb;border-radius:10px;margin-top:4px;display:none;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,0.12)"></div>
         </div>
         <button class="btn btn-secondary btn-sm" onclick="document.getElementById('biziq-paste-master').style.display=document.getElementById('biziq-paste-master').style.display==='none'?'block':'none'" style="height:44px">📋 テキスト貼り付けで登録</button>
         <button class="btn btn-secondary btn-sm" onclick="document.getElementById('biziq-file-master').click()" style="height:44px">📄 PDFアップロード</button>
@@ -5670,11 +5672,70 @@ function renderBizIQCard(data, empId) {
 
 // ===== 適性検査マスタ管理 =====
 function initBizIQMasterUI() {
-  const sel = document.getElementById('biziq-target-emp');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">社員を選択...</option>' +
-    Object.entries(employees).map(([id, e]) => `<option value="${id}">${e.name}（${id}）</option>`).join('');
+  const list = document.getElementById('biziq-target-emp-list');
+  const hidden = document.getElementById('biziq-target-emp');
+  const search = document.getElementById('biziq-target-emp-search');
+  if (!list || !hidden || !search) return;
+
+  // ドロップダウン項目を生成（検索用データをdata属性に格納）
+  const items = Object.entries(employees).map(([id, e]) => {
+    const searchText = `${(e.name || '').toLowerCase()} ${id.toLowerCase()} ${(e.dept || '').toLowerCase()}`;
+    const label = `${e.name || ''}（${id}${e.dept ? ' / ' + e.dept : ''}）`;
+    return `<div class="biziq-target-item" data-empid="${id}" data-label="${label.replace(/"/g, '&quot;')}" data-search="${searchText.replace(/"/g, '&quot;')}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:14px"><strong>${e.name || ''}</strong> <span style="color:#64748b;font-size:12px">（${id}${e.dept ? ' / ' + e.dept : ''}）</span></div>`;
+  }).join('');
+  list.innerHTML = items || '<div style="padding:14px;color:#64748b;font-size:13px">社員データがありません</div>';
+  // 選択状態をリセット（社員一覧が更新されたケースに対応）
+  search.value = '';
+  hidden.value = '';
+
+  // クリック時の選択処理（イベント委譲）
+  list.onclick = (ev) => {
+    const item = ev.target.closest('.biziq-target-item');
+    if (!item) return;
+    hidden.value = item.dataset.empid;
+    search.value = item.dataset.label;
+    list.style.display = 'none';
+  };
+  // 項目ホバー色
+  list.onmouseover = (ev) => {
+    const item = ev.target.closest('.biziq-target-item');
+    if (item) item.style.background = '#f8fafc';
+  };
+  list.onmouseout = (ev) => {
+    const item = ev.target.closest('.biziq-target-item');
+    if (item) item.style.background = '';
+  };
+
+  // 入力クリア時の選択解除
+  search.oninput = () => {
+    if (!search.value.trim()) hidden.value = '';
+    filterBizIQTargetList();
+  };
+
   renderBizIQMasterTable();
+}
+
+function filterBizIQTargetList() {
+  const q = (document.getElementById('biziq-target-emp-search').value || '').toLowerCase().trim();
+  const list = document.getElementById('biziq-target-emp-list');
+  if (!list) return;
+  list.style.display = 'block';
+  list.querySelectorAll('.biziq-target-item').forEach(item => {
+    const searchText = item.dataset.search || '';
+    item.style.display = (!q || searchText.includes(q)) ? 'block' : 'none';
+  });
+}
+
+function showBizIQTargetList() {
+  filterBizIQTargetList();
+}
+
+function hideBizIQTargetListDelayed() {
+  // クリックイベントを先に処理させるため遅延
+  setTimeout(() => {
+    const list = document.getElementById('biziq-target-emp-list');
+    if (list) list.style.display = 'none';
+  }, 200);
 }
 
 function deleteBizIQData(id) {
