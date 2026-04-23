@@ -4022,7 +4022,6 @@ function saveMailSchedule() {
   const hour = document.getElementById('mail-send-hour').value;
   const subject = document.getElementById('mail-subject').value.trim();
   const body = document.getElementById('mail-body-template').value;
-  if (!date) { showToast('⚠️ 送信日を選択してください'); return; }
   const config = { date: date, hour: Number(hour), subject, bodyTemplate: body };
   const configStr = JSON.stringify(config);
   localStorage.setItem('es_mail_schedule', configStr);
@@ -4030,9 +4029,13 @@ function saveMailSchedule() {
     const msg = document.getElementById('mail-schedule-msg');
     if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
     renderMailScheduleStatus(config);
-    showToast('✅ 設定を保存しました');
-    // GASに配信予約リクエストを送信
-    scheduleSendToGas(date, Number(hour), subject, body);
+    if (date) {
+      showToast('✅ 設定を保存しました');
+      // GASに配信予約リクエストを送信（送信日が設定されている場合のみ）
+      scheduleSendToGas(date, Number(hour), subject, body);
+    } else {
+      showToast('✅ テンプレートを保存しました（配信予約は送信日を設定してください）');
+    }
   });
 }
 
