@@ -5723,8 +5723,8 @@ function filterBizIQTargetList() {
     const searchText = item.dataset.search || '';
     item.style.display = (!q || searchText.includes(q)) ? 'block' : 'none';
   });
-  // 1件目の可視アイテムをハイライト
-  setBizIQTargetHighlight(0);
+  // 検索語がある時のみ1件目を自動ハイライト（空入力時は意図しない選択を避ける）
+  setBizIQTargetHighlight(q ? 0 : -1);
 }
 
 function showBizIQTargetList() {
@@ -5739,17 +5739,22 @@ function hideBizIQTargetListDelayed() {
   }, 200);
 }
 
-// ハイライト中のアイテムへ色を付け、範囲外のアイテムからは外す
+// ハイライト中のアイテムへ色を付け、他アイテム（非表示含む）からは外す
 function setBizIQTargetHighlight(index) {
   const list = document.getElementById('biziq-target-emp-list');
   if (!list) return;
-  const visible = Array.from(list.querySelectorAll('.biziq-target-item')).filter(it => it.style.display !== 'none');
-  visible.forEach((it, i) => {
-    it.classList.toggle('biziq-target-active', i === index);
-    it.style.background = (i === index) ? '#e0f2fe' : '';
+  // まず全アイテムからactive状態を削除（非表示アイテムの古いactiveが残らないように）
+  list.querySelectorAll('.biziq-target-item').forEach(it => {
+    it.classList.remove('biziq-target-active');
+    it.style.background = '';
   });
-  // 可視範囲にスクロール
-  if (visible[index]) visible[index].scrollIntoView({ block: 'nearest' });
+  if (index < 0) return;
+  const visible = Array.from(list.querySelectorAll('.biziq-target-item')).filter(it => it.style.display !== 'none');
+  if (visible[index]) {
+    visible[index].classList.add('biziq-target-active');
+    visible[index].style.background = '#e0f2fe';
+    visible[index].scrollIntoView({ block: 'nearest' });
+  }
 }
 
 function moveBizIQTargetHighlight(delta) {
@@ -5779,8 +5784,11 @@ function handleBizIQTargetKeydown(ev) {
     moveBizIQTargetHighlight(-1);
   } else if (ev.key === 'Enter') {
     if (!isOpen) return;
+    // 日本語IME確定のEnterは isComposing=true で来るのでスキップ
+    if (ev.isComposing || ev.keyCode === 229) return;
     const active = list.querySelector('.biziq-target-item.biziq-target-active');
-    if (active) {
+    // 非表示アイテムを誤選択しないよう可視性もチェック
+    if (active && active.style.display !== 'none') {
       ev.preventDefault();
       const hidden = document.getElementById('biziq-target-emp');
       const search = document.getElementById('biziq-target-emp-search');
