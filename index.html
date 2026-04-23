@@ -2338,10 +2338,15 @@ function renderDashboard() {
 
   // アラート
   const alertList = document.getElementById('alert-list');
+  const noDataCardStyle = 'background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)';
+  const resetAlertSection = () => { alertList.style.cssText = 'background:transparent;padding:0;box-shadow:none;border:none;margin-bottom:28px'; };
+  const restoreAlertSection = () => { alertList.style.cssText = ''; };
   if (respCount === 0) {
-    alertList.innerHTML = '<div class="no-alert">今月の回答データがないため判定できません</div>';
+    resetAlertSection();
+    alertList.innerHTML = `<div class="no-alert" style="${noDataCardStyle}">今月の回答データがないため判定できません</div>`;
   } else if (!prevCats) {
-    alertList.innerHTML = '<div class="no-alert">前月データがないためアラート判定できません</div>';
+    resetAlertSection();
+    alertList.innerHTML = `<div class="no-alert" style="${noDataCardStyle}">前月データがないためアラート判定できません</div>`;
   } else {
     const alerts = [];
     catKeys.forEach(k => {
@@ -2351,8 +2356,10 @@ function renderDashboard() {
       else if (cats[k] < 60) alerts.push({ icon:'🟡', name: catNames[k], score: cats[k], prev: prevCats[k], diff, type:'基準値割れ' });
     });
     if (alerts.length === 0) {
+      restoreAlertSection();
       alertList.innerHTML = '<div class="no-alert">✅ 今月はアラートなし</div>';
     } else {
+      restoreAlertSection();
       alertList.innerHTML = alerts.map(a => `
         <div class="alert-item">
           <div class="alert-icon">${a.icon}</div>
