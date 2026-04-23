@@ -4189,7 +4189,8 @@ async function sendMailsNow() {
   if (res && res.ok) {
     showToast('✅ ' + (res.sent || 0) + '名にメールを送信しました');
   } else {
-    showToast('⚠️ ' + (res?.error || '送信に失敗しました') + (res?.preview ? ' / ' + res.preview.substring(0, 100) : ''));
+    const msg = (res?.error || '送信に失敗しました') + (res?.hint ? '\n💡 ' + res.hint : '') + (res?.preview ? ' / ' + res.preview.substring(0, 100) : '');
+    showToast('⚠️ ' + msg);
   }
 }
 

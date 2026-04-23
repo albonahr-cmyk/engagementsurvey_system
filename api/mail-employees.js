@@ -1,17 +1,22 @@
 const { queryDB, P } = require('../lib/notion');
-const { setCors } = require('../lib/auth');
+const { setCors, authenticate } = require('../lib/auth');
 const crypto = require('crypto');
 
 module.exports = async function handler(req, res) {
   setCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  // GASからの呼び出し用: シークレットキーで認証（タイミングセーフ比較）
-  const secret = req.headers['x-mail-secret'] || '';
-  const envSecret = (process.env.MAIL_API_SECRET || '').trim();
-  if (!envSecret || secret.length !== envSecret.length ||
-      !crypto.timingSafeEqual(Buffer.from(secret), Buffer.from(envSecret))) {
-    return res.status(403).json({ ok: false, error: 'forbidden' });
+  // 認証: 管理者セッション or シークレットキー（GAS用）のどちらかが必要
+  const user = authenticate(req);
+  const isAdmin = user && user.role === 'admin';
+
+  if (!isAdmin) {
+    const secret = req.headers['x-mail-secret'] || '';
+    const envSecret = (process.env.MAIL_API_SECRET || '').trim();
+    if (!envSecret || secret.length !== envSecret.length ||
+        !crypto.timingSafeEqual(Buffer.from(secret), Buffer.from(envSecret))) {
+      return res.status(403).json({ ok: false, error: 'forbidden', hint: !envSecret ? 'MAIL_API_SECRET not configured on Vercel' : 'secret mismatch' });
+    }
   }
 
   try {
