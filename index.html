@@ -4221,38 +4221,29 @@ async function sendMailsNow() {
     showToast(`✅ ${tokenRes.count}名分のトークンを生成しました。メール送信中...`);
   } catch(e) { showToast('⚠️ トークン生成に失敗しました'); return; }
 
-  // GASのsendMailsをiframe POST方式で実行
-  const gasToken = localStorage.getItem('es_gas_token') || '';
+  // テスト送信と完全に同じJSONP方式
   showToast('📨 メール送信中...（数十秒かかる場合があります）');
-
-  let iframe = document.getElementById('gas-mail-iframe');
-  if (!iframe) {
-    iframe = document.createElement('iframe');
-    iframe.id = 'gas-mail-iframe';
-    iframe.name = 'gas-mail-iframe';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-  }
-
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = gasUrl;
-  form.target = 'gas-mail-iframe';
-  form.style.display = 'none';
-
-  const payload = { action: 'sendMails', token: gasToken };
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'payload';
-  input.value = JSON.stringify(payload);
-  form.appendChild(input);
-
-  document.body.appendChild(form);
-  form.submit();
-  setTimeout(() => { try { document.body.removeChild(form); } catch(e){} }, 1000);
-  setTimeout(() => {
+  const cbName = '_gasSendCb_' + Date.now();
+  let resolved = false;
+  window[cbName] = function(data) {
+    if (resolved) return;
+    resolved = true;
+    if (data && data.ok) {
+      showToast('✅ ' + (data.sent || 0) + '名にメールを送信しました');
+    } else {
+      showToast('⚠️ ' + (data?.error || '送信に失敗しました'));
+    }
+    if (script.parentNode) document.body.removeChild(script);
+  };
+  const script = document.createElement('script');
+  script.src = gasUrl + '?action=sendMails&callback=' + cbName;
+  script.onerror = function() {
+    if (resolved) return;
+    resolved = true;
     showToast('✅ 送信処理を実行しました（メール到達を確認してください）');
-  }, 10000);
+    if (script.parentNode) document.body.removeChild(script);
+  };
+  document.body.appendChild(script);
 }
 
 function exportScoreCSV() {
