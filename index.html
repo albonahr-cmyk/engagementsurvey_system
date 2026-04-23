@@ -4722,7 +4722,7 @@ function normalizeCJK(s) {
 async function extractPDFText(file) {
   const arrayBuffer = await file.arrayBuffer();
 
-  // 方法1: pdf.js が使える場合
+  // 方法1: pdf.js が使える場合（同じy座標のアイテムを結合して1行にまとめる）
   if (typeof pdfjsLib !== 'undefined') {
     try {
       const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
@@ -4730,9 +4730,28 @@ async function extractPDFText(file) {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
+        // y座標でグルーピング（整数丸めで微小な揺れを吸収）
+        const lineMap = new Map();
         for (const item of content.items) {
-          const t = (item.str || '').trim();
-          if (t) fullText += t + '\n';
+          const str = item.str || '';
+          if (!str) continue;
+          const y = Math.round(item.transform[5]);
+          if (!lineMap.has(y)) lineMap.set(y, []);
+          lineMap.get(y).push({ x: item.transform[4], width: item.width || 0, str });
+        }
+        // y座標降順（PDFは原点が下）→ 視覚的な上から下の順
+        const sortedY = Array.from(lineMap.keys()).sort((a, b) => b - a);
+        for (const y of sortedY) {
+          const items = lineMap.get(y).sort((a, b) => a.x - b.x);
+          let line = '';
+          let prevEnd = null;
+          for (const it of items) {
+            // 前のアイテムの終端との間に隙間がある場合はスペースを挿入（表のセル区切り等）
+            if (prevEnd !== null && it.x - prevEnd > 3) line += ' ';
+            line += it.str;
+            prevEnd = it.x + (it.width || 0);
+          }
+          if (line.trim()) fullText += line.trim() + '\n';
         }
       }
       if (fullText.length > 10) return fullText;
