@@ -2769,7 +2769,7 @@ function showDetail(empId) {
   const empRank = getBizIQData(empId)?.rank16 || calcRank(empProfile.iq, empProfile.battlePower);
 
   const data = empData[empId] || {};
-  const latestMonth = getSurveyMonth();
+  const latestMonth = document.getElementById('emp-month-select')?.value || getSurveyMonth();
   const latestScores = data[latestMonth] || null;
   const latestTotal = latestScores ? getTotal(latestScores) : null;
   const prevMonth = months[months.length - 2];
