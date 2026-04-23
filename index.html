@@ -4788,13 +4788,13 @@ async function handleUnifiedPDF(file, empId) {
     }
     const fullText = await extractPDFText(file);
     if (!fullText || fullText.length < 10) {
-      showToast('⚠️ PDFからテキストを抽出できませんでした');
+      showBizIQDiagnostic(file.name, fullText || '');
       return;
     }
     const normalized = normalizeCJK(fullText);
     const data = parseBusinessIQText(normalized);
     if (!data) {
-      showToast('⚠️ ビジネスIQ適性検査のデータを読み取れませんでした');
+      showBizIQDiagnostic(file.name, normalized);
       return;
     }
     saveBizIQData(empId, data);
@@ -4821,6 +4821,73 @@ async function handleUnifiedPDF(file, empId) {
 // 旧データ互換（残存データ表示用）
 function getKensaData(empId) {
   return null; // 旧形式は非対応
+}
+
+// ===== PDF読み取り診断 =====
+function showBizIQDiagnostic(fileName, extractedText) {
+  const textLen = (extractedText || '').length;
+  let msg = '📋 PDF読み取り診断結果\n';
+  msg += '━━━━━━━━━━━━━━━\n';
+  msg += `ファイル: ${fileName}\n`;
+  msg += `抽出テキスト長: ${textLen}文字\n\n`;
+
+  if (textLen < 10) {
+    msg += '❌ PDFから文字を抽出できませんでした\n\n';
+    msg += '考えられる原因:\n';
+    msg += '・画像PDF（スキャン・写真撮影したPDF）は文字情報が無く読めません\n';
+    msg += '・PDFが暗号化・パスワード保護されている\n\n';
+    msg += '対処法:\n';
+    msg += '→ business-iq.co.jp の結果ページから Ctrl+A → Ctrl+C でコピーし、テキスト欄に貼り付けてください';
+    alert(msg);
+    return;
+  }
+
+  const markers = {
+    'IQスコア': /IQスコア/.test(extractedText),
+    'ビジネス戦闘力': /ビジネス戦闘力/.test(extractedText),
+    '16ランク': /16ランク/.test(extractedText),
+    '受験者': /受験者/.test(extractedText),
+    '分析コメント': /分析コメント/.test(extractedText),
+  };
+  const foundCount = Object.values(markers).filter(Boolean).length;
+
+  msg += '【キーワード検出】\n';
+  Object.entries(markers).forEach(([k, v]) => {
+    msg += `  ${v ? '✅' : '❌'} ${k}\n`;
+  });
+  msg += '\n';
+
+  if (foundCount === 0) {
+    msg += '⚠️ ビジネスIQ適性検査の特徴的なキーワードが1つも見つかりません。\n';
+    msg += 'このPDFはビジネスIQ適性検査の結果ではない、またはテキスト抽出に失敗している可能性があります。\n\n';
+  } else {
+    msg += `→ ${foundCount}/5 のキーワードを検出。抽出はできていますが配置/順序が想定と違いパーサーが値を拾えませんでした。\n\n`;
+  }
+
+  msg += '【抽出テキスト（先頭800文字）】\n';
+  msg += extractedText.substring(0, 800);
+  if (textLen > 800) msg += '\n...(以下省略)';
+  msg += '\n\n';
+
+  // 利用可能なテキストエリアに自動貼り付け（master優先、なければempId別）
+  const masterTa = document.getElementById('biziq-textarea-master');
+  const pasteDiv = document.getElementById('biziq-paste-master');
+  let pasted = false;
+  if (masterTa) {
+    masterTa.value = extractedText;
+    if (pasteDiv) pasteDiv.style.display = '';
+    pasted = true;
+  }
+
+  if (pasted) {
+    msg += '💡 抽出したテキストをテキストエリアに自動貼り付けしました。\n';
+    msg += '内容を確認し、「登録する」ボタンで再試行してください。\n';
+    msg += 'それでも読み取れない場合は、business-iq.co.jp の画面から直接コピー＆貼り付けをお試しください。';
+  } else {
+    msg += '💡 business-iq.co.jp の結果ページから Ctrl+A → Ctrl+C でコピーし、テキスト欄に貼り付けてください。';
+  }
+
+  alert(msg);
 }
 
 // ===== テキスト貼り付けハンドラー =====
