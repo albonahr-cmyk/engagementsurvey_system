@@ -2999,10 +2999,11 @@ function showDetail(empId) {
           <div class="answer-group-title">💬 自由記述</div>
           <div style="background:#f8fafc;border-left:3px solid #14b8a6;padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#374151;line-height:1.75;margin-top:8px">${freeText}</div>
         </div>` : '';
+      const monthLabel = monthLabelsFull[latestMonth] || latestMonth;
       answerDetailHtml = `
         <div class="answer-detail-card">
           <h3>📝 今月の回答データ（実データ）</h3>
-          <div class="answer-submitted-at">2026年3月 ／ 実際に提出された回答 ／ 7段階評価（1=全くそう思わない ／ 7=強くそう思う）</div>
+          <div class="answer-submitted-at">${monthLabel} ／ 実際に提出された回答 ／ 7段階評価（1=全くそう思わない ／ 7=強くそう思う）</div>
           ${groupsHtml}${freeTextHtml}
         </div>`;
     } catch(e) {}
