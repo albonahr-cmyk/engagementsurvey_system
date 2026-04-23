@@ -1253,6 +1253,30 @@ if (typeof pdfjsLib !== 'undefined') {
 
     </div>
 
+    <!-- カテゴリ別目標スコア設定 -->
+    <div class="logic-section">
+      <h3>🎯 カテゴリ別目標スコア設定</h3>
+      <p class="logic-desc">各カテゴリのスコア目標値を設定します。スコアカードに目標ラインが表示され、達成状況を可視化します。</p>
+      <div id="target-editor"></div>
+      <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
+        <button class="btn btn-primary" onclick="applyTargets()">💾 保存して反映</button>
+        <button class="btn btn-secondary" onclick="resetTargets()">↩️ デフォルトに戻す</button>
+        <span id="target-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
+      </div>
+    </div>
+
+    <!-- カテゴリ別閾値設定 -->
+    <div class="logic-section">
+      <h3>🎚️ カテゴリ別スコア閾値設定</h3>
+      <p class="logic-desc">各カテゴリの「健常 / 注意 / 危険」判定に使う閾値を設定します。スコアが「危険」閾値未満 → 危険（赤）、「注意」閾値未満 → 注意（黄）、それ以上 → 健常（緑）として扱います。</p>
+      <div id="threshold-editor"></div>
+      <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
+        <button class="btn btn-primary" onclick="applyThresholds()">💾 保存して反映</button>
+        <button class="btn btn-secondary" onclick="resetThresholds()">↩️ デフォルトに戻す</button>
+        <span id="threshold-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
+      </div>
+    </div>
+
     <!-- ランク詳細一覧 -->
     <div class="logic-section">
       <h3>🏆 ランク詳細定義（S1〜C4）</h3>
@@ -1310,29 +1334,6 @@ if (typeof pdfjsLib !== 'undefined') {
       </div>
     </div>
 
-    <!-- カテゴリ別目標スコア設定 -->
-    <div class="logic-section">
-      <h3>🎯 カテゴリ別目標スコア設定</h3>
-      <p class="logic-desc">各カテゴリのスコア目標値を設定します。スコアカードに目標ラインが表示され、達成状況を可視化します。</p>
-      <div id="target-editor"></div>
-      <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
-        <button class="btn btn-primary" onclick="applyTargets()">💾 保存して反映</button>
-        <button class="btn btn-secondary" onclick="resetTargets()">↩️ デフォルトに戻す</button>
-        <span id="target-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
-      </div>
-    </div>
-
-    <!-- カテゴリ別閾値設定 -->
-    <div class="logic-section">
-      <h3>🎚️ カテゴリ別スコア閾値設定</h3>
-      <p class="logic-desc">各カテゴリの「健常 / 注意 / 危険」判定に使う閾値を設定します。スコアが「危険」閾値未満 → 危険（赤）、「注意」閾値未満 → 注意（黄）、それ以上 → 健常（緑）として扱います。</p>
-      <div id="threshold-editor"></div>
-      <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
-        <button class="btn btn-primary" onclick="applyThresholds()">💾 保存して反映</button>
-        <button class="btn btn-secondary" onclick="resetThresholds()">↩️ デフォルトに戻す</button>
-        <span id="threshold-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
-      </div>
-    </div>
   </div>
 
   <!-- 設定タブ内容 -->
