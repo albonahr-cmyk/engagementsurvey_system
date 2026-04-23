@@ -1799,7 +1799,7 @@ function initMonthSelects() {
     const el = document.getElementById(id);
     if (!el) return;
     const prev = el.value;
-    const useFull = (id === 'month-select' || id === 'action-month-select');
+    const useFull = (id === 'month-select' || id === 'action-month-select' || id === 'emp-month-select' || id === 'id-month-select');
     el.innerHTML = months.map(m =>
       `<option value="${m}"${m === (prev && months.includes(prev) ? prev : defaultMonth) ? ' selected' : ''}>${useFull ? monthLabelsFull[m] : monthLabels[m]}</option>`
     ).join('');
