@@ -2401,7 +2401,9 @@ function renderDashboard() {
     return { k, score, diff, status };
   }).filter(item => item.status !== 'ok');
 
-  if (guideItems.length === 0) {
+  if (respCount === 0) {
+    guideList.innerHTML = '<div class="no-alert">今月の回答データがないため判定できません</div>';
+  } else if (guideItems.length === 0) {
     guideList.innerHTML = '<div class="no-guide">✅ 全カテゴリ良好。継続的なモニタリングを行いましょう。</div>';
   } else {
     guideList.innerHTML = guideItems.map(({ k, score, diff, status }) => {
