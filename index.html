@@ -2739,6 +2739,13 @@ let lastTab = 'employees';
 function showDetail(empId) {
   rebuildEmpData();
   lastTab = document.getElementById('tab-employees').style.display !== 'none' ? 'employees' : 'dashboard';
+  // ブラウザ戻る（トラックパッド2本指スワイプ/マウス戻るボタン）に対応するため履歴に状態を追加
+  // 同じ detail 状態で重複pushしないよう既存stateをチェック
+  if (!window.history.state || window.history.state.screen !== 'detail') {
+    window.history.pushState({ screen: 'detail', empId, lastTab }, '');
+  } else {
+    window.history.replaceState({ screen: 'detail', empId, lastTab }, '');
+  }
   const emp = employees[empId];
   document.getElementById('detail-name').textContent = emp?.name || empId;
   document.getElementById('detail-dept').textContent = emp?.dept || '';
@@ -3067,11 +3074,28 @@ function showDetail(empId) {
 }
 
 function backToAdmin() {
+  // 履歴に detail 状態があればブラウザ戻る経由にする（popstateで一元処理）
+  if (window.history.state && window.history.state.screen === 'detail') {
+    window.history.back();
+    return;
+  }
+  doBackToAdmin();
+}
+
+function doBackToAdmin() {
   showScreen('admin');
   if (lastTab === 'employees') {
     switchTabById('employees');
   }
 }
+
+// ブラウザ戻る（スワイプ/マウス戻る/戻るボタン）で詳細画面から一覧画面に戻る
+window.addEventListener('popstate', () => {
+  const detailEl = document.getElementById('screen-detail');
+  if (detailEl && detailEl.style.display !== 'none') {
+    doBackToAdmin();
+  }
+});
 
 // ===== タブ切替 =====
 const TAB_NAMES = ['dashboard', 'employees', 'idmgmt', 'logic', 'settings', 'actions'];
