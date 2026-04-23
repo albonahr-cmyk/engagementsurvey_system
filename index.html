@@ -1105,7 +1105,13 @@ if (typeof pdfjsLib !== 'undefined') {
         </div>
       </div>
     </div>
-    <div class="section-title">👥 社員ID一覧</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+      <div class="section-title" style="margin:0">👥 社員ID一覧</div>
+      <div class="month-selector" style="margin:0">
+        <label>リセット対象月：</label>
+        <select id="id-month-select" onchange="renderIdList()"></select>
+      </div>
+    </div>
     <div class="id-table-wrap" id="id-table"></div>
 
     <!-- 回答リセット（ID入力） -->
@@ -1789,7 +1795,7 @@ function initMonthSelects() {
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const defaultMonth = months.includes(currentMonth) ? currentMonth : months[months.length - 1];
-  ['month-select', 'emp-month-select', 'action-month-select'].forEach(id => {
+  ['month-select', 'emp-month-select', 'action-month-select', 'id-month-select'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     const prev = el.value;
@@ -3124,7 +3130,7 @@ function switchTab(name, btn) {
     }
   });
   if (name === 'employees') renderEmployeeList();
-  if (name === 'idmgmt') { renderIdList(); initBizIQMasterUI(); }
+  if (name === 'idmgmt') { initMonthSelects(); renderIdList(); initBizIQMasterUI(); }
   if (name === 'logic') renderLogicTab();
   if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); }
   if (name === 'settings') renderSettingsTab();
@@ -3754,6 +3760,7 @@ function issueNewId() {
 
 function renderIdList() {
   const table = document.getElementById('id-table');
+  const month = document.getElementById('id-month-select')?.value || months[months.length - 1] || getSurveyMonth();
   const rows = Object.entries(employees).map(([id, emp]) => {
     const profile  = getProfile(id);
     const rank     = calcRank(profile.iq, profile.battlePower);
