@@ -28,9 +28,16 @@ module.exports = async function handler(req, res) {
 
     if (existing.length > 0) {
       if (value === '' || value === null || value === undefined) {
-        await updatePage(existing[0].id, {}, true);
+        // 全ての重複レコードをアーカイブ
+        for (const page of existing) {
+          await updatePage(page.id, {}, true);
+        }
       } else {
+        // 最初の1件を新しい値で更新、残りの重複レコードはアーカイブ（読み込み時の上書き問題を防ぐ）
         await updatePage(existing[0].id, { value: P.rich(value) });
+        for (let i = 1; i < existing.length; i++) {
+          await updatePage(existing[i].id, {}, true);
+        }
       }
     } else if (value && value !== '') {
       await createPage('settings', {
