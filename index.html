@@ -4221,31 +4221,38 @@ async function sendMailsNow() {
     showToast(`✅ ${tokenRes.count}名分のトークンを生成しました。メール送信中...`);
   } catch(e) { showToast('⚠️ トークン生成に失敗しました'); return; }
 
-  // GASのsendMailsをJSONPで実行（テスト送信と同じ方式）
+  // GASのsendMailsをiframe POST方式で実行
   const gasToken = localStorage.getItem('es_gas_token') || '';
   showToast('📨 メール送信中...（数十秒かかる場合があります）');
-  const cbName = '_gasSendMailsCb_' + Date.now();
-  let resolved = false;
-  window[cbName] = function(res) {
-    if (resolved) return;
-    resolved = true;
-    if (res && res.ok) {
-      showToast(`✅ ${res.sent || 0}名にメールを送信しました`);
-    } else {
-      showToast('⚠️ 送信に失敗しました: ' + (res?.error || '不明なエラー'));
-    }
-    try { document.body.removeChild(script); } catch(e){}
-  };
-  const script = document.createElement('script');
-  script.src = gasUrl + '?action=sendMails&token=' + encodeURIComponent(gasToken) + '&callback=' + cbName;
-  script.onerror = function() {
-    if (resolved) return;
-    resolved = true;
-    // GASのレスポンス取得には失敗しても、送信処理は実行されている可能性がある
+
+  let iframe = document.getElementById('gas-mail-iframe');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'gas-mail-iframe';
+    iframe.name = 'gas-mail-iframe';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = gasUrl;
+  form.target = 'gas-mail-iframe';
+  form.style.display = 'none';
+
+  const payload = { action: 'sendMails', token: gasToken };
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'payload';
+  input.value = JSON.stringify(payload);
+  form.appendChild(input);
+
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => { try { document.body.removeChild(form); } catch(e){} }, 1000);
+  setTimeout(() => {
     showToast('✅ 送信処理を実行しました（メール到達を確認してください）');
-    try { document.body.removeChild(script); } catch(e){}
-  };
-  document.body.appendChild(script);
+  }, 10000);
 }
 
 function exportScoreCSV() {
