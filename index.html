@@ -2364,6 +2364,9 @@ function renderDashboard() {
 
   // カテゴリスコア
   const catGrid = document.getElementById('category-grid');
+  if (respCount === 0) {
+    catGrid.innerHTML = '<div class="no-alert" style="grid-column:1/-1">今月の回答データがないため判定できません</div>';
+  } else {
   catGrid.innerHTML = catKeys.map((k, i) => {
     const score = cats[k];
     const prev = prevCats ? prevCats[k] : null;
@@ -2390,6 +2393,7 @@ function renderDashboard() {
         ${(() => { const pred = predictNextScore(pastScores); return pred !== null ? `<div style="font-size:10px;color:#14b8a6;font-weight:700;margin-top:4px;text-align:right">予測 ${pred}点 →</div>` : ''; })()}
       </div>`;
   }).join('');
+  }
 
   // 評価・推奨アクション
   const guideList = document.getElementById('action-guide-list');
@@ -2427,7 +2431,11 @@ function renderDashboard() {
 
   // ===== レーダーチャート =====
   const radarEl = document.getElementById('radar-chart-section');
-  if (radarEl) {
+  if (radarEl && respCount === 0) {
+    radarEl.innerHTML = `
+      <div class="section-title">📡 カテゴリ別レーダーチャート</div>
+      <div class="no-alert">今月の回答データがないため判定できません</div>`;
+  } else if (radarEl) {
     const radarSize = 340, cx = radarSize/2, cy = radarSize/2, R = 135;
     const keys = catKeys;
     const n = keys.length;
@@ -2512,7 +2520,9 @@ function renderDashboard() {
 
   // 部署別スコア
   const deptScoresGrid = document.getElementById('dept-scores-grid');
-  if (deptScoresGrid) {
+  if (deptScoresGrid && respCount === 0) {
+    deptScoresGrid.innerHTML = '<div class="no-alert">今月の回答データがないため判定できません</div>';
+  } else if (deptScoresGrid) {
     const deptMap = {};
     Object.entries(employees).forEach(([id, emp]) => {
       const dept = emp.dept;
