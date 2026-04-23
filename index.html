@@ -1337,29 +1337,6 @@ if (typeof pdfjsLib !== 'undefined') {
 
   <!-- 設定タブ内容 -->
   <div id="tab-settings" class="admin-body" style="display:none">
-    <!-- サーベイ期間設定 -->
-    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
-      <div class="section-title" style="margin-bottom:8px">📅 サーベイ回答期間</div>
-      <p style="font-size:13px;color:#64748b;margin-bottom:20px">社員がアンケートに回答できる期間を設定します。</p>
-      <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
-        <div>
-          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">開始日</label>
-          <input type="date" id="period-start" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
-        </div>
-        <div>
-          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">終了日</label>
-          <input type="date" id="period-end" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
-        </div>
-        <div>
-          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">回答期限（メール記載用）</label>
-          <input type="date" id="period-deadline" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
-        </div>
-        <button class="btn btn-primary" onclick="saveSurveyPeriod()">💾 保存</button>
-        <span id="period-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
-      </div>
-      <div id="period-current" style="margin-top:16px;font-size:13px;color:#64748b;background:#f8fafc;padding:10px 14px;border-radius:8px;display:inline-block"></div>
-    </div>
-
     <!-- スコアデータエクスポート -->
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
       <div class="section-title" style="margin-bottom:8px">📤 スコアデータ エクスポート</div>
@@ -1418,6 +1395,29 @@ if (typeof pdfjsLib !== 'undefined') {
 
   <!-- 配信 -->
   <div id="tab-mail" class="admin-body" style="display:none">
+    <!-- サーベイ期間設定 -->
+    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
+      <div class="section-title" style="margin-bottom:8px">📅 サーベイ回答期間</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:20px">社員がアンケートに回答できる期間を設定します。</p>
+      <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">開始日</label>
+          <input type="date" id="period-start" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">終了日</label>
+          <input type="date" id="period-end" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">回答期限（メール記載用）</label>
+          <input type="date" id="period-deadline" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
+        </div>
+        <button class="btn btn-primary" onclick="saveSurveyPeriod()">💾 保存</button>
+        <span id="period-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
+      </div>
+      <div id="period-current" style="margin-top:16px;font-size:13px;color:#64748b;background:#f8fafc;padding:10px 14px;border-radius:8px;display:inline-block"></div>
+    </div>
+
     <!-- メール配信設定 -->
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
       <div class="section-title" style="margin-bottom:8px">✉️ サーベイ案内メール配信</div>
@@ -3123,7 +3123,7 @@ function switchTab(name, btn) {
   if (name === 'employees') renderEmployeeList();
   if (name === 'idmgmt') { renderIdList(); initBizIQMasterUI(); }
   if (name === 'logic') renderLogicTab();
-  if (name === 'mail') loadMailSchedule();
+  if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); }
   if (name === 'settings') renderSettingsTab();
   if (name === 'actions') { initMonthSelects(); renderActionPlan(); }
 }
@@ -4020,7 +4020,7 @@ function showToast(msg) {
 }
 
 // ===== 設定タブ =====
-function renderSettingsTab() {
+function renderSurveyPeriodForm() {
   const ps = document.getElementById('period-start');
   const pe = document.getElementById('period-end');
   const pd = document.getElementById('period-deadline');
@@ -4029,6 +4029,9 @@ function renderSettingsTab() {
   if (pd) pd.value = surveyPeriod.deadline || '';
   const cur = document.getElementById('period-current');
   if (cur) cur.textContent = `現在の期間：${surveyPeriod.start} 〜 ${surveyPeriod.end}${surveyPeriod.deadline ? '　回答期限：' + surveyPeriod.deadline : ''}`;
+}
+
+function renderSettingsTab() {
   renderDeptManager();
   renderQuestionEditor();
   renderAdminAccountList();
