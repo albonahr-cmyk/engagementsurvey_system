@@ -2279,51 +2279,46 @@ function renderDashboard() {
       <div class="sub ${alertCount > 0 ? 'down' : 'up'}">${alertCount > 0 ? '要対応あり' : '問題なし'}</div></div>
   `;
 
-  // 未回答者一覧（当月のみ）
-  const currentMonth = getSurveyMonth();
+  // 未回答者一覧（全月）
   const unsubSection = document.getElementById('unsubmitted-section');
-  if (month === currentMonth) {
-    const submittedIds = getSubmittedIds(month);
-    const unsubmitted = Object.entries(employees)
-      .filter(([id, emp]) => emp.role !== 'admin' && !submittedIds.includes(id))
-      .map(([id, emp]) => ({ id, ...emp }));
+  const submittedIds = getSubmittedIds(month);
+  const unsubmitted = Object.entries(employees)
+    .filter(([id, emp]) => emp.role !== 'admin' && !submittedIds.includes(id))
+    .map(([id, emp]) => ({ id, ...emp }));
 
-    unsubSection.style.display = 'block';
-    document.getElementById('unsubmitted-count-label').textContent =
-      `（${submittedIds.length}/${Object.keys(employees).filter(id => employees[id].role !== 'admin').length}名 回答済み）`;
+  unsubSection.style.display = 'block';
+  document.getElementById('unsubmitted-count-label').textContent =
+    `（${submittedIds.length}/${Object.keys(employees).filter(id => employees[id].role !== 'admin').length}名 回答済み）`;
 
-    if (unsubmitted.length === 0) {
-      document.getElementById('unsubmitted-list').innerHTML =
-        '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);padding:24px">✅ 全員が回答済みです</div>';
-    } else {
-      document.getElementById('unsubmitted-list').innerHTML = `
-        <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;border:1px solid rgba(0,0,0,0.04)">
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr>
-              <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">社員ID</th>
-              <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">氏名</th>
-              <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">所属</th>
-              <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">ステータス</th>
-            </tr></thead>
-            <tbody>${unsubmitted.map(emp => `
-              <tr>
-                <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;color:#334155">
-                  <span style="font-size:13px;font-weight:800;color:#14b8a6;background:#f0fdfa;padding:3px 8px;border-radius:6px;font-family:'Inter',monospace">${emp.id}</span>
-                </td>
-                <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;font-weight:600;color:#1e293b">${sanitize(emp.name)}</td>
-                <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc">
-                  <span style="background:#f1f5f9;padding:3px 10px;border-radius:20px;font-size:12px;color:#64748b;font-weight:600">${sanitize(emp.dept)}</span>
-                </td>
-                <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc">
-                  <span style="background:#fef2f2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid #fecaca">未回答</span>
-                </td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>`;
-    }
+  if (unsubmitted.length === 0) {
+    document.getElementById('unsubmitted-list').innerHTML =
+      '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);padding:24px">✅ 全員が回答済みです</div>';
   } else {
-    unsubSection.style.display = 'none';
+    document.getElementById('unsubmitted-list').innerHTML = `
+      <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;border:1px solid rgba(0,0,0,0.04)">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">社員ID</th>
+            <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">氏名</th>
+            <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">所属</th>
+            <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">ステータス</th>
+          </tr></thead>
+          <tbody>${unsubmitted.map(emp => `
+            <tr>
+              <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;color:#334155">
+                <span style="font-size:13px;font-weight:800;color:#14b8a6;background:#f0fdfa;padding:3px 8px;border-radius:6px;font-family:'Inter',monospace">${emp.id}</span>
+              </td>
+              <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;font-weight:600;color:#1e293b">${sanitize(emp.name)}</td>
+              <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc">
+                <span style="background:#f1f5f9;padding:3px 10px;border-radius:20px;font-size:12px;color:#64748b;font-weight:600">${sanitize(emp.dept)}</span>
+              </td>
+              <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc">
+                <span style="background:#fef2f2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid #fecaca">未回答</span>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
   }
 
   // アラート
