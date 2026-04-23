@@ -4025,7 +4025,11 @@ function saveMailSchedule() {
   const config = { date: date, hour: Number(hour), subject, bodyTemplate: body };
   const configStr = JSON.stringify(config);
   localStorage.setItem('es_mail_schedule', configStr);
-  apiPost('settings-save', { key: 'es_mail_schedule', value: configStr }).then(() => {
+  apiPost('settings-save', { key: 'es_mail_schedule', value: configStr }).then((res) => {
+    if (!res || !res.ok) {
+      showToast('⚠️ クラウド保存に失敗しました: ' + (res?.error || 'unknown'));
+      return;
+    }
     const msg = document.getElementById('mail-schedule-msg');
     if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
     renderMailScheduleStatus(config);
