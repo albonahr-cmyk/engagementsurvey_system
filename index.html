@@ -21,12 +21,6 @@
 <meta name="twitter:description" content="チームの声を可視化するエンゲージメントサーベイツール">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous"></script>
-<script>
-if (typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
-</script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
@@ -1129,8 +1123,6 @@ if (typeof pdfjsLib !== 'undefined') {
           </select>
         </div>
         <button class="btn btn-secondary btn-sm" onclick="document.getElementById('biziq-paste-master').style.display=document.getElementById('biziq-paste-master').style.display==='none'?'block':'none'" style="height:44px">📋 テキスト貼り付けで登録</button>
-        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('biziq-file-master').click()" style="height:44px">📄 PDFアップロード</button>
-        <input type="file" id="biziq-file-master" accept=".pdf" style="display:none" onchange="handleMasterPDF(this)">
       </div>
       <div id="biziq-paste-master" style="display:none;margin-top:12px">
         <p style="font-size:12px;color:#64748b;margin-bottom:8px;line-height:1.6">
@@ -4718,195 +4710,9 @@ function normalizeCJK(s) {
   return r.replace(/\u2027/g, '・');
 }
 
-// ===== PDF テキスト抽出 =====
-async function extractPDFText(file) {
-  const arrayBuffer = await file.arrayBuffer();
-
-  // 方法1: pdf.js が使える場合（同じy座標のアイテムを結合して1行にまとめる）
-  if (typeof pdfjsLib !== 'undefined') {
-    try {
-      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-      let fullText = '';
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        // y座標でグルーピング（整数丸めで微小な揺れを吸収）
-        const lineMap = new Map();
-        for (const item of content.items) {
-          const str = item.str || '';
-          if (!str) continue;
-          const y = Math.round(item.transform[5]);
-          if (!lineMap.has(y)) lineMap.set(y, []);
-          lineMap.get(y).push({ x: item.transform[4], width: item.width || 0, str });
-        }
-        // y座標降順（PDFは原点が下）→ 視覚的な上から下の順
-        const sortedY = Array.from(lineMap.keys()).sort((a, b) => b - a);
-        for (const y of sortedY) {
-          const items = lineMap.get(y).sort((a, b) => a.x - b.x);
-          let line = '';
-          let prevEnd = null;
-          for (const it of items) {
-            // 前のアイテムの終端との間に隙間がある場合はスペースを挿入（表のセル区切り等）
-            if (prevEnd !== null && it.x - prevEnd > 3) line += ' ';
-            line += it.str;
-            prevEnd = it.x + (it.width || 0);
-          }
-          if (line.trim()) fullText += line.trim() + '\n';
-        }
-      }
-      if (fullText.length > 10) return fullText;
-    } catch(e) {
-      console.warn('pdf.js extraction failed, trying fallback:', e);
-    }
-  }
-
-  // 方法2: フォールバック（DecompressionStream API でPDFストリーム解凍）
-  const bytes = new Uint8Array(arrayBuffer);
-  const latin = new TextDecoder('latin1').decode(bytes);
-  const results = [];
-  const re = /stream\r?\n/g;
-  let m;
-  while ((m = re.exec(latin)) !== null) {
-    const start = m.index + m[0].length;
-    const endIdx = latin.indexOf('endstream', start);
-    if (endIdx < 0) continue;
-    const chunk = bytes.slice(start, endIdx);
-    if (chunk.length < 10) continue;
-    try {
-      const ds = new DecompressionStream('deflate');
-      const writer = ds.writable.getWriter();
-      writer.write(chunk); writer.close();
-      const buf = await new Response(ds.readable).arrayBuffer();
-      const decoded = new TextDecoder('utf-8', {fatal:false}).decode(buf);
-      // BT...ET内のTj/TJテキスト抽出
-      const tjRe = /\(([^)]*)\)\s*Tj|\[([^\]]*)\]\s*TJ/g;
-      let tm;
-      while ((tm = tjRe.exec(decoded)) !== null) {
-        if (tm[1] !== undefined) {
-          results.push(tm[1]);
-        } else if (tm[2] !== undefined) {
-          const inner = [];
-          const ireg = /\(([^)]*)\)/g;
-          let im;
-          while ((im = ireg.exec(tm[2])) !== null) inner.push(im[1]);
-          results.push(inner.join(''));
-        }
-      }
-    } catch(e) { /* skip non-deflate streams */ }
-  }
-  return results.join('\n');
-}
-
-// ===== ビジネスIQ適性検査 PDFアップロード =====
-async function handleUnifiedPDF(file, empId) {
-  if (!file) { showToast('⚠️ ファイルを選択してください'); return; }
-  try {
-    if (typeof pdfjsLib === 'undefined') {
-      showToast('⚠️ PDF読取ライブラリが読み込めていません');
-      return;
-    }
-    const fullText = await extractPDFText(file);
-    if (!fullText || fullText.length < 10) {
-      showBizIQDiagnostic(file.name, fullText || '');
-      return;
-    }
-    const normalized = normalizeCJK(fullText);
-    const data = parseBusinessIQText(normalized);
-    if (!data) {
-      showBizIQDiagnostic(file.name, normalized);
-      return;
-    }
-    saveBizIQData(empId, data);
-    // IQ・戦闘力をプロフィールに自動反映
-    const profile = getProfile(empId);
-    const newProfile = {
-      iq: data.iqScore || profile.iq || 0,
-      battlePower: data.battlePower || profile.battlePower || 0,
-      mbti: profile.mbti || ''
-    };
-    localStorage.setItem(`es_profile_${empId}`, JSON.stringify(newProfile));
-    if (employees[empId]) {
-      employees[empId].iq = newProfile.iq;
-      employees[empId].battlePower = newProfile.battlePower;
-    }
-    showToast('✅ ビジネスIQ適性検査データを取り込みました');
-    showDetail(empId);
-  } catch(e) {
-    console.error('BizIQ PDF error:', e);
-    showToast('⚠️ PDFの読み取りに失敗しました: ' + e.message);
-  }
-}
-
 // 旧データ互換（残存データ表示用）
 function getKensaData(empId) {
   return null; // 旧形式は非対応
-}
-
-// ===== PDF読み取り診断 =====
-function showBizIQDiagnostic(fileName, extractedText) {
-  const textLen = (extractedText || '').length;
-  let msg = '📋 PDF読み取り診断結果\n';
-  msg += '━━━━━━━━━━━━━━━\n';
-  msg += `ファイル: ${fileName}\n`;
-  msg += `抽出テキスト長: ${textLen}文字\n\n`;
-
-  if (textLen < 10) {
-    msg += '❌ PDFから文字を抽出できませんでした\n\n';
-    msg += '考えられる原因:\n';
-    msg += '・画像PDF（スキャン・写真撮影したPDF）は文字情報が無く読めません\n';
-    msg += '・PDFが暗号化・パスワード保護されている\n\n';
-    msg += '対処法:\n';
-    msg += '→ business-iq.co.jp の結果ページから Ctrl+A → Ctrl+C でコピーし、テキスト欄に貼り付けてください';
-    alert(msg);
-    return;
-  }
-
-  const markers = {
-    'IQスコア': /IQスコア/.test(extractedText),
-    'ビジネス戦闘力': /ビジネス戦闘力/.test(extractedText),
-    '16ランク': /16ランク/.test(extractedText),
-    '受験者': /受験者/.test(extractedText),
-    '分析コメント': /分析コメント/.test(extractedText),
-  };
-  const foundCount = Object.values(markers).filter(Boolean).length;
-
-  msg += '【キーワード検出】\n';
-  Object.entries(markers).forEach(([k, v]) => {
-    msg += `  ${v ? '✅' : '❌'} ${k}\n`;
-  });
-  msg += '\n';
-
-  if (foundCount === 0) {
-    msg += '⚠️ ビジネスIQ適性検査の特徴的なキーワードが1つも見つかりません。\n';
-    msg += 'このPDFはビジネスIQ適性検査の結果ではない、またはテキスト抽出に失敗している可能性があります。\n\n';
-  } else {
-    msg += `→ ${foundCount}/5 のキーワードを検出。抽出はできていますが配置/順序が想定と違いパーサーが値を拾えませんでした。\n\n`;
-  }
-
-  msg += '【抽出テキスト（先頭800文字）】\n';
-  msg += extractedText.substring(0, 800);
-  if (textLen > 800) msg += '\n...(以下省略)';
-  msg += '\n\n';
-
-  // 利用可能なテキストエリアに自動貼り付け（master優先、なければempId別）
-  const masterTa = document.getElementById('biziq-textarea-master');
-  const pasteDiv = document.getElementById('biziq-paste-master');
-  let pasted = false;
-  if (masterTa) {
-    masterTa.value = extractedText;
-    if (pasteDiv) pasteDiv.style.display = '';
-    pasted = true;
-  }
-
-  if (pasted) {
-    msg += '💡 抽出したテキストをテキストエリアに自動貼り付けしました。\n';
-    msg += '内容を確認し、「登録する」ボタンで再試行してください。\n';
-    msg += 'それでも読み取れない場合は、business-iq.co.jp の画面から直接コピー＆貼り付けをお試しください。';
-  } else {
-    msg += '💡 business-iq.co.jp の結果ページから Ctrl+A → Ctrl+C でコピーし、テキスト欄に貼り付けてください。';
-  }
-
-  alert(msg);
 }
 
 // ===== テキスト貼り付けハンドラー =====
@@ -5732,23 +5538,14 @@ function handleMasterPaste() {
   if (!rawText.trim()) { showToast('⚠️ テキストを貼り付けてください'); return; }
   const data = parseBusinessIQText(normalizeCJK(rawText));
   if (!data) { showToast('⚠️ データを認識できませんでした'); return; }
+  const isUpdate = !!getBizIQData(empId);
   saveBizIQData(empId, data);
   applyBizIQToProfile(empId, data);
   document.getElementById('biziq-textarea-master').value = '';
   document.getElementById('biziq-paste-master').style.display = 'none';
   renderBizIQMasterTable();
-  showToast(`✅ ${employees[empId]?.name || empId} の適性検査データを登録しました`);
-}
-
-function handleMasterPDF(input) {
-  const empId = document.getElementById('biziq-target-emp').value;
-  if (!empId) { showToast('⚠️ 対象社員を選択してください'); input.value = ''; return; }
-  const file = input.files[0];
-  if (!file) return;
-  handleUnifiedPDF(file, empId).then(() => {
-    renderBizIQMasterTable();
-    input.value = '';
-  });
+  const name = employees[empId]?.name || empId;
+  showToast(isUpdate ? `✅ ${name} の適性検査データを上書き更新しました` : `✅ ${name} の適性検査データを登録しました`);
 }
 
 // ===== マスタタブ切替 =====
