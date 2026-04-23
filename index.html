@@ -2293,8 +2293,9 @@ function renderDashboard() {
     .map(([id, emp]) => ({ id, ...emp }));
 
   unsubSection.style.display = 'block';
+  const totalNonAdmin = Object.keys(employees).filter(id => employees[id].role !== 'admin').length;
   document.getElementById('unsubmitted-count-label').textContent =
-    `（${submittedIds.length}/${Object.keys(employees).filter(id => employees[id].role !== 'admin').length}名 回答済み）`;
+    `（未回答 ${unsubmitted.length}名 ／ 全 ${totalNonAdmin}名中 回答済み ${submittedIds.length}名）`;
 
   const inlineEl = document.getElementById('unsubmitted-names-inline');
   if (inlineEl) {
