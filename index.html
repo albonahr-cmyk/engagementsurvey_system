@@ -2337,7 +2337,9 @@ function renderDashboard() {
 
   // アラート
   const alertList = document.getElementById('alert-list');
-  if (!prevCats) {
+  if (respCount === 0) {
+    alertList.innerHTML = '<div class="no-alert">今月の回答データがないため判定できません</div>';
+  } else if (!prevCats) {
     alertList.innerHTML = '<div class="no-alert">前月データがないためアラート判定できません</div>';
   } else {
     const alerts = [];
@@ -2365,7 +2367,7 @@ function renderDashboard() {
   // カテゴリスコア
   const catGrid = document.getElementById('category-grid');
   if (respCount === 0) {
-    catGrid.innerHTML = '<div class="no-alert" style="grid-column:1/-1">今月の回答データがないため判定できません</div>';
+    catGrid.innerHTML = '<div class="no-alert" style="grid-column:1/-1;background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
   } else {
   catGrid.innerHTML = catKeys.map((k, i) => {
     const score = cats[k];
@@ -2406,7 +2408,7 @@ function renderDashboard() {
   }).filter(item => item.status !== 'ok');
 
   if (respCount === 0) {
-    guideList.innerHTML = '<div class="no-alert">今月の回答データがないため判定できません</div>';
+    guideList.innerHTML = '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
   } else if (guideItems.length === 0) {
     guideList.innerHTML = '<div class="no-guide">✅ 全カテゴリ良好。継続的なモニタリングを行いましょう。</div>';
   } else {
@@ -2521,7 +2523,7 @@ function renderDashboard() {
   // 部署別スコア
   const deptScoresGrid = document.getElementById('dept-scores-grid');
   if (deptScoresGrid && respCount === 0) {
-    deptScoresGrid.innerHTML = '<div class="no-alert">今月の回答データがないため判定できません</div>';
+    deptScoresGrid.innerHTML = '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
   } else if (deptScoresGrid) {
     const deptMap = {};
     Object.entries(employees).forEach(([id, emp]) => {
