@@ -4221,10 +4221,24 @@ async function sendMailsNow() {
     showToast(`✅ ${tokenRes.count}名分のトークンを生成しました。メール送信中...`);
   } catch(e) { showToast('⚠️ トークン生成に失敗しました'); return; }
 
-  // GASのsendMailsを新しいタブで実行（CORS回避）
+  // GASのsendMailsをJSONPで実行
   const gasToken = localStorage.getItem('es_gas_token') || '';
-  const w = window.open(gasUrl + '?action=sendMails&token=' + encodeURIComponent(gasToken), '_blank');
-  showToast('📨 送信処理を開始しました。新しいタブで結果を確認してください。');
+  showToast('📨 メール送信中...（数十秒かかる場合があります）');
+  const cbName = '_gasSendMailsCb_' + Date.now();
+  const params = new URLSearchParams({ action: 'sendMails', token: gasToken, callback: cbName });
+  window[cbName] = function(res) {
+    delete window[cbName];
+    if (res && res.ok) {
+      showToast(`✅ ${res.sent || 0}名にメールを送信しました`);
+    } else {
+      showToast('⚠️ 送信に失敗しました: ' + (res?.error || '不明なエラー'));
+    }
+  };
+  const script = document.createElement('script');
+  script.src = gasUrl + '?' + params.toString();
+  script.onerror = () => { delete window[cbName]; showToast('⚠️ GASへの通信に失敗しました'); };
+  document.body.appendChild(script);
+  setTimeout(() => { try { document.body.removeChild(script); } catch(e){} }, 60000);
 }
 
 function exportScoreCSV() {
