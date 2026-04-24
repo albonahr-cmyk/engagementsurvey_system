@@ -1438,20 +1438,23 @@ if (typeof pdfjsLib !== 'undefined') {
         </div>
         <div>
           <label style="display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px">送信時刻</label>
-          <select id="mail-send-time" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
-            <option value="00:00">00:00</option><option value="00:30">00:30</option><option value="01:00">01:00</option><option value="01:30">01:30</option>
-            <option value="02:00">02:00</option><option value="02:30">02:30</option><option value="03:00">03:00</option><option value="03:30">03:30</option>
-            <option value="04:00">04:00</option><option value="04:30">04:30</option><option value="05:00">05:00</option><option value="05:30">05:30</option>
-            <option value="06:00">06:00</option><option value="06:30">06:30</option><option value="07:00">07:00</option><option value="07:30">07:30</option>
-            <option value="08:00">08:00</option><option value="08:30">08:30</option><option value="09:00" selected>09:00</option><option value="09:30">09:30</option>
-            <option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option>
-            <option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option>
-            <option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option>
-            <option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option>
-            <option value="18:00">18:00</option><option value="18:30">18:30</option><option value="19:00">19:00</option><option value="19:30">19:30</option>
-            <option value="20:00">20:00</option><option value="20:30">20:30</option><option value="21:00">21:00</option><option value="21:30">21:30</option>
-            <option value="22:00">22:00</option><option value="22:30">22:30</option><option value="23:00">23:00</option><option value="23:30">23:30</option>
-          </select>
+          <div style="display:flex;align-items:center;gap:6px">
+            <select id="mail-send-hour" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
+              <option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option>
+              <option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option>
+              <option value="08">08</option><option value="09" selected>09</option><option value="10">10</option><option value="11">11</option>
+              <option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option>
+              <option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option>
+              <option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+            </select>
+            <span style="font-size:16px;font-weight:700;color:#475569">:</span>
+            <select id="mail-send-minute" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;color:#1e293b">
+              <option value="00" selected>00</option>
+              <option value="15">15</option>
+              <option value="30">30</option>
+              <option value="45">45</option>
+            </select>
+          </div>
         </div>
         <button class="btn btn-primary" onclick="saveMailSchedule()">💾 保存</button>
         <span id="mail-schedule-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
@@ -4092,10 +4095,8 @@ function saveSurveyPeriod() {
 // ===== メール配信設定 =====
 function saveMailSchedule() {
   const date = document.getElementById('mail-send-date').value;
-  const time = document.getElementById('mail-send-time').value || '09:00';
-  const [hStr, mStr] = time.split(':');
-  const hour = Number(hStr);
-  const minute = Number(mStr);
+  const hour = Number(document.getElementById('mail-send-hour').value);
+  const minute = Number(document.getElementById('mail-send-minute').value);
   const subject = document.getElementById('mail-subject').value.trim();
   const body = document.getElementById('mail-body-template').value;
   const config = { date: date, hour: hour, minute: minute, subject, bodyTemplate: body };
@@ -4179,12 +4180,17 @@ function applyMailScheduleConfig(config) {
   if (!config) return;
   const dateEl = document.getElementById('mail-send-date');
   if (dateEl && config.date) dateEl.value = config.date;
-  const timeEl = document.getElementById('mail-send-time');
-  if (timeEl) {
+  const hourEl = document.getElementById('mail-send-hour');
+  const minuteEl = document.getElementById('mail-send-minute');
+  if (hourEl) {
     const h = config.hour != null ? config.hour : 9;
-    const m = config.minute != null ? config.minute : 0;
-    const timeStr = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-    timeEl.value = timeStr;
+    hourEl.value = String(h).padStart(2, '0');
+  }
+  if (minuteEl) {
+    // 既存の分が15分刻みでない場合は0分に丸める
+    var m = config.minute != null ? config.minute : 0;
+    if (m !== 0 && m !== 15 && m !== 30 && m !== 45) m = 0;
+    minuteEl.value = String(m).padStart(2, '0');
   }
   if (config.subject) document.getElementById('mail-subject').value = config.subject;
   if (config.bodyTemplate) document.getElementById('mail-body-template').value = config.bodyTemplate;
