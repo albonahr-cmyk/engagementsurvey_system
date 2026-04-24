@@ -39,6 +39,7 @@ function doGet(e) {
     if (action === 'loadSettings') return handleLoadSettings(ss, data);
     if (action === 'sendMails')    return handleSendMails(ss, data);
     if (action === 'scheduleSend') return handleScheduleSend(ss, data);
+    if (action === 'listTriggers') return handleListTriggers();
     if (action === 'testMail')     return handleTestMail(ss, data);
     if (action === 'exportSheet')  return handleExportSheet(ss, data);
 
@@ -322,6 +323,30 @@ function handleScheduleSend(ss, data) {
       .create();
 
     return jsonResponse({ ok: true, scheduledAt: sendAt.toISOString(), replaced: removed });
+  } catch(e) {
+    return jsonResponse({ error: e.message });
+  }
+}
+
+// 現在登録されているトリガー一覧を返す（管理画面の「予約状況を確認」ボタンから呼ばれる）
+function handleListTriggers() {
+  try {
+    var triggers = ScriptApp.getProjectTriggers();
+    var list = [];
+    for (var i = 0; i < triggers.length; i++) {
+      var t = triggers[i];
+      var src = t.getEventType();
+      var item = { handler: t.getHandlerFunction(), type: String(src) };
+      try {
+        // 時間ベーストリガーの発火予定時刻は getTriggerSource==='CLOCK' の場合のみ取れる
+        if (String(src) === 'CLOCK') {
+          // timeBased().at()で作成したトリガーには直接getNextFireTimeがないので、空にする（Apps Scriptの制約）
+          item.at = null;
+        }
+      } catch(ex) {}
+      list.push(item);
+    }
+    return jsonResponse({ ok: true, triggers: list });
   } catch(e) {
     return jsonResponse({ error: e.message });
   }

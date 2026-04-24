@@ -1506,6 +1506,7 @@ ALBONA 人事部</textarea>
 
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button class="btn btn-secondary" onclick="testSendMail()">📧 テスト送信（自分宛）</button>
+        <button class="btn btn-secondary" onclick="checkScheduledTriggers()">🔍 予約状況を確認</button>
         <button class="btn btn-primary" onclick="sendMailsNow()">📨 今すぐ全社員に送信</button>
         <span id="mail-test-msg" style="font-size:13px;font-weight:600;display:none"></span>
       </div>
@@ -4120,43 +4121,29 @@ function saveMailSchedule() {
   });
 }
 
-function scheduleSendToGas(date, hour, minute, subject, body) {
+async function scheduleSendToGas(date, hour, minute, subject, body) {
   const gasUrl = localStorage.getItem('es_gas_url');
   if (!gasUrl) { showToast('⚠️ GAS URLが未設定のため配信予約はスキップされました'); return; }
   const gasToken = localStorage.getItem('es_gas_token') || '';
-  const cbName = '_gasScheduleCb_' + Date.now();
-  let resolved = false;
-  const cleanup = () => { delete window[cbName]; if (script.parentNode) document.body.removeChild(script); };
-  window[cbName] = (data) => {
-    if (resolved) return; resolved = true;
-    if (data && data.ok) showToast('📅 配信予約を登録しました');
-    else showToast('⚠ 配信予約失敗: ' + (data?.error || ''));
-    cleanup();
-  };
-  // payloadをURL safeにエンコード
-  const params = new URLSearchParams({
-    action: 'scheduleSend',
-    token: gasToken,
-    date: date,
-    hour: String(hour),
-    minute: String(minute || 0),
-    subject: subject || '',
-    body: body || '',
-    callback: cbName,
-  });
-  const script = document.createElement('script');
-  script.src = gasUrl + '?' + params.toString();
-  script.onerror = () => {
-    if (resolved) return; resolved = true;
-    showToast('📅 配信予約リクエストを送信しました');
-    cleanup();
-  };
-  setTimeout(() => {
-    if (resolved) return; resolved = true;
-    showToast('📅 配信予約リクエストを送信しました');
-    cleanup();
-  }, 8000);
-  document.body.appendChild(script);
+  showToast('📅 配信予約を登録中...');
+  try {
+    const res = await apiPost('gas-proxy', {
+      gasUrl,
+      token: gasToken,
+      action: 'scheduleSend',
+      params: { date, hour: String(hour), minute: String(minute || 0) },
+    });
+    if (res && res.ok) {
+      const at = res.scheduledAt ? new Date(res.scheduledAt).toLocaleString('ja-JP') : '';
+      showToast('✅ 配信予約を登録しました' + (at ? `（${at}）` : ''));
+    } else {
+      const err = (res && res.error) || '不明なエラー';
+      const preview = res && res.preview ? ' / ' + String(res.preview).substring(0, 100) : '';
+      showToast('⚠ 配信予約失敗: ' + err + preview);
+    }
+  } catch(e) {
+    showToast('⚠ 配信予約失敗: ' + (e.message || 'ネットワークエラー'));
+  }
 }
 
 function loadMailSchedule() {
@@ -4219,6 +4206,24 @@ function renderMailScheduleStatus(config) {
   const ymd = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
   const mm = config.minute != null ? config.minute : 0;
   el.innerHTML = `現在の設定：<strong>${ymd} ${String(config.hour).padStart(2,'0')}:${String(mm).padStart(2,'0')}</strong> に自動送信`;
+}
+
+async function checkScheduledTriggers() {
+  const gasUrl = localStorage.getItem('es_gas_url');
+  if (!gasUrl) { showToast('❌ GAS URLが未設定です（設定 → GAS URL）'); return; }
+  const gasToken = localStorage.getItem('es_gas_token') || '';
+  showToast('🔍 予約状況を確認中...');
+  const res = await apiPost('gas-proxy', { gasUrl, token: gasToken, action: 'listTriggers' });
+  if (res && res.ok) {
+    if (!res.triggers || res.triggers.length === 0) {
+      showToast('📭 登録されている予約はありません');
+    } else {
+      const lines = res.triggers.map(t => `・${t.handler} → ${t.at ? new Date(t.at).toLocaleString('ja-JP') : '時刻不明'}`).join('\n');
+      alert('📅 現在の予約一覧:\n\n' + lines);
+    }
+  } else {
+    showToast('⚠ 確認失敗: ' + ((res && res.error) || '不明なエラー'));
+  }
 }
 
 async function testSendMail() {
