@@ -38,6 +38,7 @@ function doGet(e) {
     if (action === 'saveSettings') return handleSaveSettings(ss, data);
     if (action === 'loadSettings') return handleLoadSettings(ss, data);
     if (action === 'sendMails')    return handleSendMails(ss, data);
+    if (action === 'scheduleSend') return handleScheduleSend(ss, data);
     if (action === 'testMail')     return handleTestMail(ss, data);
     if (action === 'exportSheet')  return handleExportSheet(ss, data);
 
@@ -276,6 +277,58 @@ function handleTestMail(ss, data) {
   } catch(e) {
     return jsonResponse({ error: e.message });
   }
+}
+
+// ===== 1回限りの予約配信を登録 =====
+// 管理画面の「保存」ボタンから呼ばれる。指定された日時に runScheduledMailSend を1回だけ実行するトリガーを作成する。
+function handleScheduleSend(ss, data) {
+  try {
+    var dateStr = String(data.date || '');
+    var hour = parseInt(data.hour, 10);
+
+    if (!dateStr || isNaN(hour)) {
+      return jsonResponse({ error: 'date と hour が必要です' });
+    }
+
+    var parts = dateStr.split('-');
+    if (parts.length !== 3) {
+      return jsonResponse({ error: '日付フォーマットが不正です: ' + dateStr });
+    }
+
+    var year = parseInt(parts[0], 10);
+    var month = parseInt(parts[1], 10);
+    var day = parseInt(parts[2], 10);
+    var sendAt = new Date(year, month - 1, day, hour, 0, 0);
+
+    if (sendAt.getTime() <= Date.now()) {
+      return jsonResponse({ error: '指定された日時はすでに過去です: ' + sendAt.toString() });
+    }
+
+    // 既存の予約トリガーを削除（重複防止）
+    var triggers = ScriptApp.getProjectTriggers();
+    var removed = 0;
+    for (var i = 0; i < triggers.length; i++) {
+      if (triggers[i].getHandlerFunction() === 'runScheduledMailSend') {
+        ScriptApp.deleteTrigger(triggers[i]);
+        removed++;
+      }
+    }
+
+    ScriptApp.newTrigger('runScheduledMailSend')
+      .timeBased()
+      .at(sendAt)
+      .create();
+
+    return jsonResponse({ ok: true, scheduledAt: sendAt.toISOString(), replaced: removed });
+  } catch(e) {
+    return jsonResponse({ error: e.message });
+  }
+}
+
+// 予約トリガーから呼ばれる関数（GASエディタから直接実行しないこと）
+function runScheduledMailSend() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  handleSendMails(ss);
 }
 
 // 月次自動送信トリガー（GASメニューから実行して設定）
