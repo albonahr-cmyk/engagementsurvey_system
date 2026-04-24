@@ -285,6 +285,8 @@ function handleScheduleSend(ss, data) {
   try {
     var dateStr = String(data.date || '');
     var hour = parseInt(data.hour, 10);
+    var minute = parseInt(data.minute, 10);
+    if (isNaN(minute)) minute = 0;
 
     if (!dateStr || isNaN(hour)) {
       return jsonResponse({ error: 'date と hour が必要です' });
@@ -298,7 +300,7 @@ function handleScheduleSend(ss, data) {
     var year = parseInt(parts[0], 10);
     var month = parseInt(parts[1], 10);
     var day = parseInt(parts[2], 10);
-    var sendAt = new Date(year, month - 1, day, hour, 0, 0);
+    var sendAt = new Date(year, month - 1, day, hour, minute, 0);
 
     if (sendAt.getTime() <= Date.now()) {
       return jsonResponse({ error: '指定された日時はすでに過去です: ' + sendAt.toString() });
