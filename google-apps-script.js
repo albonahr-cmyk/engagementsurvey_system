@@ -308,19 +308,24 @@ function handleScheduleSend(ss, data) {
     }
 
     // 既存の予約トリガーを削除（重複防止）
+    var props = PropertiesService.getScriptProperties();
     var triggers = ScriptApp.getProjectTriggers();
     var removed = 0;
     for (var i = 0; i < triggers.length; i++) {
       if (triggers[i].getHandlerFunction() === 'runScheduledMailSend') {
+        props.deleteProperty('trigger_time_' + triggers[i].getUniqueId());
         ScriptApp.deleteTrigger(triggers[i]);
         removed++;
       }
     }
 
-    ScriptApp.newTrigger('runScheduledMailSend')
+    var newTrigger = ScriptApp.newTrigger('runScheduledMailSend')
       .timeBased()
       .at(sendAt)
       .create();
+
+    // 予約時刻をScriptPropertiesに保存（listTriggersで表示するため）
+    props.setProperty('trigger_time_' + newTrigger.getUniqueId(), sendAt.toISOString());
 
     return jsonResponse({ ok: true, scheduledAt: sendAt.toISOString(), replaced: removed });
   } catch(e) {
@@ -331,18 +336,16 @@ function handleScheduleSend(ss, data) {
 // 現在登録されているトリガー一覧を返す（管理画面の「予約状況を確認」ボタンから呼ばれる）
 function handleListTriggers() {
   try {
+    var props = PropertiesService.getScriptProperties();
     var triggers = ScriptApp.getProjectTriggers();
     var list = [];
     for (var i = 0; i < triggers.length; i++) {
       var t = triggers[i];
       var src = t.getEventType();
-      var item = { handler: t.getHandlerFunction(), type: String(src) };
+      var item = { handler: t.getHandlerFunction(), type: String(src), at: null };
       try {
-        // 時間ベーストリガーの発火予定時刻は getTriggerSource==='CLOCK' の場合のみ取れる
-        if (String(src) === 'CLOCK') {
-          // timeBased().at()で作成したトリガーには直接getNextFireTimeがないので、空にする（Apps Scriptの制約）
-          item.at = null;
-        }
+        var storedAt = props.getProperty('trigger_time_' + t.getUniqueId());
+        if (storedAt) item.at = storedAt;
       } catch(ex) {}
       list.push(item);
     }
