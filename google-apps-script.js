@@ -313,19 +313,18 @@ function handleScheduleSend(ss, data) {
     var removed = 0;
     for (var i = 0; i < triggers.length; i++) {
       if (triggers[i].getHandlerFunction() === 'runScheduledMailSend') {
-        props.deleteProperty('trigger_time_' + triggers[i].getUniqueId());
         ScriptApp.deleteTrigger(triggers[i]);
         removed++;
       }
     }
 
-    var newTrigger = ScriptApp.newTrigger('runScheduledMailSend')
+    ScriptApp.newTrigger('runScheduledMailSend')
       .timeBased()
       .at(sendAt)
       .create();
 
-    // 予約時刻をScriptPropertiesに保存（listTriggersで表示するため）
-    props.setProperty('trigger_time_' + newTrigger.getUniqueId(), sendAt.toISOString());
+    // 同時に1つしか予約しない前提で固定キー保存（listTriggersで表示するため）
+    props.setProperty('SCHEDULED_SEND_AT', sendAt.toISOString());
 
     return jsonResponse({ ok: true, scheduledAt: sendAt.toISOString(), replaced: removed });
   } catch(e) {
@@ -337,16 +336,15 @@ function handleScheduleSend(ss, data) {
 function handleListTriggers() {
   try {
     var props = PropertiesService.getScriptProperties();
+    var scheduledAt = props.getProperty('SCHEDULED_SEND_AT');
     var triggers = ScriptApp.getProjectTriggers();
     var list = [];
     for (var i = 0; i < triggers.length; i++) {
       var t = triggers[i];
-      var src = t.getEventType();
-      var item = { handler: t.getHandlerFunction(), type: String(src), at: null };
-      try {
-        var storedAt = props.getProperty('trigger_time_' + t.getUniqueId());
-        if (storedAt) item.at = storedAt;
-      } catch(ex) {}
+      var item = { handler: t.getHandlerFunction(), type: String(t.getEventType()), at: null };
+      if (item.handler === 'runScheduledMailSend' && scheduledAt) {
+        item.at = scheduledAt;
+      }
       list.push(item);
     }
     return jsonResponse({ ok: true, triggers: list });
