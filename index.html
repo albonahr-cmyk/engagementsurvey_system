@@ -2552,6 +2552,7 @@ function buildDeptDropdownHtml(currentValue) {
 
 function showDeptDropdown(triggerEl) {
   closeDeptDropdown();
+  closeFloatingDropdowns();
   const wrapper = document.createElement('div');
   wrapper.innerHTML = buildDeptDropdownHtml(selectedDept);
   const popover = wrapper.firstElementChild;
@@ -2574,7 +2575,7 @@ function closeDeptDropdown() {
 
 function _deptDropdownOutsideHandler(e) {
   const pop = document.getElementById('dept-dropdown-popover');
-  if (pop && !pop.contains(e.target) && !e.target.closest('.meta-dept-trigger')) closeDeptDropdown();
+  if (pop && !pop.contains(e.target) && !e.target.closest('.meta-dept-trigger') && !e.target.closest('.filter-chip')) closeDeptDropdown();
 }
 
 function filterDeptDropdown(query) {
@@ -2583,6 +2584,95 @@ function filterDeptDropdown(query) {
     const d = (item.getAttribute('data-dept-name') || '').toLowerCase();
     item.style.display = !q || d.includes(q) ? 'flex' : 'none';
   });
+}
+
+// ===== ダッシュボードの日付・期間フィルタ =====
+const PERIOD_OPTIONS = ['直近1年間', '指定配信日から過去1年間', '全期間'];
+let selectedPeriod = (() => {
+  try { return localStorage.getItem('es_dashboard_period') || '指定配信日から過去1年間'; }
+  catch(e) { return '指定配信日から過去1年間'; }
+})();
+
+function formatMonthAsDate(m) {
+  const [y, mm] = m.split('-');
+  const today = new Date();
+  const isCurrent = m === `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const d = isCurrent ? today : new Date(parseInt(y), parseInt(mm) - 1, 1);
+  const wd = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}(${wd})`;
+}
+
+function showDateDropdown(triggerEl) {
+  closeDeptDropdown();
+  closeFloatingDropdowns();
+  const sel = document.getElementById('month-select');
+  const currentValue = sel ? sel.value : '';
+  const items = months.slice().reverse().map(m => {
+    const isSel = m === currentValue ? 'selected' : '';
+    const label = formatMonthAsDate(m);
+    return `<div class="dept-dropdown-item ${isSel}" onclick="event.stopPropagation();selectDashboardMonth('${m}')">
+      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${label}</span>
+    </div>`;
+  }).join('');
+  const popover = document.createElement('div');
+  popover.id = 'floating-dropdown';
+  popover.className = 'dept-dropdown';
+  popover.style.minWidth = '200px';
+  popover.innerHTML = `<div class="dept-dropdown-list">${items}</div>`;
+  document.body.appendChild(popover);
+  const r = triggerEl.getBoundingClientRect();
+  popover.style.top = (r.bottom + window.scrollY + 6) + 'px';
+  popover.style.left = (r.left + window.scrollX) + 'px';
+  setTimeout(() => document.addEventListener('click', _floatingDropdownOutsideHandler), 0);
+}
+
+function showPeriodDropdown(triggerEl) {
+  closeDeptDropdown();
+  closeFloatingDropdowns();
+  const items = PERIOD_OPTIONS.map(p => {
+    const isSel = p === selectedPeriod ? 'selected' : '';
+    const arg = p.replace(/'/g, "\\'");
+    return `<div class="dept-dropdown-item ${isSel}" onclick="event.stopPropagation();selectPeriod('${arg}')">
+      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${sanitize(p)}</span>
+    </div>`;
+  }).join('');
+  const popover = document.createElement('div');
+  popover.id = 'floating-dropdown';
+  popover.className = 'dept-dropdown';
+  popover.style.minWidth = '220px';
+  popover.innerHTML = `<div class="dept-dropdown-list">${items}</div>`;
+  document.body.appendChild(popover);
+  const r = triggerEl.getBoundingClientRect();
+  popover.style.top = (r.bottom + window.scrollY + 6) + 'px';
+  popover.style.left = (r.left + window.scrollX) + 'px';
+  setTimeout(() => document.addEventListener('click', _floatingDropdownOutsideHandler), 0);
+}
+
+function selectDashboardMonth(month) {
+  closeFloatingDropdowns();
+  const sel = document.getElementById('month-select');
+  if (sel) sel.value = month;
+  renderDashboard();
+}
+
+function selectPeriod(period) {
+  closeFloatingDropdowns();
+  selectedPeriod = period || '指定配信日から過去1年間';
+  try { localStorage.setItem('es_dashboard_period', selectedPeriod); } catch(e) {}
+  renderDashboard();
+}
+
+function closeFloatingDropdowns() {
+  const old = document.getElementById('floating-dropdown');
+  if (old) old.remove();
+  document.removeEventListener('click', _floatingDropdownOutsideHandler);
+}
+
+function _floatingDropdownOutsideHandler(e) {
+  const pop = document.getElementById('floating-dropdown');
+  if (pop && !pop.contains(e.target) && !e.target.closest('.filter-chip')) closeFloatingDropdowns();
 }
 
 function getMonthData(month, deptFilter) {
@@ -2736,10 +2826,11 @@ function renderDashboard() {
   // ダッシュボードヘッダーのフィルタチップ
   const filtersEl = document.getElementById('dashboard-filters');
   if (filtersEl) {
+    const monthDateLabel = formatMonthAsDate(month);
     filtersEl.innerHTML = `
       <span class="filter-chip dept-trigger ${deptIsAll ? '' : 'active'}" onclick="event.stopPropagation();showDeptDropdown(this)">${iconPeople}${deptLabel}${iconChevron}</span>
-      <span class="filter-chip">${iconCalendar}${todayJa}</span>
-      <span class="filter-chip">${iconCalendar}指定配信日から過去1年間</span>
+      <span class="filter-chip dept-trigger" onclick="event.stopPropagation();showDateDropdown(this)">${iconCalendar}${monthDateLabel}${iconChevron}</span>
+      <span class="filter-chip dept-trigger" onclick="event.stopPropagation();showPeriodDropdown(this)">${iconCalendar}${sanitize(selectedPeriod)}${iconChevron}</span>
     `;
   }
 
