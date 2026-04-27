@@ -339,6 +339,15 @@ if (typeof pdfjsLib !== 'undefined') {
   .stat-card .sub.up { color: #0f766e; }
   .stat-card .sub.down { color: #dc2626; }
   .stat-card .sub.neutral { color: #94a3b8; }
+  /* 回答率ドーナツ */
+  .stat-card.has-donut { display: flex; flex-direction: column; }
+  .stat-card.has-donut .donut-wrap { position: relative; width: 110px; height: 110px; margin: 6px auto 4px; }
+  .stat-card.has-donut .donut-svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+  .stat-card.has-donut .donut-bg { fill: none; stroke: #f1f5f9; stroke-width: 11; }
+  .stat-card.has-donut .donut-fg { fill: none; stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset 1.1s cubic-bezier(0.4,0,0.2,1); }
+  .stat-card.has-donut .donut-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .stat-card.has-donut .donut-pct { font-size: 28px; font-weight: 800; color: #1e293b; letter-spacing: -1px; line-height: 1; }
+  .stat-card.has-donut .donut-pct .pct-mark { font-size: 16px; font-weight: 700; color: #64748b; margin-left: 1px; }
 
   .section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 14px; letter-spacing: -0.2px; }
 
@@ -2286,9 +2295,32 @@ function renderDashboard() {
     });
   }
 
+  // 回答率ドーナツ（SVG）
+  const donutR = 48;
+  const donutCirc = 2 * Math.PI * donutR;
+  const donutOffset = donutCirc * (1 - currentRespRate / 100);
+  const donutColor = currentRespRate >= 80 ? '#0f766e' : currentRespRate >= 50 ? '#14b8a6' : '#f59e0b';
+  const donutColorLight = currentRespRate >= 80 ? '#2dd4bf' : currentRespRate >= 50 ? '#5eead4' : '#fbbf24';
+
   kpi.innerHTML = `
-    <div class="stat-card"><div class="label">回答率</div><div class="value">${currentRespRate}%</div>
-      <div class="sub ${rateDiff > 0 ? 'up' : rateDiff < 0 ? 'down' : 'neutral'}">${rateDiff !== null ? (rateDiff > 0 ? '↑' : '↓') + ' 前月比 ' + (rateDiff > 0 ? '+' : '') + rateDiff + '%' : '初回データ'}</div></div>
+    <div class="stat-card has-donut"><div class="label">回答率</div>
+      <div class="donut-wrap">
+        <svg class="donut-svg" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="${donutColorLight}"/>
+              <stop offset="100%" stop-color="${donutColor}"/>
+            </linearGradient>
+          </defs>
+          <circle class="donut-bg" cx="60" cy="60" r="${donutR}"/>
+          <circle class="donut-fg" cx="60" cy="60" r="${donutR}" stroke="url(#donutGrad)"
+            stroke-dasharray="${donutCirc.toFixed(2)}" stroke-dashoffset="${donutCirc.toFixed(2)}"
+            data-target-offset="${donutOffset.toFixed(2)}"/>
+        </svg>
+        <div class="donut-center"><div class="donut-pct">${currentRespRate}<span class="pct-mark">%</span></div></div>
+      </div>
+      <div class="sub ${rateDiff > 0 ? 'up' : rateDiff < 0 ? 'down' : 'neutral'}" style="text-align:center">${rateDiff !== null ? (rateDiff > 0 ? '↑' : '↓') + ' 前月比 ' + (rateDiff > 0 ? '+' : '') + rateDiff + '%' : '初回データ'}</div>
+    </div>
     <div class="stat-card"><div class="label">総合スコア</div><div class="value">${isNaN(total) ? '―' : total + '点'}</div>
       <div class="sub ${totalDiff > 0 ? 'up' : totalDiff < 0 ? 'down' : 'neutral'}">${totalDiff !== null && !isNaN(totalDiff) ? (totalDiff > 0 ? '↑ +' : '↓ ') + totalDiff + '点' : '初回データ'}</div></div>
     <div class="stat-card"><div class="label">回答人数</div><div class="value">${respCount}名</div>
@@ -2296,6 +2328,15 @@ function renderDashboard() {
     <div class="stat-card"><div class="label">⚠️ アラート件数</div><div class="value" style="color:${alertCount > 0 ? '#dc2626' : '#0f766e'}">${alertCount}件</div>
       <div class="sub ${alertCount > 0 ? 'down' : 'up'}">${alertCount > 0 ? '要対応あり' : '問題なし'}</div></div>
   `;
+
+  // ドーナツチャートをアニメーション
+  requestAnimationFrame(() => {
+    const fg = kpi.querySelector('.donut-fg');
+    if (fg) {
+      const target = fg.getAttribute('data-target-offset');
+      requestAnimationFrame(() => { fg.setAttribute('stroke-dashoffset', target); });
+    }
+  });
 
   // 未回答者一覧（全月）
   const unsubSection = document.getElementById('unsubmitted-section');
