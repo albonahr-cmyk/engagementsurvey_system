@@ -477,11 +477,14 @@ if (typeof pdfjsLib !== 'undefined') {
 
   .section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 14px; letter-spacing: -0.2px; }
 
-  /* 評価基準とレーダーの2カラム配置 */
-  .dashboard-split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 32px; align-items: start; }
+  /* 評価基準とレーダーの2カラム配置（高さは揃える） */
+  .dashboard-split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 32px; }
   @media (max-width: 1100px) { .dashboard-split { grid-template-columns: 1fr; } }
   .dashboard-split-col { display: flex; flex-direction: column; min-width: 0; }
   .dashboard-split-col .section-title { margin-bottom: 12px; }
+  .dashboard-split-col > div:nth-child(2) { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .dashboard-split-col .no-guide { flex: 1; margin-bottom: 0; display: flex; align-items: center; justify-content: center; }
+  .dashboard-split-col .radar-wrap { flex: 1; align-items: center; }
   /* キードライバーごとのスコア（コンパクト横一列） */
   .kd-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #99f6e4; margin-bottom: 32px; }
   .kd-card-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 10px; }
@@ -2932,7 +2935,7 @@ function renderDashboard() {
   if (radarEl && respCount === 0) {
     radarEl.innerHTML = '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
   } else if (radarEl) {
-    const radarSize = 340, cx = radarSize/2, cy = radarSize/2, R = 135;
+    const radarSize = 260, cx = radarSize/2, cy = radarSize/2, R = 105;
     const keys = catKeys;
     const n = keys.length;
     const angleStep = (2 * Math.PI) / n;
@@ -2989,7 +2992,7 @@ function renderDashboard() {
 
     radarEl.innerHTML = `
       <div class="radar-wrap">
-        <svg width="${radarSize+100}" height="${radarSize+70}" viewBox="-50 -35 ${radarSize+100} ${radarSize+70}" style="overflow:visible">
+        <svg viewBox="-50 -35 ${radarSize+100} ${radarSize+70}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;max-width:${radarSize+100}px;display:block;margin:0 auto;overflow:visible">
           ${gridPolygons}
           ${axisLines}
           ${prevDataPoints ? `<polygon points="${prevDataPoints}" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>` : ''}
