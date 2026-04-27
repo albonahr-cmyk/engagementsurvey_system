@@ -33,6 +33,12 @@ if (typeof pdfjsLib !== 'undefined') {
 
   .screen { display: none; min-height: 100vh; }
   .screen.active { display: flex; }
+  /* メールリンクからのアクセス時：ログイン画面を非表示にしてローディングを即表示 */
+  html.token-mode #screen-login.active { display: none !important; animation: none !important; }
+  html.token-mode #screen-loading { display: flex !important; }
+  #screen-loading { align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  .auth-spinner { width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #0d9488; border-radius: 50%; animation: authSpin 0.8s linear infinite; }
+  @keyframes authSpin { to { transform: rotate(360deg); } }
   .card { background: white; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); padding: 40px; }
   .btn { padding: 12px 28px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: 0.3px; }
   .btn-primary { background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; box-shadow: 0 4px 0 #115e59, 0 6px 16px rgba(13,148,136,0.3); transform: translateY(0); }
@@ -867,6 +873,19 @@ if (typeof pdfjsLib !== 'undefined') {
 </style>
 </head>
 <body>
+
+<script>
+// メールリンクからのアクセス時はログイン画面を表示せず即ローディングへ
+if (new URLSearchParams(location.search).get('token')) {
+  document.documentElement.classList.add('token-mode');
+}
+</script>
+
+<!-- 自動ログイン中のローディング -->
+<div id="screen-loading" class="screen">
+  <div class="auth-spinner"></div>
+  <p style="color:#64748b;font-size:14px;margin:0">ログイン中...</p>
+</div>
 
 <!-- ログイン -->
 <div id="screen-login" class="screen active">
@@ -6015,13 +6034,13 @@ function switchMasterTab(name, btn) {
       saveSession(data);
       currentEmpId = data.empId;
 
-      // クラウドからサーベイ期間を取得してから判定
-      try { await loadAllSettingsFromCloud(); reloadAllSettings(); } catch(e) {}
-      const currentMonth = getSurveyMonth();
-
-      const checkRes = await fetch(API_BASE + '/api/check?month=' + currentMonth, {
-        headers: authHeaders(),
-      });
+      // 設定読み込みと回答チェックを並列実行（ローカルの es_survey_period から先に月を決める）
+      const tentativeMonth = getSurveyMonth();
+      const [settingsResult, checkRes] = await Promise.all([
+        loadAllSettingsFromCloud().catch(() => false),
+        fetch(API_BASE + '/api/check?month=' + tentativeMonth, { headers: authHeaders() }),
+      ]);
+      try { reloadAllSettings(); } catch(e) {}
       const checkData = await checkRes.json();
 
       if (checkData.submitted || hasSubmittedThisMonth(data.empId)) {
