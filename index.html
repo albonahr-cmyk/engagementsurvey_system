@@ -6018,11 +6018,11 @@ function switchMasterTab(name, btn) {
       // ログイン画面のID/PASS欄に黒丸を埋めて自動入力風の演出
       const loginIdEl = document.getElementById('login-id');
       const loginPwEl = document.getElementById('login-pw');
-      if (loginIdEl) loginIdEl.value = '●●●●●●';
+      if (loginIdEl) loginIdEl.value = '●●●●';
       if (loginPwEl) {
         // type=password だとマスク文字が小さくID欄とサイズが揃わないため一時的に text に変更
         loginPwEl.type = 'text';
-        loginPwEl.value = '●●●●●●';
+        loginPwEl.value = '●●●●';
       }
 
       // 設定はバックグラウンドで読み込む（ブロックしない）
