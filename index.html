@@ -3058,7 +3058,10 @@ function renderDashboard() {
   // グループ毎のエンゲージメントスコア（コンパクト横棒）
   const deptScoresGrid = document.getElementById('dept-scores-grid');
   if (deptScoresGrid) {
+    // 仮プレースホルダ部署：実際の社員追加までは点線で「回答数が足りません」表示
+    const placeholderDepts = ['VR', 'RAYSEE', 'monomo', 'おぢポ', 'UNSEEN', '本部', '新規事業開発'];
     const deptMap = {};
+    placeholderDepts.forEach(d => { deptMap[d] = { totals: [], memberCount: 0 }; });
     Object.entries(employees).forEach(([id, emp]) => {
       if (emp.role === 'admin') return;
       const dept = emp.dept;
