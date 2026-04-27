@@ -196,11 +196,28 @@ function fetchEmployeesFromAPI() {
   return data.data;
 }
 
+// ===== Vercel API経由で全社員のサーベイトークンを再生成 =====
+function regenerateSurveyTokens() {
+  var props = PropertiesService.getScriptProperties();
+  var apiBase = props.getProperty('VERCEL_API_BASE') || 'https://engagementsurvey-system-nvlq.vercel.app';
+  var secret = props.getProperty('MAIL_API_SECRET') || '';
+
+  var url = apiBase + '/api/generate-tokens';
+  UrlFetchApp.fetch(url, {
+    method: 'post',
+    muteHttpExceptions: true,
+    headers: { 'x-mail-secret': secret }
+  });
+}
+
 // ===== メール一斉送信 =====
 // Notion連動: Vercel API経由で社員データを取得してメール送信
 function handleSendMails(ss, data) {
   try {
-    // Notion DBから社員リストを取得
+    // メール送信前に全社員のサーベイトークンを再生成（自動ログイン用）
+    regenerateSurveyTokens();
+
+    // Notion DBから社員リストを取得（再生成後の最新トークン）
     var empList = fetchEmployeesFromAPI();
     if (empList.length === 0) return jsonResponse({ error: 'メールアドレスが登録されている社員がいません' });
 
