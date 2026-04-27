@@ -1299,12 +1299,8 @@ if (typeof pdfjsLib !== 'undefined') {
         <option>B1</option><option>B2</option><option>B3</option><option>B4</option>
         <option>C1</option><option>C2</option><option>C3</option><option>C4</option>
       </select>
-      <div class="month-selector" style="margin:0">
-        <label>サーベイ月：</label>
-        <select id="emp-month-select" onchange="renderEmployeeList()"></select>
-      </div>
     </div>
-    <div class="section-title">👥 社員マスタ一覧 <span id="emp-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
+    <span id="emp-count-label" style="display:none"></span>
     <div class="response-table" id="emp-table"></div>
   </div>
 
@@ -3534,30 +3530,26 @@ function renderEmployeeList() {
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
-      <th>社員</th><th>事業部</th><th>ランク</th><th>IQ</th><th>戦闘力</th><th>MBTI</th><th>サーベイ（${monthLabels[month]||month}）</th><th></th>
+      <th>社員</th><th>事業部</th><th>職種</th><th>役職</th><th>勤務地</th><th></th>
     </tr></thead>
     <tbody>${rows.map(r => {
       const emp = employees[r.id] || {};
       const email = emp.email || '';
-      const surveyHtml = r.total !== null
-        ? `<span class="em-survey-pt">${r.total}点</span>
-           <span class="em-survey-delta" style="color:${r.diff===null?'#94a3b8':r.diff>=0?'#0f766e':'#dc2626'}">${r.diff!==null?(r.diff>0?'+':'')+r.diff:'―'}</span>`
-        : '<span class="em-empty" style="font-size:12px">未回答</span>';
+      const jobType = emp.jobType || '';
+      const position = emp.position || '';
+      const workLocation = emp.workLocation || '';
       return `
       <tr class="clickable" onclick="showDetail('${r.id}')">
         <td>
           <div class="em-name">${sanitize(r.name)}</div>
           <div class="em-meta">
-            <span class="em-id">${r.id}</span>
             ${email ? `<span class="em-email">${sanitize(email)}</span>` : '<span class="em-email em-empty">メール未登録</span>'}
           </div>
         </td>
-        <td>${r.dept ? `<span class="em-chip">${sanitize(r.dept)}</span>` : '<span class="em-empty">―</span>'}</td>
-        <td>${r.rank ? `<span class="em-chip">${r.rank}</span>` : '<span class="em-empty">―</span>'}</td>
-        <td><span class="em-num">${r.iq || '<span class=\"em-empty\">―</span>'}</span></td>
-        <td><span class="em-num">${r.bp ? r.bp.toLocaleString() : '<span class=\"em-empty\">―</span>'}</span></td>
-        <td>${r.mbtiType ? `<span class="em-chip">${r.mbtiType}</span>` : '<span class="em-empty">―</span>'}</td>
-        <td>${surveyHtml}</td>
+        <td>${r.dept ? `<span class="em-chip">${sanitize(r.dept)}</span>` : ''}</td>
+        <td>${jobType ? sanitize(jobType) : ''}</td>
+        <td>${position ? sanitize(position) : ''}</td>
+        <td>${workLocation ? `<span class="em-chip">${sanitize(workLocation)}</span>` : ''}</td>
         <td><button class="em-detail" onclick="event.stopPropagation();showDetail('${r.id}')">詳細</button></td>
       </tr>`;
     }).join('')}
@@ -4867,7 +4859,10 @@ function _renderAccountView(empId) {
     <div class="account-info-section">
       <div class="section-label">社員情報</div>
       <div class="account-info-row"><div class="label">氏名</div><div class="value">${sanitize(emp.name || '—')}</div></div>
-      <div class="account-info-row"><div class="label">所属部署</div><div class="value">${sanitize(emp.dept || '—')}</div></div>
+      <div class="account-info-row"><div class="label">事業部</div><div class="value">${sanitize(emp.dept || '—')}</div></div>
+      <div class="account-info-row"><div class="label">職種</div><div class="value">${sanitize(emp.jobType || '—')}</div></div>
+      <div class="account-info-row"><div class="label">役職</div><div class="value">${sanitize(emp.position || '—')}</div></div>
+      <div class="account-info-row"><div class="label">勤務地</div><div class="value">${sanitize(emp.workLocation || '—')}</div></div>
       <div class="account-info-row"><div class="label">メールアドレス</div><div class="value">${emp.email ? sanitize(emp.email) : '—'}</div></div>
     </div>
     <div class="account-info-section">
@@ -4889,7 +4884,10 @@ function _renderAccountEdit(empId) {
     <div class="account-info-section">
       <div class="section-label">社員情報を編集</div>
       <div class="account-info-row"><div class="label">氏名</div><input id="ai-edit-name" value="${sanitize(emp.name || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
-      <div class="account-info-row" style="margin-top:10px"><div class="label">所属部署</div><input id="ai-edit-dept" value="${sanitize(emp.dept || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">事業部</div><input id="ai-edit-dept" value="${sanitize(emp.dept || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">職種</div><input id="ai-edit-jobtype" value="${sanitize(emp.jobType || '')}" placeholder="例：マーケティング、エンジニア" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">役職</div><input id="ai-edit-position" value="${sanitize(emp.position || '')}" placeholder="例：一般社員、マネージャー" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">勤務地</div><input id="ai-edit-workloc" value="${sanitize(emp.workLocation || '')}" placeholder="例：東京、福岡" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">メールアドレス</div><input id="ai-edit-email" value="${sanitize(emp.email || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">新しいパスワード（変更する場合のみ）</div><input id="ai-edit-pw" type="text" placeholder="空欄なら変更なし" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
     </div>`;
@@ -4902,15 +4900,18 @@ function _renderAccountEdit(empId) {
 function _accountSave(empId) {
   const name = document.getElementById('ai-edit-name').value.trim();
   const dept = document.getElementById('ai-edit-dept').value.trim();
+  const jobType = document.getElementById('ai-edit-jobtype').value.trim();
+  const position = document.getElementById('ai-edit-position').value.trim();
+  const workLocation = document.getElementById('ai-edit-workloc').value.trim();
   const email = document.getElementById('ai-edit-email').value.trim();
   const pw = document.getElementById('ai-edit-pw').value.trim();
   if (!name) { showToast('氏名を入力してください'); return; }
-  const payload = { empId, name, dept, email };
+  const payload = { empId, name, dept, email, jobType, position, workLocation };
   if (pw) payload.password = pw;
   showToast('保存中...');
   apiPost('employee-save', payload).then(res => {
     if (res?.ok) {
-      employees[empId] = { ...employees[empId], name, dept, email };
+      employees[empId] = { ...employees[empId], name, dept, email, jobType, position, workLocation };
       if (pw) employees[empId].hasPassword = true;
       renderEmployeeList();
       _renderAccountView(empId);
