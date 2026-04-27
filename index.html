@@ -409,6 +409,37 @@ if (typeof pdfjsLib !== 'undefined') {
   .dept-bar-score { width: 64px; text-align: right; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; flex-shrink: 0; }
   .dept-bar-score .dept-bar-pt { font-size: 13px; font-weight: 700; margin-left: 1px; }
   .dept-bar-count { width: 60px; text-align: right; font-size: 12px; color: #94a3b8; font-weight: 600; flex-shrink: 0; }
+  /* 重要な変化 / グループスコア の 3カード行 */
+  .changes-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  @media (max-width: 900px) { .changes-grid { grid-template-columns: 1fr; } }
+  .change-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); display: flex; flex-direction: column; min-height: 240px; }
+  .change-card-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .change-card-title .info-tip { width: 14px; height: 14px; border-radius: 50%; background: #cbd5e1; color: white; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: help; font-style: italic; font-family: serif; }
+  .change-card .card-meta { display: flex; gap: 6px; font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 12px; flex-wrap: wrap; }
+  .change-card .card-meta span { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: #f1f5f9; border-radius: 12px; white-space: nowrap; }
+  .change-card .card-meta .meta-icon { width: 12px; height: 12px; flex-shrink: 0; color: #64748b; }
+  .change-card-body { flex: 1; display: flex; flex-direction: column; }
+  .change-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 13px; text-align: center; padding: 20px 10px; }
+  .change-list { display: flex; flex-direction: column; gap: 6px; }
+  .change-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; background: #f8fafc; }
+  .change-item .ci-info { flex: 1; min-width: 0; }
+  .change-item .ci-name { font-size: 13px; font-weight: 700; color: #334155; }
+  .change-item .ci-detail { font-size: 11px; color: #64748b; font-weight: 600; margin-top: 1px; }
+  .change-item .ci-delta { font-size: 14px; font-weight: 800; min-width: 52px; text-align: right; }
+  .change-item.rising .ci-delta { color: #0d9488; }
+  .change-item.falling .ci-delta { color: #dc2626; }
+  /* グループスコア コンパクト版 */
+  .dept-mini-list { display: flex; flex-direction: column; gap: 2px; }
+  .dept-mini-row { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 6px; cursor: pointer; transition: background 0.15s; }
+  .dept-mini-row:hover { background: #f8fafc; }
+  .dept-mini-row.empty { cursor: default; opacity: 0.85; }
+  .dept-mini-row.empty:hover { background: transparent; }
+  .dept-mini-name { width: 88px; font-size: 13px; font-weight: 600; color: #334155; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dept-mini-track { flex: 1; background: #f1f5f9; border-radius: 6px; height: 22px; overflow: hidden; position: relative; min-width: 50px; }
+  .dept-mini-fill { height: 100%; background: linear-gradient(90deg, #99f6e4, #5eead4); border-radius: 6px; transition: width 0.9s cubic-bezier(0.4,0,0.2,1); }
+  .dept-mini-track.empty-track { border: 1px dashed #cbd5e1; background: transparent; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #94a3b8; font-weight: 600; }
+  .dept-mini-score { font-size: 13px; font-weight: 800; color: #334155; min-width: 28px; text-align: right; flex-shrink: 0; }
+  .dept-mini-row.empty .dept-mini-score { color: #94a3b8; }
   /* スコア推移チャート */
   .trend-card { background: white; border-radius: 14px; padding: 24px 28px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
   .trend-card-header { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -1088,6 +1119,23 @@ if (typeof pdfjsLib !== 'undefined') {
       <button onclick="refreshSurveyData()" class="btn btn-secondary btn-sm">🔄 最新データ取得</button>
     </div>
     <div class="stats-grid" id="kpi-grid"></div>
+    <div class="changes-grid">
+      <div class="change-card">
+        <div class="change-card-title">重要な上昇変化</div>
+        <div class="card-meta" id="rising-changes-meta"></div>
+        <div class="change-card-body" id="rising-changes-body"></div>
+      </div>
+      <div class="change-card">
+        <div class="change-card-title">重要な下降変化</div>
+        <div class="card-meta" id="falling-changes-meta"></div>
+        <div class="change-card-body" id="falling-changes-body"></div>
+      </div>
+      <div class="change-card">
+        <div class="change-card-title">グループ毎のエンゲージメントスコア <span class="info-tip" title="部署ごとの平均エンゲージメントスコア">i</span></div>
+        <div class="card-meta" id="dept-scores-meta"></div>
+        <div class="change-card-body" id="dept-scores-grid"></div>
+      </div>
+    </div>
     <div id="unsubmitted-section" style="display:none">
       <div class="section-title">📬 未回答者一覧 <span id="unsubmitted-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
       <div id="unsubmitted-names-inline" style="font-size:13px;color:#475569;margin-bottom:12px;line-height:1.7"></div>
@@ -1105,8 +1153,6 @@ if (typeof pdfjsLib !== 'undefined') {
     <div id="action-guide-list" style="margin-bottom:40px"></div>
     <div class="section-title">📡 カテゴリ別レーダーチャート</div>
     <div id="radar-chart-section" style="margin-bottom:32px"></div>
-    <div class="section-title">🏢 部署別スコア</div>
-    <div id="dept-scores-grid" style="margin-bottom:32px"></div>
   </div>
 
   <!-- 社員一覧（マスタ） -->
@@ -2908,10 +2954,53 @@ function renderDashboard() {
       </div>`;
   }
 
-  // 部署別スコア（全グループを横棒グラフで）
+  // ====== 重要な変化 / グループ毎のスコア（3カード） ======
+  const cardMetaShort = `
+    <span>${iconPeople}全メンバー</span>
+    <span>${iconCalendar}${todayJa}</span>
+  `;
+  const setMeta = id => { const el = document.getElementById(id); if (el) el.innerHTML = cardMetaShort; };
+  setMeta('rising-changes-meta');
+  setMeta('falling-changes-meta');
+  setMeta('dept-scores-meta');
+
+  // 重要な上昇 / 下降変化（カテゴリ別、前月比 ±5点以上）
+  const risingEl = document.getElementById('rising-changes-body');
+  const fallingEl = document.getElementById('falling-changes-body');
+  const renderChanges = (el, items, kind) => {
+    if (!el) return;
+    if (items.length === 0) {
+      el.innerHTML = '<div class="change-empty">重要な変化はありませんでした</div>';
+      return;
+    }
+    el.innerHTML = `<div class="change-list">${items.map(c => `
+      <div class="change-item ${kind}">
+        <div class="ci-info">
+          <div class="ci-name">${sanitize(c.name)}</div>
+          <div class="ci-detail">前月 ${c.prev}点 → 今月 ${c.score}点</div>
+        </div>
+        <div class="ci-delta">${c.diff > 0 ? '+' : ''}${c.diff}点</div>
+      </div>`).join('')}</div>`;
+  };
+  if (respCount === 0 || !prevCats) {
+    if (risingEl) risingEl.innerHTML = '<div class="change-empty">重要な変化はありませんでした</div>';
+    if (fallingEl) fallingEl.innerHTML = '<div class="change-empty">重要な変化はありませんでした</div>';
+  } else {
+    const rising = [], falling = [];
+    catKeys.forEach(k => {
+      const diff = cats[k] - prevCats[k];
+      if (diff >= 5) rising.push({ name: catNames[k], score: cats[k], prev: prevCats[k], diff });
+      else if (diff <= -5) falling.push({ name: catNames[k], score: cats[k], prev: prevCats[k], diff });
+    });
+    rising.sort((a, b) => b.diff - a.diff);
+    falling.sort((a, b) => a.diff - b.diff);
+    renderChanges(risingEl, rising, 'rising');
+    renderChanges(fallingEl, falling, 'falling');
+  }
+
+  // グループ毎のエンゲージメントスコア（コンパクト横棒）
   const deptScoresGrid = document.getElementById('dept-scores-grid');
   if (deptScoresGrid) {
-    // 全部署を抽出（回答有無に関わらず）
     const deptMap = {};
     Object.entries(employees).forEach(([id, emp]) => {
       if (emp.role === 'admin') return;
@@ -2926,7 +3015,6 @@ function renderDashboard() {
       const avg = info.totals.length > 0 ? Math.round(info.totals.reduce((a,b) => a+b, 0) / info.totals.length) : null;
       return { dept, avg, respCount: info.totals.length, memberCount: info.memberCount };
     });
-    // スコア降順、データなしは末尾
     deptList.sort((a, b) => {
       if (a.avg === null && b.avg === null) return 0;
       if (a.avg === null) return 1;
@@ -2934,39 +3022,29 @@ function renderDashboard() {
       return b.avg - a.avg;
     });
     if (deptList.length === 0) {
-      deptScoresGrid.innerHTML = '<div style="color:#94a3b8;font-size:14px">データがありません</div>';
+      deptScoresGrid.innerHTML = '<div class="change-empty">データがありません</div>';
     } else {
-      const maxAvg = Math.max(...deptList.map(d => d.avg || 0), 1);
-      const deptHtml = deptList.map((d, i) => {
-        const isTop = i === 0 && d.avg !== null;
+      const deptHtml = deptList.map(d => {
         if (d.avg === null) {
-          return `<div class="dept-bar-row dept-bar-empty">
-            <div class="dept-bar-rank">―</div>
-            <div class="dept-bar-name">${sanitize(d.dept)}</div>
-            <div class="dept-bar-track"><div class="dept-bar-fill-empty">未回答</div></div>
-            <div class="dept-bar-score" style="color:#94a3b8">―</div>
-            <div class="dept-bar-count">0/${d.memberCount}名</div>
+          return `<div class="dept-mini-row empty">
+            <div class="dept-mini-name">${sanitize(d.dept)}</div>
+            <div class="dept-mini-track empty-track">回答数が足りません</div>
+            <div class="dept-mini-score">―</div>
           </div>`;
         }
-        let c1, c2, txt;
-        if (d.avg >= 70) { c1 = '#2dd4bf'; c2 = '#0d9488'; txt = '#0f766e'; }
-        else if (d.avg >= 60) { c1 = '#fbbf24'; c2 = '#f59e0b'; txt = '#d97706'; }
-        else { c1 = '#f87171'; c2 = '#ef4444'; txt = '#dc2626'; }
-        const widthPct = Math.round(d.avg / 100 * 100);
-        return `<div class="dept-bar-row" onclick="showDeptDetail('${d.dept}', '${month}')">
-          <div class="dept-bar-rank ${isTop ? 'top' : ''}">${isTop ? '🏆' : i + 1}</div>
-          <div class="dept-bar-name">${sanitize(d.dept)}</div>
-          <div class="dept-bar-track">
-            <div class="dept-bar-fill" data-target-w="${widthPct}%" style="width:0;background:linear-gradient(90deg,${c1},${c2})"></div>
+        const widthPct = Math.round(d.avg);
+        return `<div class="dept-mini-row" onclick="showDeptDetail('${d.dept}', '${month}')">
+          <div class="dept-mini-name">${sanitize(d.dept)}</div>
+          <div class="dept-mini-track">
+            <div class="dept-mini-fill" data-target-w="${widthPct}%" style="width:0"></div>
           </div>
-          <div class="dept-bar-score" style="color:${txt}">${d.avg}<span class="dept-bar-pt">点</span></div>
-          <div class="dept-bar-count">${d.respCount}/${d.memberCount}名</div>
+          <div class="dept-mini-score">${d.avg}</div>
         </div>`;
       }).join('');
-      deptScoresGrid.innerHTML = `<div class="dept-bar-card">${deptHtml}</div>`;
+      deptScoresGrid.innerHTML = `<div class="dept-mini-list">${deptHtml}</div>`;
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          deptScoresGrid.querySelectorAll('.dept-bar-fill').forEach(el => {
+          deptScoresGrid.querySelectorAll('.dept-mini-fill').forEach(el => {
             el.style.width = el.getAttribute('data-target-w');
           });
         });
