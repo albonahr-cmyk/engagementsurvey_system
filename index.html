@@ -3352,6 +3352,10 @@ function doLogin() {
       reloadAllSettings();
       const currentMonth = getSurveyMonth();
       return checkSubmittedOnline(result.empId, currentMonth).then(submitted => {
+      // 管理者がリセットした場合に備え、サーバー側が未提出ならローカルの提出フラグも消す
+      if (!submitted) {
+        localStorage.removeItem(`es_${result.empId}_${currentMonth}`);
+      }
       if (submitted || hasSubmittedThisMonth(result.empId)) {
         document.getElementById('already-name').textContent = sanitize(result.name);
         const sm = getSurveyMonth();
@@ -6037,6 +6041,11 @@ function switchMasterTab(name, btn) {
       const checkRes = await fetch(API_BASE + '/api/check?month=' + tentativeMonth, { headers: authHeaders() });
       const checkData = await checkRes.json();
 
+      // 管理者が回答をリセットした場合に備え、サーバーが未提出と返したらローカルの提出フラグも削除する
+      if (!checkData.submitted) {
+        localStorage.removeItem(`es_${data.empId}_${tentativeMonth}`);
+      }
+
       // 黒丸演出を見せる最小限の遅延
       await new Promise(r => setTimeout(r, 100));
 
@@ -6119,6 +6128,10 @@ function switchMasterTab(name, btn) {
       reloadAllSettings();
       const currentMonth = getSurveyMonth();
       checkSubmittedOnline(_sessionEmpId, currentMonth).then(submitted => {
+        // 管理者がリセットした場合に備え、サーバー側が未提出ならローカルの提出フラグも消す
+        if (!submitted) {
+          localStorage.removeItem(`es_${_sessionEmpId}_${currentMonth}`);
+        }
         if (submitted || hasSubmittedThisMonth(_sessionEmpId)) {
           document.getElementById('already-name').textContent = sanitize(_sessionName);
           const sm2 = getSurveyMonth();
