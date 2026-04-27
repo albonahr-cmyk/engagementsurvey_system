@@ -2372,24 +2372,23 @@ function renderDashboard() {
   }
 
   // スコアドーナツ（SVG）
-  const benchmark = 70;
   const scoreVal = isNaN(total) ? 0 : total;
   const grade = getScoreGrade(scoreVal);
   const donutR = 48;
   const donutCirc = 2 * Math.PI * donutR;
   const donutOffset = donutCirc * (1 - scoreVal / 100);
-  const donutColor = scoreVal >= 80 ? '#0f766e' : scoreVal >= 60 ? '#14b8a6' : scoreVal >= 40 ? '#f59e0b' : '#ef4444';
-  const donutColorLight = scoreVal >= 80 ? '#2dd4bf' : scoreVal >= 60 ? '#5eead4' : scoreVal >= 40 ? '#fbbf24' : '#fca5a5';
+  const tealDark = '#0d9488';
+  const tealLight = '#14b8a6';
 
   kpi.innerHTML = `
     <div class="stat-card has-donut score-main-card"><div class="label">スコア</div>
       <div class="donut-wrap">
-        <div class="grade-badge" style="background:${grade.color}">${scoreVal > 0 ? grade.letter : '―'}</div>
+        <div class="grade-badge" style="background:${tealDark}">${scoreVal > 0 ? grade.letter : '―'}</div>
         <svg class="donut-svg" viewBox="0 0 120 120">
           <defs>
             <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="${donutColorLight}"/>
-              <stop offset="100%" stop-color="${donutColor}"/>
+              <stop offset="0%" stop-color="${tealLight}"/>
+              <stop offset="100%" stop-color="${tealDark}"/>
             </linearGradient>
           </defs>
           <circle class="donut-bg" cx="60" cy="60" r="${donutR}"/>
@@ -2397,10 +2396,10 @@ function renderDashboard() {
             stroke-dasharray="${donutCirc.toFixed(2)}" stroke-dashoffset="${donutCirc.toFixed(2)}"
             data-target-offset="${donutOffset.toFixed(2)}"/>
         </svg>
-        <div class="donut-center"><div class="donut-pct" style="color:${donutColor}">${scoreVal > 0 ? scoreVal : '―'}</div></div>
+        <div class="donut-center"><div class="donut-pct" style="color:${tealDark}">${scoreVal > 0 ? scoreVal : '―'}</div></div>
       </div>
       <div class="score-card-footer">
-        <div><div class="footer-label">ベンチマーク</div><div class="footer-value">${benchmark}</div></div>
+        <div><div class="footer-label">回答数</div><div class="footer-value">${respCount}名</div></div>
         <div><div class="footer-label">回答率</div><div class="footer-value">${currentRespRate}%</div></div>
       </div>
       <div class="sub ${totalDiff > 0 ? 'up' : totalDiff < 0 ? 'down' : 'neutral'}" style="text-align:center;margin-top:6px">${totalDiff !== null && !isNaN(totalDiff) ? (totalDiff > 0 ? '↑ 前月比 +' : '↓ 前月比 ') + totalDiff + '点' : '初回データ'}</div>
