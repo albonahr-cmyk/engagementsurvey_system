@@ -330,7 +330,8 @@ if (typeof pdfjsLib !== 'undefined') {
   .month-selector select:focus { outline: none; border-color: #0d9488; }
 
   /* KPIカード */
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stats-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  @media (max-width: 720px) { .stats-grid { grid-template-columns: 1fr; } }
   .stat-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.15s; }
   .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
   .stat-card .label { font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.3px; }
@@ -348,6 +349,15 @@ if (typeof pdfjsLib !== 'undefined') {
   .stat-card.has-donut .donut-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   .stat-card.has-donut .donut-pct { font-size: 28px; font-weight: 800; color: #1e293b; letter-spacing: -1px; line-height: 1; }
   .stat-card.has-donut .donut-pct .pct-mark { font-size: 16px; font-weight: 700; color: #64748b; margin-left: 1px; }
+  .stat-card.has-donut .donut-pct { font-size: 36px; }
+  /* グレードバッジ（ドーナツ右上に浮かす） */
+  .stat-card.has-donut .grade-badge { position: absolute; top: -4px; right: -8px; min-width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 15px; font-weight: 800; letter-spacing: -0.3px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); padding: 0 6px; z-index: 2; animation: gradePop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.4s both; }
+  @keyframes gradePop { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
+  /* スコアカードのフッター（ベンチマーク・回答率） */
+  .score-card-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 12px; border-top: 1px solid #f1f5f9; margin-top: 8px; }
+  .score-card-footer > div { text-align: center; }
+  .score-card-footer .footer-label { font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 2px; }
+  .score-card-footer .footer-value { font-size: 18px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
   /* スコア分布チャート */
   .score-dist-card { background: white; border-radius: 14px; padding: 28px 32px 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
   .score-dist-summary { font-size: 13px; color: #64748b; margin-bottom: 18px; }
@@ -2299,6 +2309,18 @@ function saveThresholds() {
   localStorage.setItem('es_cat_thresholds', JSON.stringify(categoryThresholds));
 }
 
+function getScoreGrade(score) {
+  if (score >= 90) return { letter: 'S',  color: '#a855f7' };
+  if (score >= 85) return { letter: 'A',  color: '#0d9488' };
+  if (score >= 80) return { letter: 'B+', color: '#0d9488' };
+  if (score >= 75) return { letter: 'B',  color: '#14b8a6' };
+  if (score >= 70) return { letter: 'C+', color: '#f59e0b' };
+  if (score >= 65) return { letter: 'C',  color: '#f59e0b' };
+  if (score >= 60) return { letter: 'D+', color: '#ef4444' };
+  if (score >= 50) return { letter: 'D',  color: '#dc2626' };
+  return { letter: 'D-', color: '#991b1b' };
+}
+
 function getMonthData(month) {
   const prev = months[months.indexOf(month) - 1];
   const cats = {};
@@ -2349,16 +2371,20 @@ function renderDashboard() {
     });
   }
 
-  // 回答率ドーナツ（SVG）
+  // スコアドーナツ（SVG）
+  const benchmark = 70;
+  const scoreVal = isNaN(total) ? 0 : total;
+  const grade = getScoreGrade(scoreVal);
   const donutR = 48;
   const donutCirc = 2 * Math.PI * donutR;
-  const donutOffset = donutCirc * (1 - currentRespRate / 100);
-  const donutColor = currentRespRate >= 80 ? '#0f766e' : currentRespRate >= 50 ? '#14b8a6' : '#f59e0b';
-  const donutColorLight = currentRespRate >= 80 ? '#2dd4bf' : currentRespRate >= 50 ? '#5eead4' : '#fbbf24';
+  const donutOffset = donutCirc * (1 - scoreVal / 100);
+  const donutColor = scoreVal >= 80 ? '#0f766e' : scoreVal >= 60 ? '#14b8a6' : scoreVal >= 40 ? '#f59e0b' : '#ef4444';
+  const donutColorLight = scoreVal >= 80 ? '#2dd4bf' : scoreVal >= 60 ? '#5eead4' : scoreVal >= 40 ? '#fbbf24' : '#fca5a5';
 
   kpi.innerHTML = `
-    <div class="stat-card has-donut"><div class="label">回答率</div>
+    <div class="stat-card has-donut score-main-card"><div class="label">スコア</div>
       <div class="donut-wrap">
+        <div class="grade-badge" style="background:${grade.color}">${scoreVal > 0 ? grade.letter : '―'}</div>
         <svg class="donut-svg" viewBox="0 0 120 120">
           <defs>
             <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -2371,12 +2397,14 @@ function renderDashboard() {
             stroke-dasharray="${donutCirc.toFixed(2)}" stroke-dashoffset="${donutCirc.toFixed(2)}"
             data-target-offset="${donutOffset.toFixed(2)}"/>
         </svg>
-        <div class="donut-center"><div class="donut-pct">${currentRespRate}<span class="pct-mark">%</span></div></div>
+        <div class="donut-center"><div class="donut-pct" style="color:${donutColor}">${scoreVal > 0 ? scoreVal : '―'}</div></div>
       </div>
-      <div class="sub ${rateDiff > 0 ? 'up' : rateDiff < 0 ? 'down' : 'neutral'}" style="text-align:center">${rateDiff !== null ? (rateDiff > 0 ? '↑' : '↓') + ' 前月比 ' + (rateDiff > 0 ? '+' : '') + rateDiff + '%' : '初回データ'}</div>
+      <div class="score-card-footer">
+        <div><div class="footer-label">ベンチマーク</div><div class="footer-value">${benchmark}</div></div>
+        <div><div class="footer-label">回答率</div><div class="footer-value">${currentRespRate}%</div></div>
+      </div>
+      <div class="sub ${totalDiff > 0 ? 'up' : totalDiff < 0 ? 'down' : 'neutral'}" style="text-align:center;margin-top:6px">${totalDiff !== null && !isNaN(totalDiff) ? (totalDiff > 0 ? '↑ 前月比 +' : '↓ 前月比 ') + totalDiff + '点' : '初回データ'}</div>
     </div>
-    <div class="stat-card"><div class="label">総合スコア</div><div class="value">${isNaN(total) ? '―' : total + '点'}</div>
-      <div class="sub ${totalDiff > 0 ? 'up' : totalDiff < 0 ? 'down' : 'neutral'}">${totalDiff !== null && !isNaN(totalDiff) ? (totalDiff > 0 ? '↑ +' : '↓ ') + totalDiff + '点' : '初回データ'}</div></div>
     <div class="stat-card"><div class="label">回答人数</div><div class="value">${respCount}名</div>
       <div class="sub neutral">対象 ${totalEmps}名</div></div>
     <div class="stat-card"><div class="label">⚠️ アラート件数</div><div class="value" style="color:${alertCount > 0 ? '#dc2626' : '#0f766e'}">${alertCount}件</div>
