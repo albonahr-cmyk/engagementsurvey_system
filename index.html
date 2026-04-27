@@ -2935,7 +2935,7 @@ function renderDashboard() {
   if (radarEl && respCount === 0) {
     radarEl.innerHTML = '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
   } else if (radarEl) {
-    const radarSize = 260, cx = radarSize/2, cy = radarSize/2, R = 105;
+    const radarSize = 220, cx = radarSize/2, cy = radarSize/2, R = 88;
     const keys = catKeys;
     const n = keys.length;
     const angleStep = (2 * Math.PI) / n;
