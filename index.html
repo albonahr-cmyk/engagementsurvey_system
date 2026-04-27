@@ -374,6 +374,22 @@ if (typeof pdfjsLib !== 'undefined') {
   .dept-bar-score { width: 64px; text-align: right; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; flex-shrink: 0; }
   .dept-bar-score .dept-bar-pt { font-size: 13px; font-weight: 700; margin-left: 1px; }
   .dept-bar-count { width: 60px; text-align: right; font-size: 12px; color: #94a3b8; font-weight: 600; flex-shrink: 0; }
+  /* スコア推移チャート */
+  .trend-card { background: white; border-radius: 14px; padding: 24px 28px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
+  .trend-card-header { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
+  .trend-legend { display: flex; gap: 14px; font-size: 12px; color: #64748b; flex-wrap: wrap; }
+  .trend-legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+  .trend-legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .trend-svg-wrap { width: 100%; overflow-x: auto; }
+  .trend-svg { width: 100%; height: auto; min-width: 560px; display: block; }
+  .trend-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .trend-line-anim { stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: trendDraw 1.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+  @keyframes trendDraw { to { stroke-dashoffset: 0; } }
+  .trend-area { fill-opacity: 0.12; opacity: 0; animation: trendFade 0.6s ease-out 0.8s forwards; }
+  @keyframes trendFade { to { opacity: 1; } }
+  .trend-point { transform-box: fill-box; transform-origin: center; transform: scale(0); animation: trendPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  .trend-spike-marker { transform-box: fill-box; transform-origin: center; transform: scale(0); animation: trendPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  @keyframes trendPop { to { transform: scale(1); } }
 
   .section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 14px; letter-spacing: -0.2px; }
 
@@ -1039,6 +1055,8 @@ if (typeof pdfjsLib !== 'undefined') {
     <div class="alert-section" id="alert-list"></div>
     <div class="section-title">📊 月のスコア分布</div>
     <div id="score-distribution" style="margin-bottom:32px"></div>
+    <div class="section-title">📈 スコア推移</div>
+    <div id="score-trend-chart" style="margin-bottom:32px"></div>
     <div class="section-title">カテゴリ別スコア</div>
     <div class="category-scores" id="category-grid"></div>
     <div class="section-title">📋 評価基準・推奨アクション</div>
@@ -2509,6 +2527,9 @@ function renderDashboard() {
     }
   }
 
+  // スコア推移（折れ線グラフ）
+  renderScoreTrendChart(month);
+
   // カテゴリスコア
   const catGrid = document.getElementById('category-grid');
   if (respCount === 0) {
@@ -2727,6 +2748,161 @@ function renderDashboard() {
       });
     }
   }
+}
+
+// ===== スコア推移グラフ（折れ線） =====
+// ⑤急な上昇/下降の可視化と兼用：spike閾値±10点で🔺🔻マーカーを付与
+function renderScoreTrendChart(currentMonth) {
+  const el = document.getElementById('score-trend-chart');
+  if (!el) return;
+
+  // 各月の総合スコアを算出（empDataから直接、回答が無い月はnull）
+  const series = months.map(m => {
+    const totals = [];
+    Object.entries(employees).forEach(([id, emp]) => {
+      if (emp.role === 'admin') return;
+      const sc = empData[id]?.[m];
+      if (sc) totals.push(getTotal(sc));
+    });
+    return {
+      month: m,
+      score: totals.length > 0 ? Math.round(totals.reduce((a,b) => a+b, 0) / totals.length) : null,
+      respCount: totals.length
+    };
+  });
+
+  const validCount = series.filter(s => s.score !== null).length;
+  if (validCount === 0) {
+    el.innerHTML = '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">推移を表示できる回答データがまだありません</div>';
+    return;
+  }
+
+  // SVG ジオメトリ
+  const W = 800, H = 260, padL = 44, padR = 28, padT = 28, padB = 44;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const yMin = 0, yMax = 100;
+  const xStep = series.length > 1 ? innerW / (series.length - 1) : 0;
+  const yScale = v => padT + (yMax - v) / (yMax - yMin) * innerH;
+
+  const points = series.map((s, i) => ({
+    ...s,
+    x: padL + i * xStep,
+    y: s.score !== null ? yScale(s.score) : null
+  }));
+
+  // 連続セグメント抽出（null区間で分断）
+  const segments = [];
+  let cur = [];
+  points.forEach(p => {
+    if (p.y === null) { if (cur.length > 0) { segments.push(cur); cur = []; } }
+    else { cur.push(p); }
+  });
+  if (cur.length > 0) segments.push(cur);
+
+  const linePathOf = pts => pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+  const areaPathOf = pts => {
+    if (pts.length === 0) return '';
+    const start = `M ${pts[0].x.toFixed(1)} ${(padT + innerH).toFixed(1)}`;
+    const up = ` L ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    const line = pts.slice(1).map(p => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+    const close = ` L ${pts[pts.length-1].x.toFixed(1)} ${(padT + innerH).toFixed(1)} Z`;
+    return start + up + ' ' + line + close;
+  };
+
+  // スパイク検出（前回有効値との差で判定。±10点超）
+  const SPIKE_THRESHOLD = 10;
+  const spikes = [];
+  let lastValid = null;
+  points.forEach(p => {
+    if (p.score === null) return;
+    if (lastValid !== null) {
+      const d = p.score - lastValid.score;
+      if (Math.abs(d) >= SPIKE_THRESHOLD) {
+        spikes.push({ ...p, diff: d });
+      }
+    }
+    lastValid = p;
+  });
+
+  // 軸グリッド
+  const gridLines = [0, 20, 40, 60, 80, 100].map(v => {
+    const y = yScale(v);
+    return `<line x1="${padL}" y1="${y}" x2="${padL + innerW}" y2="${y}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,4"/>
+            <text x="${padL - 8}" y="${y + 4}" font-size="11" fill="#94a3b8" text-anchor="end">${v}</text>`;
+  }).join('');
+
+  const xLabels = points.map(p => {
+    const lbl = monthLabels[p.month] || p.month;
+    const isCurrent = p.month === currentMonth;
+    return `<text x="${p.x.toFixed(1)}" y="${(padT + innerH + 22).toFixed(1)}" font-size="11" fill="${isCurrent ? '#0f766e' : '#94a3b8'}" font-weight="${isCurrent ? '800' : '600'}" text-anchor="middle">${lbl}</text>`;
+  }).join('');
+
+  const linesSvg = segments.map(seg => `
+    <path d="${areaPathOf(seg)}" class="trend-area" fill="url(#trendAreaGrad)"/>
+    <path d="${linePathOf(seg)}" class="trend-line trend-line-anim" stroke="url(#trendLineGrad)"/>
+  `).join('');
+
+  const pointsSvg = points.filter(p => p.y !== null).map((p, i) => {
+    const isCur = p.month === currentMonth;
+    const r = isCur ? 6 : 4.5;
+    const delay = (0.3 + i * 0.07).toFixed(2);
+    return `
+      <g class="trend-point" style="animation-delay:${delay}s">
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${r}" fill="white" stroke="#0d9488" stroke-width="${isCur ? 3 : 2}"/>
+        <text x="${p.x.toFixed(1)}" y="${(p.y - 12).toFixed(1)}" font-size="${isCur ? 13 : 11}" fill="#1e293b" font-weight="${isCur ? '800' : '700'}" text-anchor="middle">${p.score}</text>
+      </g>`;
+  }).join('');
+
+  // スパイクマーカー（▲▼）
+  const spikesSvg = spikes.map((p, i) => {
+    const up = p.diff > 0;
+    const color = up ? '#0d9488' : '#dc2626';
+    const bg = up ? '#ccfbf1' : '#fee2e2';
+    const arrow = up ? '▲' : '▼';
+    const offsetY = up ? -28 : 22;
+    const delay = (0.9 + i * 0.12).toFixed(2);
+    return `
+      <g class="trend-spike-marker" style="animation-delay:${delay}s">
+        <circle cx="${p.x.toFixed(1)}" cy="${(p.y + offsetY).toFixed(1)}" r="11" fill="${bg}" stroke="${color}" stroke-width="2"/>
+        <text x="${p.x.toFixed(1)}" y="${(p.y + offsetY + 4).toFixed(1)}" font-size="11" fill="${color}" font-weight="900" text-anchor="middle">${arrow}</text>
+      </g>`;
+  }).join('');
+
+  const spikeBadges = spikes.length > 0
+    ? spikes.map(s => `<span style="display:inline-flex;align-items:center;gap:4px;background:${s.diff > 0 ? '#ccfbf1' : '#fee2e2'};color:${s.diff > 0 ? '#0f766e' : '#dc2626'};padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-right:6px">${s.diff > 0 ? '▲' : '▼'} ${monthLabels[s.month] || s.month} ${s.diff > 0 ? '+' : ''}${s.diff}点</span>`).join('')
+    : '<span style="color:#94a3b8;font-size:12px">急な変動なし</span>';
+
+  el.innerHTML = `
+    <div class="trend-card">
+      <div class="trend-card-header">
+        <div class="trend-legend">
+          <div class="trend-legend-item"><span class="trend-legend-dot" style="background:linear-gradient(90deg,#5eead4,#0d9488)"></span>総合スコア</div>
+          <div class="trend-legend-item"><span class="trend-legend-dot" style="background:#ccfbf1;border:2px solid #0d9488"></span>▲ 急上昇 (+10点以上)</div>
+          <div class="trend-legend-item"><span class="trend-legend-dot" style="background:#fee2e2;border:2px solid #dc2626"></span>▼ 急下降 (-10点以上)</div>
+        </div>
+        <div style="margin-left:auto;font-size:12px;color:#475569">${spikeBadges}</div>
+      </div>
+      <div class="trend-svg-wrap">
+        <svg class="trend-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="trendLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#5eead4"/>
+              <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+            <linearGradient id="trendAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#0d9488" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#0d9488" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          ${gridLines}
+          ${linesSvg}
+          ${pointsSvg}
+          ${spikesSvg}
+          ${xLabels}
+        </svg>
+      </div>
+    </div>
+  `;
 }
 
 // ===== 社員一覧描画 =====
