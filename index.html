@@ -481,10 +481,13 @@ if (typeof pdfjsLib !== 'undefined') {
   .dashboard-split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 32px; }
   @media (max-width: 1100px) { .dashboard-split { grid-template-columns: 1fr; } }
   .dashboard-split-col { display: flex; flex-direction: column; min-width: 0; }
-  .dashboard-split-col .section-title { margin-bottom: 12px; }
-  .dashboard-split-col > div:nth-child(2) { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-  .dashboard-split-col .no-guide { flex: 1; margin-bottom: 0; display: flex; align-items: center; justify-content: center; }
-  .dashboard-split-col .radar-wrap { flex: 1; align-items: center; }
+  .split-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .split-card-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 12px; flex-shrink: 0; }
+  .split-card #action-guide-list, .split-card #radar-chart-section { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .split-card .no-guide { background: transparent; box-shadow: none; padding: 12px; flex: 1; margin-bottom: 0; display: flex; align-items: center; justify-content: center; }
+  .split-card .radar-wrap { background: transparent; padding: 0; box-shadow: none; border: none; flex: 1; align-items: center; }
+  .split-card .guide-card:last-child { margin-bottom: 0; }
+  .split-card .no-alert { background: transparent !important; box-shadow: none !important; border: none !important; flex: 1; display: flex; align-items: center; justify-content: center; }
   /* キードライバーごとのスコア（コンパクト横一列） */
   .kd-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #99f6e4; margin-bottom: 32px; }
   .kd-card-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 10px; }
@@ -1180,12 +1183,16 @@ if (typeof pdfjsLib !== 'undefined') {
     </div>
     <div class="dashboard-split">
       <div class="dashboard-split-col">
-        <div class="section-title">📋 評価基準・推奨アクション</div>
-        <div id="action-guide-list"></div>
+        <div class="split-card">
+          <div class="split-card-title">評価基準・推奨アクション</div>
+          <div id="action-guide-list"></div>
+        </div>
       </div>
       <div class="dashboard-split-col">
-        <div class="section-title">📡 カテゴリ別レーダーチャート</div>
-        <div id="radar-chart-section"></div>
+        <div class="split-card">
+          <div class="split-card-title">カテゴリ別レーダーチャート</div>
+          <div id="radar-chart-section"></div>
+        </div>
       </div>
     </div>
     <div class="kd-card">
