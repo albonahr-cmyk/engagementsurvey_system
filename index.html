@@ -324,6 +324,20 @@ if (typeof pdfjsLib !== 'undefined') {
   .admin-body { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
 
   /* 月セレクター */
+  /* ダッシュボードヘッダー（オーバービュー＋フィルタチップ） */
+  .dashboard-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .dashboard-header-left { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1; }
+  .dashboard-header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .dashboard-title { font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.3px; }
+  .dashboard-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filter-chip { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; background: #f1f5f9; border-radius: 16px; font-size: 12px; font-weight: 600; color: #475569; border: 1px solid transparent; white-space: nowrap; }
+  .filter-chip .meta-icon { width: 13px; height: 13px; flex-shrink: 0; color: #64748b; }
+  .filter-chip .chip-x { cursor: pointer; color: #94a3b8; font-weight: 700; padding: 0 2px; margin-left: 2px; user-select: none; line-height: 1; }
+  .filter-chip .chip-x:hover { color: #64748b; }
+  .filter-chip.dept-trigger { cursor: pointer; transition: all 0.15s; }
+  .filter-chip.dept-trigger:hover { background: #e2e8f0; border-color: #cbd5e1; }
+  .filter-chip.dept-trigger.active { background: #ccfbf1; border-color: #5eead4; color: #0f766e; }
+  .filter-chip .chevron { width: 10px; height: 10px; opacity: 0.6; }
   .month-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
   .month-selector label { font-size: 14px; font-weight: 600; color: #374151; }
   .month-selector select { padding: 8px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; color: #374151; cursor: pointer; }
@@ -1158,11 +1172,16 @@ if (typeof pdfjsLib !== 'undefined') {
 
   <!-- 月次ダッシュボード -->
   <div id="tab-dashboard" class="admin-body">
-    <div class="month-selector">
-      <label>表示月：</label>
-      <select id="month-select" onchange="renderDashboard()"></select>
-      <button onclick="refreshSurveyData()" class="btn btn-secondary btn-sm">🔄 最新データ取得</button>
+    <div class="dashboard-header">
+      <div class="dashboard-header-left">
+        <div class="dashboard-title">オーバービュー</div>
+        <div class="dashboard-filters" id="dashboard-filters"></div>
+      </div>
+      <div class="dashboard-header-right">
+        <button onclick="refreshSurveyData()" class="btn btn-secondary btn-sm">🔄 最新データ取得</button>
+      </div>
     </div>
+    <select id="month-select" onchange="renderDashboard()" style="display:none"></select>
     <div class="stats-grid" id="kpi-grid"></div>
     <div class="changes-grid">
       <div class="change-card">
@@ -2713,6 +2732,16 @@ function renderDashboard() {
     <span>${iconPeople}${sanitize(ALL_MEMBERS)}</span>
     <span>${iconCalendar}${todayJa}</span>
   `;
+
+  // ダッシュボードヘッダーのフィルタチップ
+  const filtersEl = document.getElementById('dashboard-filters');
+  if (filtersEl) {
+    filtersEl.innerHTML = `
+      <span class="filter-chip dept-trigger ${deptIsAll ? '' : 'active'}" onclick="event.stopPropagation();showDeptDropdown(this)">${iconPeople}${deptLabel}${iconChevron}</span>
+      <span class="filter-chip">${iconCalendar}${todayJa}</span>
+      <span class="filter-chip">${iconCalendar}指定配信日から過去1年間</span>
+    `;
+  }
 
   // スコアの推移ミニチャート（KPIカード用）— 総合スコアの折れ線
   const miniTrendSeries = months.map(m => {
