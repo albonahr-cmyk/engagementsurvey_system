@@ -569,6 +569,23 @@ if (typeof pdfjsLib !== 'undefined') {
   .no-alert { text-align: center; padding: 24px; color: #94a3b8; font-size: 14px; font-weight: 500; }
 
   /* 回答一覧テーブル */
+  /* 社員一覧テーブル（モノクロ・スタイリッシュ） */
+  #emp-table.response-table { background: transparent; box-shadow: none; border: none; border-radius: 0; }
+  #emp-table table th { background: transparent; color: #94a3b8; font-weight: 600; font-size: 11px; letter-spacing: 0.4px; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; }
+  #emp-table table td { padding: 16px; font-size: 13px; color: #475569; border-top: 1px solid #f1f5f9; }
+  #emp-table table tr.clickable:hover td { background: #f8fafc; cursor: pointer; }
+  #emp-table .em-name { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  #emp-table .em-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  #emp-table .em-id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 999px; }
+  #emp-table .em-email { font-size: 12px; color: #94a3b8; font-weight: 500; }
+  #emp-table .em-chip { display: inline-flex; align-items: center; padding: 3px 11px; background: #f1f5f9; color: #475569; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  #emp-table .em-chip.dim { color: #94a3b8; }
+  #emp-table .em-num { font-weight: 700; color: #334155; font-variant-numeric: tabular-nums; font-size: 13px; }
+  #emp-table .em-empty { color: #cbd5e1; }
+  #emp-table .em-survey-pt { font-size: 14px; font-weight: 800; color: #1e293b; }
+  #emp-table .em-survey-delta { font-size: 11px; font-weight: 700; margin-left: 6px; font-variant-numeric: tabular-nums; }
+  #emp-table .em-detail { color: #64748b; font-size: 12px; font-weight: 600; background: #f1f5f9; border: none; border-radius: 999px; padding: 6px 14px; cursor: pointer; transition: background 0.15s, color 0.15s; }
+  #emp-table .em-detail:hover { background: #e2e8f0; color: #1e293b; }
   .response-table { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 32px; border: 1px solid rgba(0,0,0,0.04); }
   .response-table table { width: 100%; border-collapse: collapse; }
   .response-table th { background: #f8fafc; padding: 13px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -3517,34 +3534,31 @@ function renderEmployeeList() {
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
-      <th>社員</th><th>ランク</th><th>IQ</th><th>戦闘力</th><th>MBTI</th><th>サーベイ（${monthLabels[month]||month}）</th><th>信頼</th><th></th>
+      <th>社員</th><th>事業部</th><th>ランク</th><th>IQ</th><th>戦闘力</th><th>MBTI</th><th>サーベイ（${monthLabels[month]||month}）</th><th></th>
     </tr></thead>
     <tbody>${rows.map(r => {
-      const rc = r.rank ? `rank-${r.rank[0].toLowerCase()}` : '';
-      const mbtiInfo = r.mbtiType ? mbtiData[r.mbtiType] : null;
-      const trustHtml = r.trust ? `<span style="font-weight:700;color:${r.trust.score>=8?'#0f766e':r.trust.score>=4?'#d97706':'#dc2626'}">${r.trust.score}/${r.trust.max}</span>` : '<span style="color:#cbd5e1">―</span>';
+      const emp = employees[r.id] || {};
+      const email = emp.email || '';
       const surveyHtml = r.total !== null
-        ? `<span style="font-weight:800;font-size:14px">${r.total}点</span>
-           <span style="font-size:11px;color:${r.diff===null?'#94a3b8':r.diff>=0?'#0f766e':'#dc2626'};font-weight:700;margin-left:4px">${r.diff!==null?(r.diff>0?'+':'')+r.diff:'―'}</span>
-           ${r.hasReal ? '<span style="font-size:9px;background:#dcfce7;color:#0f766e;padding:1px 5px;border-radius:6px;margin-left:4px;font-weight:700">実</span>' : ''}
-           ${r.status ? `<span class="badge badge-${r.status}" style="margin-left:6px;font-size:10px;padding:2px 6px">${r.status==='alert'?'⚠️':''}${r.status==='alert'?'要確認':r.status==='warn'?'注意':'良好'}</span>` : ''}`
-        : '<span style="color:#cbd5e1;font-size:12px">未回答</span>';
+        ? `<span class="em-survey-pt">${r.total}点</span>
+           <span class="em-survey-delta" style="color:${r.diff===null?'#94a3b8':r.diff>=0?'#0f766e':'#dc2626'}">${r.diff!==null?(r.diff>0?'+':'')+r.diff:'―'}</span>`
+        : '<span class="em-empty" style="font-size:12px">未回答</span>';
       return `
       <tr class="clickable" onclick="showDetail('${r.id}')">
         <td>
-          <div style="font-weight:600;color:#1e293b">${sanitize(r.name)}</div>
-          <div style="display:flex;gap:4px;margin-top:2px">
-            <span style="font-size:11px;color:#14b8a6;background:#f0fdfa;padding:1px 6px;border-radius:4px;font-family:monospace;font-weight:700">${r.id}</span>
-            <span style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:4px;color:#64748b">${sanitize(r.dept)}</span>
+          <div class="em-name">${sanitize(r.name)}</div>
+          <div class="em-meta">
+            <span class="em-id">${r.id}</span>
+            ${email ? `<span class="em-email">${sanitize(email)}</span>` : '<span class="em-email em-empty">メール未登録</span>'}
           </div>
         </td>
-        <td>${r.rank ? `<span class="rank-badge-sm ${rc}">${r.rank}</span>` : '<span style="color:#cbd5e1">―</span>'}</td>
-        <td style="font-weight:700;color:#4c1d95">${r.iq || '<span style="color:#cbd5e1">―</span>'}</td>
-        <td style="font-weight:700;color:#ea580c">${r.bp ? r.bp.toLocaleString() : '<span style="color:#cbd5e1">―</span>'}</td>
-        <td>${mbtiInfo ? `<span class="mbti-badge mbti-${mbtiInfo.group.toLowerCase()}" style="font-size:10px;padding:2px 6px">${r.mbtiType}</span>` : '<span style="color:#cbd5e1">―</span>'}</td>
+        <td>${r.dept ? `<span class="em-chip">${sanitize(r.dept)}</span>` : '<span class="em-empty">―</span>'}</td>
+        <td>${r.rank ? `<span class="em-chip">${r.rank}</span>` : '<span class="em-empty">―</span>'}</td>
+        <td><span class="em-num">${r.iq || '<span class=\"em-empty\">―</span>'}</span></td>
+        <td><span class="em-num">${r.bp ? r.bp.toLocaleString() : '<span class=\"em-empty\">―</span>'}</span></td>
+        <td>${r.mbtiType ? `<span class="em-chip">${r.mbtiType}</span>` : '<span class="em-empty">―</span>'}</td>
         <td>${surveyHtml}</td>
-        <td>${trustHtml}</td>
-        <td><button class="detail-link" onclick="event.stopPropagation();showDetail('${r.id}')">詳細</button></td>
+        <td><button class="em-detail" onclick="event.stopPropagation();showDetail('${r.id}')">詳細</button></td>
       </tr>`;
     }).join('')}
     </tbody>
