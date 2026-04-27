@@ -336,7 +336,8 @@ if (typeof pdfjsLib !== 'undefined') {
   .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
   .stat-card .label { font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.3px; }
   .stat-card .card-meta { display: flex; gap: 10px; font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 10px; flex-wrap: wrap; }
-  .stat-card .card-meta span { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+  .stat-card .card-meta span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .stat-card .card-meta .meta-icon { width: 13px; height: 13px; flex-shrink: 0; color: #64748b; }
   .stat-card .value { font-size: 34px; font-weight: 800; color: #1e293b; letter-spacing: -1px; }
   .stat-card .sub { font-size: 13px; margin-top: 6px; font-weight: 600; }
   .stat-card .sub.up { color: #0f766e; }
@@ -2401,17 +2402,20 @@ function renderDashboard() {
   const tealDark = '#0d9488';
   const tealLight = '#14b8a6';
 
-  // KPIカード共通のメタ情報行（👥全メンバー / 📅日付 / 🔄総合）
+  // KPIカード共通のメタ情報行（モノクロSVGアイコン+ラベル）
   const todayJa = (() => {
     const d = new Date();
     const days = ['日','月','火','水','木','金','土'];
     return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}(${days[d.getDay()]})`;
   })();
+  const iconPeople = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+  const iconCalendar = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+  const iconRefresh = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
   const cardMeta = `
     <div class="card-meta">
-      <span>👥 全メンバー</span>
-      <span>📅 ${todayJa}</span>
-      <span>🔄 総合</span>
+      <span>${iconPeople}全メンバー</span>
+      <span>${iconCalendar}${todayJa}</span>
+      <span>${iconRefresh}総合</span>
     </div>
   `;
 
