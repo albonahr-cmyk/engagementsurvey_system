@@ -371,14 +371,32 @@ function handleScheduleSend(ss, data) {
 }
 
 // 現在登録されているトリガー一覧を返す（管理画面の「予約状況を確認」ボタンから呼ばれる）
+// 予約時刻が過去になっていたら、関連トリガーを自動でクリーンアップする
 function handleListTriggers() {
   try {
     var props = PropertiesService.getScriptProperties();
     var scheduledAt = props.getProperty('SCHEDULED_SEND_AT');
     var triggers = ScriptApp.getProjectTriggers();
+
+    var isPast = false;
+    if (scheduledAt) {
+      var ts = new Date(scheduledAt).getTime();
+      if (!isNaN(ts) && ts <= Date.now()) isPast = true;
+    }
+    if (isPast) {
+      for (var i = 0; i < triggers.length; i++) {
+        if (triggers[i].getHandlerFunction() === 'runScheduledMailSend') {
+          ScriptApp.deleteTrigger(triggers[i]);
+        }
+      }
+      props.deleteProperty('SCHEDULED_SEND_AT');
+      triggers = ScriptApp.getProjectTriggers();
+      scheduledAt = null;
+    }
+
     var list = [];
-    for (var i = 0; i < triggers.length; i++) {
-      var t = triggers[i];
+    for (var j = 0; j < triggers.length; j++) {
+      var t = triggers[j];
       var item = { handler: t.getHandlerFunction(), type: String(t.getEventType()), at: null };
       if (item.handler === 'runScheduledMailSend' && scheduledAt) {
         item.at = scheduledAt;
@@ -392,9 +410,24 @@ function handleListTriggers() {
 }
 
 // 予約トリガーから呼ばれる関数（GASエディタから直接実行しないこと）
+// 発火後に自分自身（および runScheduledMailSend の全トリガー）を削除して、SCHEDULED_SEND_AT をクリアする
 function runScheduledMailSend() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  handleSendMails(ss);
+  try {
+    handleSendMails(ss);
+  } finally {
+    try {
+      var triggers = ScriptApp.getProjectTriggers();
+      for (var i = 0; i < triggers.length; i++) {
+        if (triggers[i].getHandlerFunction() === 'runScheduledMailSend') {
+          ScriptApp.deleteTrigger(triggers[i]);
+        }
+      }
+      PropertiesService.getScriptProperties().deleteProperty('SCHEDULED_SEND_AT');
+    } catch(e) {
+      // ignore
+    }
+  }
 }
 
 // 月次自動送信トリガー（GASメニューから実行して設定）
