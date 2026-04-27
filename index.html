@@ -1759,12 +1759,32 @@ async function loadAllFromGoogleSheets(month) {
 }
 
 // サーバーからサーベイ回答をlocalStorageに復元
+// サーバーに存在しないローカルキーは削除（リセット済みデータの残留を防ぐ）
 async function restoreSurveyAnswersFromServer() {
   try {
     const data = await loadAllFromGoogleSheets('');
-    if (!data || data.length === 0) return 0;
-    let count = 0;
+    if (!data) return 0;
     _skipSync = true;
+    // サーバー側で有効な回答キーの集合
+    const validKeys = new Set();
+    for (const entry of data) {
+      if (entry.empId && entry.month && entry.answers) {
+        validKeys.add(`es_${entry.empId}_${entry.month}`);
+      }
+    }
+    // ローカルの es_<empId>_YYYY-MM 形式キーで、サーバーに無いものを削除
+    const monthKeyPattern = /^es_.+_\d{4}-\d{2}$/;
+    const localSurveyKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && monthKeyPattern.test(k)) localSurveyKeys.push(k);
+    }
+    let removed = 0;
+    localSurveyKeys.forEach(k => {
+      if (!validKeys.has(k)) { _origRemoveItem(k); removed++; }
+    });
+    // サーバー側のデータを書き込み
+    let count = 0;
     for (const entry of data) {
       if (entry.empId && entry.month && entry.answers) {
         const key = `es_${entry.empId}_${entry.month}`;
@@ -1774,7 +1794,7 @@ async function restoreSurveyAnswersFromServer() {
       }
     }
     _skipSync = false;
-    console.log('サーバーから' + count + '件のサーベイ回答を復元');
+    console.log(`サーバーから${count}件復元 / リセット済み${removed}件をローカル削除`);
     return count;
   } catch (e) { console.warn('サーベイ回答復元失敗:', e); _skipSync = false; return 0; }
 }
