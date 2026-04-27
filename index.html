@@ -2280,7 +2280,7 @@ function renderDashboard() {
 
   // アラートカウント
   let alertCount = 0;
-  if (prevCats) {
+  if (respCount > 0 && prevCats) {
     catKeys.forEach(k => {
       if (cats[k] - prevCats[k] <= -10 || cats[k] < 60) alertCount++;
     });
