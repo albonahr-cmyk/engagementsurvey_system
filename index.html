@@ -1507,6 +1507,7 @@ ALBONA 人事部</textarea>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button class="btn btn-secondary" onclick="testSendMail()">📧 テスト送信（自分宛）</button>
         <button class="btn btn-secondary" onclick="checkScheduledTriggers()">🔍 予約状況を確認</button>
+        <button class="btn btn-secondary" onclick="cancelScheduledSend()">🗑️ 予約をクリア</button>
         <button class="btn btn-primary" onclick="sendMailsNow()">📨 今すぐ全社員に送信</button>
         <span id="mail-test-msg" style="font-size:13px;font-weight:600;display:none"></span>
       </div>
@@ -4223,6 +4224,20 @@ async function checkScheduledTriggers() {
     }
   } else {
     showToast('⚠ 確認失敗: ' + ((res && res.error) || '不明なエラー'));
+  }
+}
+
+async function cancelScheduledSend() {
+  const gasUrl = localStorage.getItem('es_gas_url');
+  if (!gasUrl) { showToast('❌ GAS URLが未設定です（設定 → GAS URL）'); return; }
+  if (!confirm('登録されているすべての予約配信を取消しますか？')) return;
+  const gasToken = localStorage.getItem('es_gas_token') || '';
+  showToast('🗑️ 予約を削除中...');
+  const res = await apiPost('gas-proxy', { gasUrl, token: gasToken, action: 'cancelSchedule' });
+  if (res && res.ok) {
+    showToast(`✅ 予約を ${res.removed} 件取消しました`);
+  } else {
+    showToast('⚠ 取消失敗: ' + ((res && res.error) || '不明なエラー'));
   }
 }
 

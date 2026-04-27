@@ -39,6 +39,7 @@ function doGet(e) {
     if (action === 'loadSettings') return handleLoadSettings(ss, data);
     if (action === 'sendMails')    return handleSendMails(ss, data);
     if (action === 'scheduleSend') return handleScheduleSend(ss, data);
+    if (action === 'cancelSchedule') return handleCancelSchedule();
     if (action === 'listTriggers') return handleListTriggers();
     if (action === 'testMail')     return handleTestMail(ss, data);
     if (action === 'exportSheet')  return handleExportSheet(ss, data);
@@ -292,6 +293,26 @@ function handleTestMail(ss, data) {
 
     GmailApp.sendEmail(testTo, subject, body);
     return jsonResponse({ ok: true, sentTo: testTo });
+  } catch(e) {
+    return jsonResponse({ error: e.message });
+  }
+}
+
+// ===== 予約配信をすべて取消 =====
+// 管理画面の「予約をクリア」ボタンから呼ばれる。runScheduledMailSend の全トリガーを削除する。
+function handleCancelSchedule() {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var triggers = ScriptApp.getProjectTriggers();
+    var removed = 0;
+    for (var i = 0; i < triggers.length; i++) {
+      if (triggers[i].getHandlerFunction() === 'runScheduledMailSend') {
+        ScriptApp.deleteTrigger(triggers[i]);
+        removed++;
+      }
+    }
+    props.deleteProperty('SCHEDULED_SEND_AT');
+    return jsonResponse({ ok: true, removed: removed });
   } catch(e) {
     return jsonResponse({ error: e.message });
   }
