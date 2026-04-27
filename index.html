@@ -422,9 +422,9 @@ if (typeof pdfjsLib !== 'undefined') {
   .change-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 13px; text-align: center; padding: 20px 10px; }
   .change-list { display: flex; flex-direction: column; gap: 4px; }
   .change-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: #f8fafc; }
-  .change-item .ci-name { font-size: 12px; font-weight: 700; color: #334155; flex: 0 0 auto; white-space: nowrap; }
-  .change-item .ci-detail { font-size: 11px; color: #94a3b8; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .change-item .ci-delta { font-size: 13px; font-weight: 800; min-width: 42px; text-align: right; flex-shrink: 0; }
+  .change-item .ci-name { font-size: 12px; font-weight: 700; color: #334155; flex: 0 0 64px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .change-item .ci-detail { font-size: 11px; color: #94a3b8; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .change-item .ci-delta { font-size: 13px; font-weight: 800; min-width: 42px; text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; }
   .change-item.rising .ci-delta { color: #0d9488; }
   .change-item.falling .ci-delta { color: #dc2626; }
   /* グループスコア コンパクト版 */
