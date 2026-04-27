@@ -398,6 +398,12 @@ if (typeof pdfjsLib !== 'undefined') {
   .score-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.15s; }
   .score-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
   .score-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .score-card-header .cat-name-wrap { display: flex; align-items: center; gap: 10px; }
+  .score-card-header .cat-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; font-size: 20px; background: #f0fdfa; flex-shrink: 0; transition: transform 0.2s; }
+  .score-card:hover .cat-icon { transform: scale(1.08) rotate(-3deg); }
+  .score-card-header .cat-icon-alert { background: #fef2f2; }
+  .score-card-header .cat-icon-warn { background: #fff7ed; }
+  .score-card-header .cat-icon-ok { background: #f0fdfa; }
   .score-card-header .cat-name { font-size: 16px; font-weight: 700; color: #334155; }
   .score-card-header .score-num { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
   .score-card-header .score-num.alert { color: #dc2626; }
@@ -474,6 +480,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .guide-card.warn { border-left-color: #f59e0b; }
   .guide-card.ok { border-left-color: #0d9488; }
   .guide-card-score { flex: 0 0 110px; }
+  .guide-cat-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; font-size: 26px; background: #f0fdfa; margin-bottom: 6px; }
   .guide-score-num { font-size: 26px; font-weight: 700; }
   .guide-score-num.alert { color: #dc2626; }
   .guide-score-num.warn { color: #d97706; }
@@ -2129,6 +2136,7 @@ function getPersonalizedCategoryAction(cat, level, rank, mbtiType) {
 }
 
 const catKeys = ['やりがい', '成長', '健康', '上司', 'チーム', '承認', '信頼', '組織', '業務'];
+const catIcons = { やりがい:'💼', 成長:'🌱', 健康:'💪', 上司:'🤝', チーム:'👥', 承認:'⭐', 信頼:'🧭', 組織:'🏢', 業務:'🌿' };
 const catNames = { やりがい:'職務', 成長:'自己成長', 健康:'健康', 上司:'支援', チーム:'人間関係', 承認:'承認', 信頼:'理念戦略', 組織:'組織風土', 業務:'環境' };
 
 const _defaultQuestionCatMap = {
@@ -2549,7 +2557,10 @@ function renderDashboard() {
     return `
       <div class="score-card">
         <div class="score-card-header">
-          <span class="cat-name">${catNames[k]}</span>
+          <span class="cat-name-wrap">
+            <span class="cat-icon cat-icon-${status}">${catIcons[k] || '📊'}</span>
+            <span class="cat-name">${catNames[k]}</span>
+          </span>
           <span class="score-num ${status}">${score}点${alert}</span>
         </div>
         <div class="score-bar-wrap" style="position:relative;overflow:visible"><div class="score-bar ${status}" style="width:${score}%"></div>${categoryTargets[k] ? `<div style="position:absolute;top:0;bottom:0;left:${Math.min(categoryTargets[k],100)}%;width:2px;background:#14b8a6;opacity:0.8;border-radius:1px"></div>` : ''}</div>
@@ -2584,6 +2595,7 @@ function renderDashboard() {
       return `
         <div class="guide-card ${status}">
           <div class="guide-card-score">
+            <div class="guide-cat-icon cat-icon-${status}">${catIcons[k] || '📊'}</div>
             <div class="guide-score-num ${status}">${score}点</div>
             <div class="guide-cat-name">${catNames[k]}</div>
             ${diffText}
