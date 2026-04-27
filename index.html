@@ -359,6 +359,21 @@ if (typeof pdfjsLib !== 'undefined') {
   .score-dist-label { font-size: 12px; color: #64748b; margin-top: 10px; font-weight: 700; letter-spacing: 0.3px; text-align: center; width: 100%; max-width: 80px; }
   .score-dist-axis { display: flex; gap: 18px; padding-top: 4px; }
   .score-dist-axis > div { flex: 1; display: flex; justify-content: center; }
+  /* 部署別 横棒グラフ */
+  .dept-bar-card { background: white; border-radius: 14px; padding: 12px 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
+  .dept-bar-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
+  .dept-bar-row:hover { background: #f8fafc; }
+  .dept-bar-row.dept-bar-empty { cursor: default; opacity: 0.7; }
+  .dept-bar-row.dept-bar-empty:hover { background: transparent; }
+  .dept-bar-rank { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #64748b; flex-shrink: 0; }
+  .dept-bar-rank.top { background: linear-gradient(135deg, #fef3c7, #fde68a); font-size: 16px; }
+  .dept-bar-name { width: 110px; font-size: 14px; font-weight: 700; color: #334155; flex-shrink: 0; }
+  .dept-bar-track { flex: 1; background: #f1f5f9; border-radius: 8px; height: 16px; overflow: hidden; min-width: 80px; position: relative; }
+  .dept-bar-fill { height: 100%; border-radius: 8px; transition: width 1s cubic-bezier(0.4,0,0.2,1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3); }
+  .dept-bar-fill-empty { font-size: 11px; color: #94a3b8; padding: 0 12px; line-height: 16px; font-weight: 600; }
+  .dept-bar-score { width: 64px; text-align: right; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; flex-shrink: 0; }
+  .dept-bar-score .dept-bar-pt { font-size: 13px; font-weight: 700; margin-left: 1px; }
+  .dept-bar-count { width: 60px; text-align: right; font-size: 12px; color: #94a3b8; font-weight: 600; flex-shrink: 0; }
 
   .section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 14px; letter-spacing: -0.2px; }
 
@@ -2647,38 +2662,70 @@ function renderDashboard() {
       </div>`;
   }
 
-  // 部署別スコア
+  // 部署別スコア（全グループを横棒グラフで）
   const deptScoresGrid = document.getElementById('dept-scores-grid');
-  if (deptScoresGrid && respCount === 0) {
-    deptScoresGrid.innerHTML = '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
-  } else if (deptScoresGrid) {
+  if (deptScoresGrid) {
+    // 全部署を抽出（回答有無に関わらず）
     const deptMap = {};
     Object.entries(employees).forEach(([id, emp]) => {
+      if (emp.role === 'admin') return;
       const dept = emp.dept;
       if (!dept) return;
+      if (!deptMap[dept]) deptMap[dept] = { totals: [], memberCount: 0 };
+      deptMap[dept].memberCount++;
       const scores = empData[id]?.[month];
-      if (!scores) return;
-      if (!deptMap[dept]) deptMap[dept] = { totals: [], count: 0 };
-      deptMap[dept].totals.push(getTotal(scores));
-      deptMap[dept].count++;
+      if (scores) deptMap[dept].totals.push(getTotal(scores));
     });
-    const deptHtml = Object.entries(deptMap).map(([dept, info]) => {
-      const avg = Math.round(info.totals.reduce((a,b) => a+b, 0) / info.totals.length);
-      const count = info.count;
-      let color1, color2, textColor;
-      if (avg >= 70) { color1 = '#2dd4bf'; color2 = '#0d9488'; textColor = '#0f766e'; }
-      else if (avg >= 60) { color1 = '#fbbf24'; color2 = '#f59e0b'; textColor = '#d97706'; }
-      else { color1 = '#f87171'; color2 = '#ef4444'; textColor = '#dc2626'; }
-      return `<div style="background:white;border-radius:12px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:10px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all 0.2s" onclick="showDeptDetail('${dept}', '${month}')">
-        <div style="width:100px;font-size:13px;font-weight:700;color:#374151">${sanitize(dept)}</div>
-        <div style="flex:1;background:#f1f5f9;border-radius:4px;height:12px;overflow:hidden">
-          <div style="height:100%;width:${avg}%;background:linear-gradient(90deg,${color1},${color2});border-radius:4px;transition:width 0.5s"></div>
-        </div>
-        <div style="font-size:16px;font-weight:800;width:50px;text-align:right;color:${textColor}">${avg}点</div>
-        <div style="font-size:12px;color:#94a3b8">${count}名</div>
-      </div>`;
-    }).join('');
-    deptScoresGrid.innerHTML = deptHtml || '<div style="color:#94a3b8;font-size:14px">データがありません</div>';
+    const deptList = Object.entries(deptMap).map(([dept, info]) => {
+      const avg = info.totals.length > 0 ? Math.round(info.totals.reduce((a,b) => a+b, 0) / info.totals.length) : null;
+      return { dept, avg, respCount: info.totals.length, memberCount: info.memberCount };
+    });
+    // スコア降順、データなしは末尾
+    deptList.sort((a, b) => {
+      if (a.avg === null && b.avg === null) return 0;
+      if (a.avg === null) return 1;
+      if (b.avg === null) return -1;
+      return b.avg - a.avg;
+    });
+    if (deptList.length === 0) {
+      deptScoresGrid.innerHTML = '<div style="color:#94a3b8;font-size:14px">データがありません</div>';
+    } else {
+      const maxAvg = Math.max(...deptList.map(d => d.avg || 0), 1);
+      const deptHtml = deptList.map((d, i) => {
+        const isTop = i === 0 && d.avg !== null;
+        if (d.avg === null) {
+          return `<div class="dept-bar-row dept-bar-empty">
+            <div class="dept-bar-rank">―</div>
+            <div class="dept-bar-name">${sanitize(d.dept)}</div>
+            <div class="dept-bar-track"><div class="dept-bar-fill-empty">未回答</div></div>
+            <div class="dept-bar-score" style="color:#94a3b8">―</div>
+            <div class="dept-bar-count">0/${d.memberCount}名</div>
+          </div>`;
+        }
+        let c1, c2, txt;
+        if (d.avg >= 70) { c1 = '#2dd4bf'; c2 = '#0d9488'; txt = '#0f766e'; }
+        else if (d.avg >= 60) { c1 = '#fbbf24'; c2 = '#f59e0b'; txt = '#d97706'; }
+        else { c1 = '#f87171'; c2 = '#ef4444'; txt = '#dc2626'; }
+        const widthPct = Math.round(d.avg / 100 * 100);
+        return `<div class="dept-bar-row" onclick="showDeptDetail('${d.dept}', '${month}')">
+          <div class="dept-bar-rank ${isTop ? 'top' : ''}">${isTop ? '🏆' : i + 1}</div>
+          <div class="dept-bar-name">${sanitize(d.dept)}</div>
+          <div class="dept-bar-track">
+            <div class="dept-bar-fill" data-target-w="${widthPct}%" style="width:0;background:linear-gradient(90deg,${c1},${c2})"></div>
+          </div>
+          <div class="dept-bar-score" style="color:${txt}">${d.avg}<span class="dept-bar-pt">点</span></div>
+          <div class="dept-bar-count">${d.respCount}/${d.memberCount}名</div>
+        </div>`;
+      }).join('');
+      deptScoresGrid.innerHTML = `<div class="dept-bar-card">${deptHtml}</div>`;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          deptScoresGrid.querySelectorAll('.dept-bar-fill').forEach(el => {
+            el.style.width = el.getAttribute('data-target-w');
+          });
+        });
+      });
+    }
   }
 }
 
