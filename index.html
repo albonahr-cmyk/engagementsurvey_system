@@ -378,6 +378,11 @@ if (typeof pdfjsLib !== 'undefined') {
   .stat-card.has-stacked .stacked-legend { display: flex; flex-direction: column; gap: 2px; padding-top: 2px; }
   .stat-card.has-stacked .stacked-legend-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: #64748b; font-weight: 600; line-height: 1.3; }
   .stat-card.has-stacked .stacked-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  /* スコア推移ミニチャート（KPI内） */
+  .stat-card.has-mini-trend { display: flex; flex-direction: column; }
+  .stat-card.has-mini-trend .mini-trend-svg-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 4px 0; }
+  .stat-card.has-mini-trend .mini-trend-legend { display: flex; align-items: center; gap: 6px; justify-content: center; font-size: 11px; color: #64748b; font-weight: 600; padding-top: 6px; border-top: 1px solid #f1f5f9; margin-top: 6px; }
+  .stat-card.has-mini-trend .mini-trend-dot { display: inline-block; width: 14px; height: 2px; background: #0d9488; border-radius: 1px; }
   /* スコア分布チャート */
   .score-dist-card { background: white; border-radius: 14px; padding: 28px 32px 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
   .score-dist-summary { font-size: 13px; color: #64748b; margin-bottom: 18px; }
@@ -2383,14 +2388,6 @@ function renderDashboard() {
   const totalDiff = prevTotal !== null ? total - prevTotal : null;
   const rateDiff = prevRespRate !== null ? currentRespRate - prevRespRate : null;
 
-  // アラートカウント
-  let alertCount = 0;
-  if (respCount > 0 && prevCats) {
-    catKeys.forEach(k => {
-      if (cats[k] - prevCats[k] <= -10 || cats[k] < 60) alertCount++;
-    });
-  }
-
   // スコアドーナツ（SVG）
   const scoreVal = isNaN(total) ? 0 : total;
   const grade = getScoreGrade(scoreVal);
@@ -2418,6 +2415,62 @@ function renderDashboard() {
       <span>${iconRefresh}総合</span>
     </div>
   `;
+
+  // スコアの推移ミニチャート（KPIカード用）— 総合スコアの折れ線
+  const miniTrendSeries = months.map(m => {
+    const totals = [];
+    Object.entries(employees).forEach(([id, emp]) => {
+      if (emp.role === 'admin') return;
+      const sc = empData[id]?.[m];
+      if (sc) totals.push(getTotal(sc));
+    });
+    return { month: m, score: totals.length > 0 ? Math.round(totals.reduce((a,b) => a+b, 0) / totals.length) : null };
+  });
+  const miniTrendValid = miniTrendSeries.filter(s => s.score !== null).map(s => s.score);
+  const miniTrendHasData = miniTrendValid.length > 0;
+  let miniTrendSvg = '';
+  if (miniTrendHasData) {
+    const W = 260, H = 120, padL = 26, padR = 8, padT = 8, padB = 22;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+    const minV = Math.min(...miniTrendValid);
+    const maxV = Math.max(...miniTrendValid);
+    const yMin = Math.max(0, Math.floor((minV - 5) / 5) * 5);
+    const yMax = Math.min(100, Math.ceil((maxV + 5) / 5) * 5);
+    const yRange = Math.max(1, yMax - yMin);
+    const yScale = v => padT + (yMax - v) / yRange * innerH;
+    const xStep = miniTrendSeries.length > 1 ? innerW / (miniTrendSeries.length - 1) : 0;
+    const pts = miniTrendSeries.map((s, i) => ({
+      x: padL + i * xStep,
+      y: s.score !== null ? yScale(s.score) : null,
+      score: s.score, month: s.month
+    }));
+    // 連続セグメント
+    const segs = [];
+    let cur = [];
+    pts.forEach(p => { if (p.y === null) { if (cur.length) { segs.push(cur); cur = []; } } else cur.push(p); });
+    if (cur.length) segs.push(cur);
+    const linePath = seg => seg.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+    const yTicks = [yMin, Math.round((yMin + yMax) / 2), yMax];
+    const grid = yTicks.map(v => {
+      const y = yScale(v);
+      return `<line x1="${padL}" y1="${y}" x2="${padL + innerW}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>
+              <text x="${padL - 5}" y="${y + 3}" font-size="9" fill="#94a3b8" text-anchor="end">${v}</text>`;
+    }).join('');
+    // Xラベル: 最初・中央・最後の3つだけ
+    const labelIdxs = miniTrendSeries.length <= 3
+      ? miniTrendSeries.map((_, i) => i)
+      : [0, Math.floor(miniTrendSeries.length / 2), miniTrendSeries.length - 1];
+    const xLabels = labelIdxs.map(i => {
+      const p = pts[i];
+      const lbl = monthLabels[p.month] || p.month;
+      return `<text x="${p.x.toFixed(1)}" y="${(padT + innerH + 14).toFixed(1)}" font-size="9" fill="#94a3b8" text-anchor="middle">${lbl}</text>`;
+    }).join('');
+    const lineSvg = segs.map(seg => `<path d="${linePath(seg)}" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+    const dotsSvg = pts.filter(p => p.y !== null).map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.5" fill="#0d9488"/>`).join('');
+    miniTrendSvg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block">
+      ${grid}${lineSvg}${dotsSvg}${xLabels}
+    </svg>`;
+  }
 
   // スコアの分布（積み上げ縦棒グラフ）— 現在月と前月の2本
   const distBands = [
@@ -2509,10 +2562,13 @@ function renderDashboard() {
         </div>
       `}
     </div>
-    <div class="stat-card"><div class="label">⚠️ アラート件数</div>
+    <div class="stat-card has-mini-trend"><div class="label">スコアの推移</div>
       ${cardMeta}
-      <div class="value" style="color:${alertCount > 0 ? '#dc2626' : '#0f766e'}">${alertCount}件</div>
-      <div class="sub ${alertCount > 0 ? 'down' : 'up'}">${alertCount > 0 ? '要対応あり' : '問題なし'}</div></div>
+      ${miniTrendHasData ? `<div class="mini-trend-svg-wrap">${miniTrendSvg}</div>
+        <div class="mini-trend-legend"><span class="mini-trend-dot"></span>総合スコア</div>` : `
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:13px">回答データがまだありません</div>
+      `}
+    </div>
   `;
 
   // ドーナツチャートをアニメーション
