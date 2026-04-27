@@ -2456,13 +2456,12 @@ function renderDashboard() {
       return `<line x1="${padL}" y1="${y}" x2="${padL + innerW}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>
               <text x="${padL - 5}" y="${y + 3}" font-size="9" fill="#94a3b8" text-anchor="end">${v}</text>`;
     }).join('');
-    // Xラベル: 最初・中央・最後の3つだけ
-    const labelIdxs = miniTrendSeries.length <= 3
-      ? miniTrendSeries.map((_, i) => i)
-      : [0, Math.floor(miniTrendSeries.length / 2), miniTrendSeries.length - 1];
-    const xLabels = labelIdxs.map(i => {
+    // Xラベル: 全月表示（数が多い場合は2本おきに間引き）
+    const stride = miniTrendSeries.length <= 8 ? 1 : Math.ceil(miniTrendSeries.length / 8);
+    const xLabels = miniTrendSeries.map((s, i) => {
+      if (i % stride !== 0 && i !== miniTrendSeries.length - 1) return '';
       const p = pts[i];
-      const lbl = monthLabels[p.month] || p.month;
+      const lbl = monthLabels[s.month] || s.month;
       return `<text x="${p.x.toFixed(1)}" y="${(padT + innerH + 14).toFixed(1)}" font-size="9" fill="#94a3b8" text-anchor="middle">${lbl}</text>`;
     }).join('');
     const lineSvg = segs.map(seg => `<path d="${linePath(seg)}" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
