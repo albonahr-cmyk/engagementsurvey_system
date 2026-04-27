@@ -440,6 +440,25 @@ if (typeof pdfjsLib !== 'undefined') {
   .dept-mini-track.empty-track { border: 1px dashed #cbd5e1; background: transparent; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #94a3b8; font-weight: 600; }
   .dept-mini-score { font-size: 13px; font-weight: 800; color: #334155; min-width: 28px; text-align: right; flex-shrink: 0; }
   .dept-mini-row.empty .dept-mini-score { color: #94a3b8; }
+  /* グループフィルタ（メタ行のクリック可能チップ） */
+  .meta-dept-trigger { cursor: pointer; display: inline-flex !important; align-items: center; gap: 4px; padding: 3px 10px !important; background: #f1f5f9 !important; border-radius: 14px !important; font-size: 11px; font-weight: 600; color: #64748b; border: 1px solid transparent; transition: all 0.15s; user-select: none; white-space: nowrap; }
+  .meta-dept-trigger:hover { background: #e2e8f0 !important; border-color: #cbd5e1; }
+  .meta-dept-trigger.active { background: #ccfbf1 !important; border-color: #5eead4; color: #0f766e; }
+  .meta-dept-trigger .meta-icon { width: 12px; height: 12px; flex-shrink: 0; color: inherit; }
+  .meta-dept-trigger .chevron { width: 10px; height: 10px; opacity: 0.6; }
+  .dept-dropdown { position: absolute; z-index: 1500; background: white; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; min-width: 220px; padding: 10px; max-height: 360px; overflow-y: auto; }
+  .dept-dropdown-search { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 999px; margin-bottom: 8px; background: #f8fafc; }
+  .dept-dropdown-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 13px; color: #334155; font-family: inherit; min-width: 0; }
+  .dept-dropdown-search .search-icon { width: 14px; height: 14px; color: #94a3b8; flex-shrink: 0; }
+  .dept-dropdown-search .clear-btn { cursor: pointer; color: #94a3b8; padding: 0 4px; font-weight: 700; font-size: 16px; line-height: 1; user-select: none; }
+  .dept-dropdown-search .clear-btn:hover { color: #64748b; }
+  .dept-dropdown-list { display: flex; flex-direction: column; gap: 2px; }
+  .dept-dropdown-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; color: #334155; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: background 0.1s; }
+  .dept-dropdown-item:hover { background: #f1f5f9; }
+  .dept-dropdown-item.selected { background: #ccfbf1; color: #0f766e; }
+  .dept-dropdown-item .check { width: 14px; height: 14px; flex-shrink: 0; opacity: 0; color: #0d9488; }
+  .dept-dropdown-item.selected .check { opacity: 1; }
+  .dept-dropdown-empty { padding: 20px; text-align: center; color: #94a3b8; font-size: 12px; }
   /* スコア推移チャート */
   .trend-card { background: white; border-radius: 14px; padding: 24px 28px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
   .trend-card-header { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -2412,17 +2431,109 @@ function getScoreGrade(score) {
   return { letter: 'D-', color: '#991b1b' };
 }
 
-function getMonthData(month) {
+// ===== ダッシュボードのグループフィルタ =====
+const ALL_MEMBERS = '全メンバー';
+let selectedDept = (() => {
+  try { return localStorage.getItem('es_dashboard_dept') || ALL_MEMBERS; }
+  catch(e) { return ALL_MEMBERS; }
+})();
+
+function inSelectedDept(empId) {
+  const emp = employees[empId];
+  if (!emp || emp.role === 'admin') return false;
+  if (!selectedDept || selectedDept === ALL_MEMBERS) return true;
+  return emp.dept === selectedDept;
+}
+
+function getAllDepts() {
+  const set = new Set();
+  Object.values(employees).forEach(e => {
+    if (e.role !== 'admin' && e.dept) set.add(e.dept);
+  });
+  return Array.from(set).sort();
+}
+
+function selectDept(dept) {
+  closeDeptDropdown();
+  selectedDept = dept || ALL_MEMBERS;
+  try { localStorage.setItem('es_dashboard_dept', selectedDept); } catch(e) {}
+  renderDashboard();
+}
+
+function buildDeptDropdownHtml(currentValue) {
+  const depts = [ALL_MEMBERS, ...getAllDepts()];
+  const items = depts.map(d => {
+    const sel = d === currentValue ? 'selected' : '';
+    const safe = sanitize(d);
+    const arg = d.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return `<div class="dept-dropdown-item ${sel}" data-dept-name="${safe}" onclick="event.stopPropagation();selectDept('${arg}')">
+      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${safe}</span>
+    </div>`;
+  }).join('');
+  return `<div class="dept-dropdown" id="dept-dropdown-popover">
+    <div class="dept-dropdown-search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="グループ名で検索" oninput="filterDeptDropdown(this.value)" onclick="event.stopPropagation()" autocomplete="off"/>
+      <span class="clear-btn" onclick="event.stopPropagation();const i=this.parentElement.querySelector('input');i.value='';filterDeptDropdown('');i.focus()">×</span>
+    </div>
+    <div class="dept-dropdown-list" id="dept-dropdown-list">${items}</div>
+  </div>`;
+}
+
+function showDeptDropdown(triggerEl) {
+  closeDeptDropdown();
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = buildDeptDropdownHtml(selectedDept);
+  const popover = wrapper.firstElementChild;
+  document.body.appendChild(popover);
+  const r = triggerEl.getBoundingClientRect();
+  popover.style.top = (r.bottom + window.scrollY + 6) + 'px';
+  popover.style.left = (r.left + window.scrollX) + 'px';
+  setTimeout(() => {
+    document.addEventListener('click', _deptDropdownOutsideHandler);
+    const input = popover.querySelector('input');
+    if (input) input.focus();
+  }, 0);
+}
+
+function closeDeptDropdown() {
+  const old = document.getElementById('dept-dropdown-popover');
+  if (old) old.remove();
+  document.removeEventListener('click', _deptDropdownOutsideHandler);
+}
+
+function _deptDropdownOutsideHandler(e) {
+  const pop = document.getElementById('dept-dropdown-popover');
+  if (pop && !pop.contains(e.target) && !e.target.closest('.meta-dept-trigger')) closeDeptDropdown();
+}
+
+function filterDeptDropdown(query) {
+  const q = (query || '').trim().toLowerCase();
+  document.querySelectorAll('#dept-dropdown-list .dept-dropdown-item').forEach(item => {
+    const d = (item.getAttribute('data-dept-name') || '').toLowerCase();
+    item.style.display = !q || d.includes(q) ? 'flex' : 'none';
+  });
+}
+
+function getMonthData(month, deptFilter) {
+  const useDept = deptFilter !== undefined ? deptFilter : selectedDept;
+  const empIds = Object.keys(employees).filter(id => {
+    const emp = employees[id];
+    if (!emp || emp.role === 'admin') return false;
+    if (useDept && useDept !== ALL_MEMBERS) return emp.dept === useDept;
+    return true;
+  });
   const prev = months[months.indexOf(month) - 1];
   const cats = {};
   catKeys.forEach(k => {
-    const scores = Object.values(empData).map(e => e[month]?.[k] || 0).filter(v => v > 0);
+    const scores = empIds.map(id => empData[id]?.[month]?.[k] || 0).filter(v => v > 0);
     cats[k] = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
   });
   const prevCats = prev ? (() => {
     const pc = {};
     catKeys.forEach(k => {
-      const scores = Object.values(empData).map(e => e[prev]?.[k] || 0).filter(v => v > 0);
+      const scores = empIds.map(id => empData[id]?.[prev]?.[k] || 0).filter(v => v > 0);
       pc[k] = scores.length > 0 ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
     });
     return pc;
@@ -2436,17 +2547,22 @@ function getMonthData(month) {
 
 // ===== ダッシュボード描画 =====
 function renderDashboard() {
+  // 削除済み/存在しないグループが選択されていた場合は全メンバーに戻す
+  if (selectedDept !== ALL_MEMBERS && !getAllDepts().includes(selectedDept)) {
+    selectedDept = ALL_MEMBERS;
+    try { localStorage.setItem('es_dashboard_dept', ALL_MEMBERS); } catch(e) {}
+  }
   const month = document.getElementById('month-select').value;
   const { cats, prevCats, total, prevTotal } = getMonthData(month);
 
-  // 実データから回答数・回答率を計算
-  const totalEmps = Object.keys(employees).filter(id => employees[id].role !== 'admin').length;
-  const submittedThisMonth = getSubmittedIds(month);
+  // 実データから回答数・回答率を計算（選択中グループでフィルタ）
+  const totalEmps = Object.keys(employees).filter(id => inSelectedDept(id)).length;
+  const submittedThisMonth = getSubmittedIds(month).filter(id => inSelectedDept(id));
   const respCount = submittedThisMonth.length;
   const currentRespRate = totalEmps > 0 ? Math.round(respCount / totalEmps * 100) : 0;
 
   const prevMonth = months[months.indexOf(month) - 1];
-  const prevSubmitted = prevMonth ? getSubmittedIds(prevMonth) : [];
+  const prevSubmitted = prevMonth ? getSubmittedIds(prevMonth).filter(id => inSelectedDept(id)) : [];
   const prevRespRate = prevMonth && totalEmps > 0 ? Math.round(prevSubmitted.length / totalEmps * 100) : null;
 
   // KPI
@@ -2474,9 +2590,13 @@ function renderDashboard() {
   const iconPeople = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
   const iconCalendar = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
   const iconRefresh = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+  const iconChevron = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="6 9 12 15 18 9"/></svg>`;
+  const deptIsAll = !selectedDept || selectedDept === ALL_MEMBERS;
+  const deptLabel = sanitize(deptIsAll ? ALL_MEMBERS : selectedDept);
+  const deptTrigger = `<span class="meta-dept-trigger ${deptIsAll ? '' : 'active'}" onclick="event.stopPropagation();showDeptDropdown(this)">${iconPeople}${deptLabel}${iconChevron}</span>`;
   const cardMeta = `
     <div class="card-meta">
-      <span>${iconPeople}全メンバー</span>
+      ${deptTrigger}
       <span>${iconCalendar}${todayJa}</span>
       <span>${iconRefresh}総合</span>
     </div>
@@ -2485,8 +2605,8 @@ function renderDashboard() {
   // スコアの推移ミニチャート（KPIカード用）— 総合スコアの折れ線
   const miniTrendSeries = months.map(m => {
     const totals = [];
-    Object.entries(employees).forEach(([id, emp]) => {
-      if (emp.role === 'admin') return;
+    Object.keys(employees).forEach(id => {
+      if (!inSelectedDept(id)) return;
       const sc = empData[id]?.[m];
       if (sc) totals.push(getTotal(sc));
     });
@@ -2550,8 +2670,8 @@ function renderDashboard() {
   function distFor(monthKey) {
     const counts = distBands.map(() => 0);
     let n = 0;
-    Object.entries(employees).forEach(([id, emp]) => {
-      if (emp.role === 'admin') return;
+    Object.keys(employees).forEach(id => {
+      if (!inSelectedDept(id)) return;
       const sc = empData[id]?.[monthKey];
       if (!sc) return;
       const t = getTotal(sc);
@@ -2651,15 +2771,15 @@ function renderDashboard() {
     });
   });
 
-  // 未回答者一覧（全月）
+  // 未回答者一覧（全月）— 選択中グループでフィルタ
   const unsubSection = document.getElementById('unsubmitted-section');
-  const submittedIds = getSubmittedIds(month);
+  const submittedIds = getSubmittedIds(month).filter(id => inSelectedDept(id));
   const unsubmitted = Object.entries(employees)
-    .filter(([id, emp]) => emp.role !== 'admin' && !submittedIds.includes(id))
+    .filter(([id, emp]) => inSelectedDept(id) && !submittedIds.includes(id))
     .map(([id, emp]) => ({ id, ...emp }));
 
   unsubSection.style.display = 'block';
-  const totalNonAdmin = Object.keys(employees).filter(id => employees[id].role !== 'admin').length;
+  const totalNonAdmin = Object.keys(employees).filter(id => inSelectedDept(id)).length;
   document.getElementById('unsubmitted-count-label').textContent =
     `（未回答 ${unsubmitted.length}名 ／ 全 ${totalNonAdmin}名中 回答済み ${submittedIds.length}名）`;
 
@@ -2956,13 +3076,18 @@ function renderDashboard() {
 
   // ====== 重要な変化 / グループ毎のスコア（3カード） ======
   const cardMetaShort = `
-    <span>${iconPeople}全メンバー</span>
+    ${deptTrigger}
     <span>${iconCalendar}${todayJa}</span>
   `;
-  const setMeta = id => { const el = document.getElementById(id); if (el) el.innerHTML = cardMetaShort; };
-  setMeta('rising-changes-meta');
-  setMeta('falling-changes-meta');
-  setMeta('dept-scores-meta');
+  // 部署別スコアカードはdept固定で表示するためフィルタトリガを出さない
+  const cardMetaShortNoFilter = `
+    <span>${iconPeople}${sanitize(ALL_MEMBERS)}</span>
+    <span>${iconCalendar}${todayJa}</span>
+  `;
+  const setMeta = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+  setMeta('rising-changes-meta', cardMetaShort);
+  setMeta('falling-changes-meta', cardMetaShort);
+  setMeta('dept-scores-meta', cardMetaShortNoFilter);
 
   // 重要な上昇 / 下降変化（カテゴリ別、前月比 ±5点以上）
   const risingEl = document.getElementById('rising-changes-body');
@@ -3059,11 +3184,11 @@ function renderScoreTrendChart(currentMonth) {
   const el = document.getElementById('score-trend-chart');
   if (!el) return;
 
-  // 各月の総合スコアを算出（empDataから直接、回答が無い月はnull）
+  // 各月の総合スコアを算出（empDataから直接、回答が無い月はnull）— 選択中グループでフィルタ
   const series = months.map(m => {
     const totals = [];
-    Object.entries(employees).forEach(([id, emp]) => {
-      if (emp.role === 'admin') return;
+    Object.keys(employees).forEach(id => {
+      if (!inSelectedDept(id)) return;
       const sc = empData[id]?.[m];
       if (sc) totals.push(getTotal(sc));
     });
