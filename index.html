@@ -6021,17 +6021,16 @@ function switchMasterTab(name, btn) {
       if (loginIdEl) loginIdEl.value = '●●●●●●';
       if (loginPwEl) loginPwEl.value = 'autofilled';
 
-      // 設定読み込みと回答チェックを並列実行（ローカルの es_survey_period から先に月を決める）
+      // 設定はバックグラウンドで読み込む（ブロックしない）
+      loadAllSettingsFromCloud().catch(() => false).then(() => { try { reloadAllSettings(); } catch(e) {} });
+
+      // 回答チェックだけ待つ
       const tentativeMonth = getSurveyMonth();
-      const [settingsResult, checkRes] = await Promise.all([
-        loadAllSettingsFromCloud().catch(() => false),
-        fetch(API_BASE + '/api/check?month=' + tentativeMonth, { headers: authHeaders() }),
-      ]);
-      try { reloadAllSettings(); } catch(e) {}
+      const checkRes = await fetch(API_BASE + '/api/check?month=' + tentativeMonth, { headers: authHeaders() });
       const checkData = await checkRes.json();
 
-      // 黒丸演出を見せるためのわずかな遅延
-      await new Promise(r => setTimeout(r, 400));
+      // 黒丸演出を見せる最小限の遅延
+      await new Promise(r => setTimeout(r, 100));
 
       if (checkData.submitted || hasSubmittedThisMonth(data.empId)) {
         document.getElementById('already-name').textContent = sanitize(data.name);
