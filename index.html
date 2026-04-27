@@ -6020,13 +6020,13 @@ function switchMasterTab(name, btn) {
       const loginPwEl = document.getElementById('login-pw');
       if (loginIdEl) {
         loginIdEl.value = '●●●●●';
-        loginIdEl.style.color = '#cbd5e1';
+        loginIdEl.style.color = '#94a3b8';
       }
       if (loginPwEl) {
         // type=password だとマスク文字が小さくID欄とサイズが揃わないため一時的に text に変更
         loginPwEl.type = 'text';
         loginPwEl.value = '●●●●●';
-        loginPwEl.style.color = '#cbd5e1';
+        loginPwEl.style.color = '#94a3b8';
       }
 
       // 設定はバックグラウンドで読み込む（ブロックしない）
