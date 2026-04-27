@@ -34,9 +34,6 @@ module.exports = async function handler(req, res) {
       return res.json({ ok: false, error: 'invalid_token' });
     }
 
-    // トークンを無効化（1回限り）
-    await updatePage(page.id, { surveyToken: P.rich('') });
-
     // JWTトークン生成
     const authToken = createToken({ empId, role });
 
