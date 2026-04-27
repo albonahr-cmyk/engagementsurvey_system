@@ -477,6 +477,22 @@ if (typeof pdfjsLib !== 'undefined') {
 
   .section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 14px; letter-spacing: -0.2px; }
 
+  /* キードライバーごとのスコア（コンパクト横一列） */
+  .kd-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #99f6e4; margin-bottom: 32px; }
+  .kd-card-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 10px; }
+  .kd-card .card-meta { display: flex; gap: 6px; font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 12px; flex-wrap: wrap; }
+  .kd-card .card-meta span { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: #f1f5f9; border-radius: 12px; white-space: nowrap; }
+  .kd-card .card-meta .meta-icon { width: 12px; height: 12px; flex-shrink: 0; color: #64748b; }
+  .kd-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+  @media (max-width: 1100px) { .kd-row { grid-template-columns: repeat(5, 1fr); } }
+  @media (max-width: 600px) { .kd-row { grid-template-columns: repeat(3, 1fr); } }
+  .kd-chip { background: #f1f5f9; padding: 10px 6px; border-radius: 10px; cursor: pointer; transition: background 0.15s, border-color 0.15s; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 1px solid transparent; }
+  .kd-chip:hover { background: #e2e8f0; }
+  .kd-chip.active { background: #ccfbf1; border-color: #5eead4; }
+  .kd-chip-top { display: flex; align-items: center; gap: 5px; }
+  .kd-icon { width: 20px; height: 20px; flex-shrink: 0; display: block; }
+  .kd-score { font-size: 13px; font-weight: 800; color: #1e293b; letter-spacing: -0.3px; }
+  .kd-label { font-size: 10px; color: #64748b; font-weight: 600; text-align: center; line-height: 1.2; }
   /* カテゴリスコア */
   .category-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
   .score-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.15s; }
@@ -1154,8 +1170,11 @@ if (typeof pdfjsLib !== 'undefined') {
         <div class="change-card-body" id="dept-scores-grid"></div>
       </div>
     </div>
-    <div class="section-title">カテゴリ別スコア</div>
-    <div class="category-scores" id="category-grid"></div>
+    <div class="kd-card">
+      <div class="kd-card-title">キードライバーごとのスコア</div>
+      <div class="card-meta" id="kd-meta"></div>
+      <div class="kd-row" id="kd-row"></div>
+    </div>
     <div class="section-title">📋 評価基準・推奨アクション</div>
     <div id="action-guide-list" style="margin-bottom:40px"></div>
     <div class="section-title">📡 カテゴリ別レーダーチャート</div>
@@ -2252,6 +2271,20 @@ const catKeys = ['やりがい', '成長', '健康', '上司', 'チーム', '承
 const catIcons = { やりがい:'💼', 成長:'🌱', 健康:'💪', 上司:'🤝', チーム:'👥', 承認:'⭐', 信頼:'🧭', 組織:'🏢', 業務:'🌿' };
 const catNames = { やりがい:'職務', 成長:'自己成長', 健康:'健康', 上司:'支援', チーム:'人間関係', 承認:'承認', 信頼:'理念戦略', 組織:'組織風土', 業務:'環境' };
 
+// キードライバー用のカラーイラストSVGアイコン（絵文字の代わり）
+const driverIcons = {
+  total: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="20" width="6" height="8" rx="1.5" fill="#5eead4"/><rect x="13" y="14" width="6" height="14" rx="1.5" fill="#14b8a6"/><rect x="21" y="8" width="6" height="20" rx="1.5" fill="#0d9488"/></svg>`,
+  やりがい: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="11" y="5" width="10" height="6" rx="1.5" fill="none" stroke="#92400e" stroke-width="2.2"/><rect x="3" y="10" width="26" height="18" rx="2.5" fill="#d97706"/><rect x="3" y="16" width="26" height="2.5" fill="#78350f" opacity="0.4"/><rect x="13.5" y="16" width="5" height="4" rx="0.6" fill="#fbbf24"/></svg>`,
+  成長: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 28 V18" stroke="#15803d" stroke-width="2.5" stroke-linecap="round"/><path d="M16 18 C9 18 5 13 5 8 C12 8 16 13 16 18 Z" fill="#22c55e"/><path d="M16 16 C23 16 27 11 27 6 C20 6 16 11 16 16 Z" fill="#16a34a"/></svg>`,
+  健康: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 28 C16 28 5 21 5 13 C5 9 8 6 11 6 C13 6 15 7 16 9 C17 7 19 6 21 6 C24 6 27 9 27 13 C27 21 16 28 16 28 Z" fill="#ef4444"/><path d="M10 11 C9.5 12.5 10 14 11 15" stroke="#fecaca" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>`,
+  上司: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 L9 11 L16 14 V19 L9 23 Z" fill="#fcd34d"/><path d="M30 17 L23 11 L16 14 V19 L23 23 Z" fill="#f59e0b"/><rect x="14" y="13" width="4" height="7" rx="0.6" fill="#fde68a" stroke="#92400e" stroke-width="0.5"/></svg>`,
+  チーム: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="4" fill="#60a5fa"/><path d="M2 26 C2 20 6 17 10 17 C14 17 18 20 18 26 Z" fill="#3b82f6"/><circle cx="22" cy="10" r="4" fill="#a78bfa"/><path d="M14 26 C14 20 18 17 22 17 C26 17 30 20 30 26 Z" fill="#8b5cf6"/></svg>`,
+  承認: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 4 L19.5 12 L28 13 L21.5 19 L23 27 L16 23 L9 27 L10.5 19 L4 13 L12.5 12 Z" fill="#fbbf24"/><path d="M16 4 L19.5 12 L28 13 L21.5 19 L23 27 L16 23 V4 Z" fill="#f59e0b"/></svg>`,
+  信頼: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="12" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/><path d="M16 5 L19 16 L16 27 L13 16 Z" fill="#ef4444"/><circle cx="16" cy="16" r="2.2" fill="#1e293b"/></svg>`,
+  組織: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="7" width="20" height="21" rx="1.5" fill="#94a3b8"/><rect x="6" y="7" width="20" height="3" fill="#475569"/><rect x="9" y="13" width="3" height="3" fill="#cbd5e1"/><rect x="14.5" y="13" width="3" height="3" fill="#cbd5e1"/><rect x="20" y="13" width="3" height="3" fill="#cbd5e1"/><rect x="9" y="18" width="3" height="3" fill="#cbd5e1"/><rect x="14.5" y="18" width="3" height="3" fill="#cbd5e1"/><rect x="20" y="18" width="3" height="3" fill="#cbd5e1"/><rect x="14" y="23" width="4" height="5" fill="#475569"/></svg>`,
+  業務: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 28 V14" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"/><circle cx="16" cy="11" r="9" fill="#22c55e"/><circle cx="11" cy="9" r="5.5" fill="#16a34a"/><circle cx="21" cy="9" r="5.5" fill="#16a34a"/><circle cx="16" cy="6" r="5" fill="#15803d"/></svg>`,
+};
+
 const _defaultQuestionCatMap = {
   q1:'やりがい', q2:'やりがい', q3:'やりがい', q4:'やりがい',
   q5:'成長', q6:'成長', q7:'成長', q8:'成長',
@@ -2648,6 +2681,14 @@ function renderDashboard() {
       <span>${iconRefresh}総合</span>
     </div>
   `;
+  const cardMetaShort = `
+    ${deptTrigger}
+    <span>${iconCalendar}${todayJa}</span>
+  `;
+  const cardMetaShortNoFilter = `
+    <span>${iconPeople}${sanitize(ALL_MEMBERS)}</span>
+    <span>${iconCalendar}${todayJa}</span>
+  `;
 
   // スコアの推移ミニチャート（KPIカード用）— 総合スコアの折れ線
   const miniTrendSeries = months.map(m => {
@@ -2820,40 +2861,24 @@ function renderDashboard() {
 
   // 未回答者一覧は配信タブで描画
 
-  // カテゴリスコア
-  const catGrid = document.getElementById('category-grid');
-  if (respCount === 0) {
-    catGrid.innerHTML = '<div class="no-alert" style="grid-column:1/-1;background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
-  } else {
-  catGrid.innerHTML = catKeys.map((k, i) => {
-    const score = cats[k];
-    const prev = prevCats ? prevCats[k] : null;
-    const diff = prev !== null ? score - prev : null;
-    const status = getCatStatus(k, score, diff);
-    const alert = status !== 'ok' ? ' ⚠️' : '';
-    const pastScores = months.slice(0, months.indexOf(month) + 1).map(m => {
-      const s = Object.values(empData).map(e => e[m]?.[k] || 0).filter(v => v > 0);
-      return Math.round(s.reduce((a,b) => a+b, 0) / s.length);
-    }).slice(-6);
-    const maxS = Math.max(...pastScores);
-    return `
-      <div class="score-card">
-        <div class="score-card-header">
-          <span class="cat-name-wrap">
-            <span class="cat-icon cat-icon-${status}">${catIcons[k] || '📊'}</span>
-            <span class="cat-name">${catNames[k]}</span>
-          </span>
-          <span class="score-num ${status}">${score}点${alert}</span>
-        </div>
-        <div class="score-bar-wrap" style="position:relative;overflow:visible"><div class="score-bar ${status}" style="width:${score}%"></div>${categoryTargets[k] ? `<div style="position:absolute;top:0;bottom:0;left:${Math.min(categoryTargets[k],100)}%;width:2px;background:#14b8a6;opacity:0.8;border-radius:1px"></div>` : ''}</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0">
-          <div class="score-trend" style="margin:0">前月比 ${diff !== null ? `<span class="${diff >= 0 ? 'up' : 'down'}">${diff > 0 ? '+' : ''}${diff}点</span>` : '初回'}</div>
-          ${categoryTargets[k] ? `<div style="font-size:10px;font-weight:700;color:${score>=categoryTargets[k]?'#0f766e':'#14b8a6'}">目標${categoryTargets[k]}点 ${score>=categoryTargets[k]?'✅':'▲'+(categoryTargets[k]-score)}</div>` : ''}
-        </div>
-        <div class="mini-chart">${pastScores.map(v => `<div class="mini-bar" style="height:${(v/maxS)*100}%;background:${status==='alert'?'#ef4444':status==='warn'?'#f59e0b':'#0d9488'};opacity:0.7"></div>`).join('')}</div>
-        ${(() => { const pred = predictNextScore(pastScores); return pred !== null ? `<div style="font-size:10px;color:#14b8a6;font-weight:700;margin-top:4px;text-align:right">予測 ${pred}点 →</div>` : ''; })()}
-      </div>`;
-  }).join('');
+  // キードライバーごとのスコア（コンパクト横一列）
+  const kdMeta = document.getElementById('kd-meta');
+  if (kdMeta) kdMeta.innerHTML = cardMetaShort;
+  const kdRow = document.getElementById('kd-row');
+  if (kdRow) {
+    if (respCount === 0) {
+      kdRow.innerHTML = '<div style="grid-column:1/-1;color:#94a3b8;font-size:13px;text-align:center;padding:16px">今月の回答データがないため判定できません</div>';
+    } else {
+      const drivers = [{ key: 'total', label: '総合', score: total }, ...catKeys.map(k => ({ key: k, label: catNames[k], score: cats[k] }))];
+      kdRow.innerHTML = drivers.map((d, i) => `
+        <div class="kd-chip ${i === 0 ? 'active' : ''}">
+          <div class="kd-chip-top">
+            <span class="kd-icon">${driverIcons[d.key] || ''}</span>
+            <span class="kd-score">${d.score}</span>
+          </div>
+          <div class="kd-label">${sanitize(d.label)}</div>
+        </div>`).join('');
+    }
   }
 
   // 評価・推奨アクション
@@ -2978,15 +3003,7 @@ function renderDashboard() {
   }
 
   // ====== 重要な変化 / グループ毎のスコア（3カード） ======
-  const cardMetaShort = `
-    ${deptTrigger}
-    <span>${iconCalendar}${todayJa}</span>
-  `;
-  // 部署別スコアカードはdept固定で表示するためフィルタトリガを出さない
-  const cardMetaShortNoFilter = `
-    <span>${iconPeople}${sanitize(ALL_MEMBERS)}</span>
-    <span>${iconCalendar}${todayJa}</span>
-  `;
+  // 部署別スコアカードはdept固定で表示するためフィルタトリガは cardMetaShortNoFilter を使用
   const setMeta = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
   setMeta('rising-changes-meta', cardMetaShort);
   setMeta('falling-changes-meta', cardMetaShort);
