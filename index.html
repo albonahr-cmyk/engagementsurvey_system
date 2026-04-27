@@ -6019,7 +6019,11 @@ function switchMasterTab(name, btn) {
       const loginIdEl = document.getElementById('login-id');
       const loginPwEl = document.getElementById('login-pw');
       if (loginIdEl) loginIdEl.value = '●●●●●●';
-      if (loginPwEl) loginPwEl.value = 'autofilled';
+      if (loginPwEl) {
+        // type=password だとマスク文字が小さくID欄とサイズが揃わないため一時的に text に変更
+        loginPwEl.type = 'text';
+        loginPwEl.value = '●●●●●●';
+      }
 
       // 設定はバックグラウンドで読み込む（ブロックしない）
       loadAllSettingsFromCloud().catch(() => false).then(() => { try { reloadAllSettings(); } catch(e) {} });
