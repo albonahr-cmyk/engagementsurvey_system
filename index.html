@@ -335,6 +335,8 @@ if (typeof pdfjsLib !== 'undefined') {
   .stat-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); transition: transform 0.15s, box-shadow 0.15s; }
   .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
   .stat-card .label { font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.3px; }
+  .stat-card .card-meta { display: flex; gap: 10px; font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 10px; flex-wrap: wrap; }
+  .stat-card .card-meta span { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
   .stat-card .value { font-size: 34px; font-weight: 800; color: #1e293b; letter-spacing: -1px; }
   .stat-card .sub { font-size: 13px; margin-top: 6px; font-weight: 600; }
   .stat-card .sub.up { color: #0f766e; }
@@ -2399,6 +2401,20 @@ function renderDashboard() {
   const tealDark = '#0d9488';
   const tealLight = '#14b8a6';
 
+  // KPIカード共通のメタ情報行（👥全メンバー / 📅日付 / 🔄総合）
+  const todayJa = (() => {
+    const d = new Date();
+    const days = ['日','月','火','水','木','金','土'];
+    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}(${days[d.getDay()]})`;
+  })();
+  const cardMeta = `
+    <div class="card-meta">
+      <span>👥 全メンバー</span>
+      <span>📅 ${todayJa}</span>
+      <span>🔄 総合</span>
+    </div>
+  `;
+
   // スコアの分布（積み上げ縦棒グラフ）— 現在月と前月の2本
   const distBands = [
     { max: 14,  color: '#dc2626', label: '~14' },
@@ -2430,6 +2446,7 @@ function renderDashboard() {
 
   kpi.innerHTML = `
     <div class="stat-card has-donut score-main-card"><div class="label">スコア</div>
+      ${cardMeta}
       <div class="donut-wrap">
         <div class="grade-badge" style="background:${tealDark}">${scoreVal > 0 ? grade.letter : '―'}</div>
         <svg class="donut-svg" viewBox="0 0 120 120">
@@ -2453,6 +2470,7 @@ function renderDashboard() {
       <div class="sub ${totalDiff > 0 ? 'up' : totalDiff < 0 ? 'down' : 'neutral'}" style="text-align:center;margin-top:6px">${totalDiff !== null && !isNaN(totalDiff) ? (totalDiff > 0 ? '↑ 前月比 +' : '↓ 前月比 ') + totalDiff + '点' : ''}</div>
     </div>
     <div class="stat-card has-stacked"><div class="label">スコアの分布</div>
+      ${cardMeta}
       ${!distHasData ? `
         <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:13px">回答データがまだありません</div>
         <div class="sub neutral" style="margin-top:6px">回答 ${respCount}名 / 対象 ${totalEmps}名</div>
@@ -2487,7 +2505,9 @@ function renderDashboard() {
         </div>
       `}
     </div>
-    <div class="stat-card"><div class="label">⚠️ アラート件数</div><div class="value" style="color:${alertCount > 0 ? '#dc2626' : '#0f766e'}">${alertCount}件</div>
+    <div class="stat-card"><div class="label">⚠️ アラート件数</div>
+      ${cardMeta}
+      <div class="value" style="color:${alertCount > 0 ? '#dc2626' : '#0f766e'}">${alertCount}件</div>
       <div class="sub ${alertCount > 0 ? 'down' : 'up'}">${alertCount > 0 ? '要対応あり' : '問題なし'}</div></div>
   `;
 
