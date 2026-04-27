@@ -1237,24 +1237,6 @@ if (typeof pdfjsLib !== 'undefined') {
 
   <!-- 社員一覧（マスタ） -->
   <div id="tab-employees" class="admin-body" style="display:none">
-    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
-      <input type="text" id="emp-search" placeholder="名前・IDで検索..." oninput="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;width:180px;font-family:inherit">
-      <select id="emp-dept-filter" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
-        <option value="">すべての部署</option>
-        <option>営業部</option><option>開発部</option><option>総務部</option><option>マーケ部</option><option>人事部</option><option>経理部</option>
-      </select>
-      <select id="emp-rank-filter" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
-        <option value="">すべてのランク</option>
-        <option>S1</option><option>S2</option><option>S3</option><option>S4</option>
-        <option>A1</option><option>A2</option><option>A3</option><option>A4</option>
-        <option>B1</option><option>B2</option><option>B3</option><option>B4</option>
-        <option>C1</option><option>C2</option><option>C3</option><option>C4</option>
-      </select>
-      <div class="month-selector" style="margin:0">
-        <label>サーベイ月：</label>
-        <select id="emp-month-select" onchange="renderEmployeeList()"></select>
-      </div>
-    </div>
     <div class="emp-kpi-grid">
       <div class="emp-kpi-card">
         <div class="emp-kpi-icon" style="background:#ccfbf1">
@@ -1285,6 +1267,24 @@ if (typeof pdfjsLib !== 'undefined') {
           <div class="emp-kpi-value"><span id="emp-kpi-mailerr">―</span><span class="unit">名</span></div>
           <div class="emp-kpi-sub" id="emp-kpi-mailerr-sub"></div>
         </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="emp-search" placeholder="名前・IDで検索..." oninput="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;width:180px;font-family:inherit">
+      <select id="emp-dept-filter" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
+        <option value="">すべての部署</option>
+        <option>営業部</option><option>開発部</option><option>総務部</option><option>マーケ部</option><option>人事部</option><option>経理部</option>
+      </select>
+      <select id="emp-rank-filter" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
+        <option value="">すべてのランク</option>
+        <option>S1</option><option>S2</option><option>S3</option><option>S4</option>
+        <option>A1</option><option>A2</option><option>A3</option><option>A4</option>
+        <option>B1</option><option>B2</option><option>B3</option><option>B4</option>
+        <option>C1</option><option>C2</option><option>C3</option><option>C4</option>
+      </select>
+      <div class="month-selector" style="margin:0">
+        <label>サーベイ月：</label>
+        <select id="emp-month-select" onchange="renderEmployeeList()"></select>
       </div>
     </div>
     <div class="section-title">👥 社員マスタ一覧 <span id="emp-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
