@@ -348,6 +348,17 @@ if (typeof pdfjsLib !== 'undefined') {
   .stat-card.has-donut .donut-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   .stat-card.has-donut .donut-pct { font-size: 28px; font-weight: 800; color: #1e293b; letter-spacing: -1px; line-height: 1; }
   .stat-card.has-donut .donut-pct .pct-mark { font-size: 16px; font-weight: 700; color: #64748b; margin-left: 1px; }
+  /* スコア分布チャート */
+  .score-dist-card { background: white; border-radius: 14px; padding: 28px 32px 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
+  .score-dist-summary { font-size: 13px; color: #64748b; margin-bottom: 18px; }
+  .score-dist-summary strong { color: #1e293b; font-weight: 700; }
+  .score-dist-chart { display: flex; align-items: flex-end; gap: 18px; height: 220px; padding-top: 24px; border-bottom: 1px solid #e2e8f0; }
+  .score-dist-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+  .score-dist-bar { width: 100%; max-width: 80px; min-height: 0; border-radius: 10px 10px 0 0; position: relative; transition: height 1s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .score-dist-bar-count { position: absolute; top: -26px; left: 0; right: 0; text-align: center; font-size: 15px; font-weight: 800; color: #1e293b; }
+  .score-dist-label { font-size: 12px; color: #64748b; margin-top: 10px; font-weight: 700; letter-spacing: 0.3px; text-align: center; width: 100%; max-width: 80px; }
+  .score-dist-axis { display: flex; gap: 18px; padding-top: 4px; }
+  .score-dist-axis > div { flex: 1; display: flex; justify-content: center; }
 
   .section-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 14px; letter-spacing: -0.2px; }
 
@@ -1011,6 +1022,8 @@ if (typeof pdfjsLib !== 'undefined') {
     </div>
     <div class="section-title">⚠️ アラート</div>
     <div class="alert-section" id="alert-list"></div>
+    <div class="section-title">📊 月のスコア分布</div>
+    <div id="score-distribution" style="margin-bottom:32px"></div>
     <div class="section-title">カテゴリ別スコア</div>
     <div class="category-scores" id="category-grid"></div>
     <div class="section-title">📋 評価基準・推奨アクション</div>
@@ -2421,6 +2434,63 @@ function renderDashboard() {
           </div>
           <span class="badge ${a.diff <= -10 ? 'badge-alert' : 'badge-warn'}" style="margin-left:auto">${a.diff > 0 ? '+' : ''}${a.diff}点</span>
         </div>`).join('');
+    }
+  }
+
+  // スコア分布（縦棒グラフ）
+  const distEl = document.getElementById('score-distribution');
+  if (distEl) {
+    if (respCount === 0) {
+      distEl.innerHTML = '<div class="no-alert" style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04)">今月の回答データがないため判定できません</div>';
+    } else {
+      const buckets = [
+        { range: '0-19',   min: 0,  max: 19,  c1: '#fecaca', c2: '#ef4444' },
+        { range: '20-39',  min: 20, max: 39,  c1: '#fed7aa', c2: '#f97316' },
+        { range: '40-59',  min: 40, max: 59,  c1: '#fde68a', c2: '#eab308' },
+        { range: '60-79',  min: 60, max: 79,  c1: '#a7f3d0', c2: '#10b981' },
+        { range: '80-100', min: 80, max: 100, c1: '#5eead4', c2: '#0d9488' }
+      ];
+      const counts = buckets.map(() => 0);
+      let totalForAvg = 0, nForAvg = 0;
+      submittedThisMonth.forEach(id => {
+        const scores = empData[id]?.[month];
+        if (!scores) return;
+        const tot = getTotal(scores);
+        totalForAvg += tot; nForAvg++;
+        for (let i = 0; i < buckets.length; i++) {
+          if (tot >= buckets[i].min && tot <= buckets[i].max) { counts[i]++; break; }
+        }
+      });
+      const maxCount = Math.max(1, ...counts);
+      const avgScore = nForAvg > 0 ? Math.round(totalForAvg / nForAvg) : 0;
+      const modeIdx = counts.indexOf(Math.max(...counts));
+      distEl.innerHTML = `
+        <div class="score-dist-card">
+          <div class="score-dist-summary">
+            回答 <strong>${nForAvg}名</strong>　平均スコア <strong>${avgScore}点</strong>　最頻ゾーン <strong>${buckets[modeIdx].range}点</strong>
+          </div>
+          <div class="score-dist-chart">
+            ${buckets.map((b, i) => {
+              const h = Math.round(counts[i] / maxCount * 100);
+              return `<div class="score-dist-bar-wrap">
+                <div class="score-dist-bar" data-target-h="${h}%" style="height:0;background:linear-gradient(180deg,${b.c1},${b.c2})">
+                  ${counts[i] > 0 ? `<div class="score-dist-bar-count">${counts[i]}名</div>` : ''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div class="score-dist-axis">
+            ${buckets.map(b => `<div><div class="score-dist-label">${b.range}</div></div>`).join('')}
+          </div>
+        </div>
+      `;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          distEl.querySelectorAll('.score-dist-bar').forEach(el => {
+            el.style.height = el.getAttribute('data-target-h');
+          });
+        });
+      });
     }
   }
 
