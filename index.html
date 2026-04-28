@@ -1901,6 +1901,21 @@ ALBONA 人事部</textarea>
   </div><!-- /admin-layout -->
 </div>
 
+<!-- コンディション・ドロワー -->
+<div id="condition-drawer-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.4);z-index:2000;opacity:0;transition:opacity .25s ease" onclick="closeConditionDrawer()"></div>
+<div id="condition-drawer" style="display:none;position:fixed;top:0;right:0;width:min(640px,100vw);height:100vh;background:#f8fafc;z-index:2001;box-shadow:-8px 0 30px rgba(15,23,42,0.15);overflow-y:auto;transform:translateX(100%);transition:transform .3s ease">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;background:white;z-index:5">
+    <h2 id="condition-drawer-title" style="font-size:17px;font-weight:700;color:#1e293b;margin:0"></h2>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="font-size:13px;font-weight:600;color:#0d9488;cursor:pointer">共有範囲</span>
+      <button onclick="closeConditionDrawer()" style="background:none;border:none;cursor:pointer;color:#64748b;padding:4px;display:inline-flex;align-items:center;justify-content:center" onmouseover="this.style.color='#1e293b'" onmouseout="this.style.color='#64748b'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="condition-drawer-body" style="padding:20px"></div>
+</div>
+
 <!-- 社員詳細 -->
 <div id="screen-detail" class="screen">
   <nav class="admin-nav">
@@ -3894,6 +3909,244 @@ document.addEventListener('click', (e) => {
   panel.style.display = 'none';
 });
 
+// ===== コンディション・ドロワー =====
+function openConditionDrawer(empId) {
+  const emp = employees[empId];
+  if (!emp) return;
+  const month = months[months.length - 1];
+  const prev = months[months.indexOf(month) - 1] || null;
+  const data = empData[empId] || {};
+  const cur = data[month] || null;
+  const prevData = prev ? data[prev] : null;
+  const total = cur ? getTotal(cur) : null;
+  const prevTotal = prevData ? getTotal(prevData) : null;
+  const diff = (total !== null && prevTotal !== null) ? total - prevTotal : null;
+  const cond = getCondition(total);
+
+  document.getElementById('condition-drawer-title').textContent = `${emp.name || empId}のコンディション`;
+
+  const scoreCard = renderConditionScoreCard(emp, total, diff, cond, month);
+  const summarySection = renderConditionSummarySection(cond, diff);
+  const analysisSection = cur ? renderConditionAnalysisSection(cur, cond, diff) : '';
+  const forwardSection = cond ? renderConditionForwardSection(cond, diff) : '';
+  const detailHtml = showDetail(empId, true);
+
+  document.getElementById('condition-drawer-body').innerHTML =
+    scoreCard + summarySection + analysisSection + forwardSection + detailHtml;
+
+  const overlay = document.getElementById('condition-drawer-overlay');
+  const drawer = document.getElementById('condition-drawer');
+  overlay.style.display = 'block';
+  drawer.style.display = 'block';
+  drawer.scrollTop = 0;
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    drawer.style.transform = 'translateX(0)';
+  });
+  document.body.style.overflow = 'hidden';
+}
+
+function closeConditionDrawer() {
+  const overlay = document.getElementById('condition-drawer-overlay');
+  const drawer = document.getElementById('condition-drawer');
+  overlay.style.opacity = '0';
+  drawer.style.transform = 'translateX(100%)';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    drawer.style.display = 'none';
+    document.body.style.overflow = '';
+  }, 300);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const d = document.getElementById('condition-drawer');
+    if (d && d.style.display === 'block') closeConditionDrawer();
+  }
+});
+
+function renderConditionScoreCard(emp, total, diff, cond, month) {
+  const dateStr = (() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  })();
+  const condIcon = cond ? getConditionIconHtml(cond.key, 22) : `<span style="color:#94a3b8">—</span>`;
+  const totalStr = total !== null ? `<span style="font-weight:700;color:#1e293b;font-size:18px">${total}</span>` : '<span style="color:#94a3b8">—</span>';
+  const diffStr = (() => {
+    if (diff === null) return '';
+    if (diff > 0) return `<span style="color:#10b981;font-weight:700;font-size:14px">↑ +${diff}</span>`;
+    if (diff < 0) return `<span style="color:#dc2626;font-weight:700;font-size:14px">↓ ${diff}</span>`;
+    return `<span style="color:#94a3b8;font-weight:700;font-size:14px">→ ±0</span>`;
+  })();
+  const summaryShort = getConditionSummary(cond, diff);
+  return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:20px">
+    <div style="font-weight:700;color:#1e293b;font-size:15px;margin-bottom:10px">コンディションスコア</div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:#64748b;margin-bottom:14px">
+      <span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${sanitize(emp.name || '')}</span>
+      <span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>${dateStr}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+      <span style="display:inline-flex;align-items:center;gap:8px">${condIcon}${totalStr}</span>
+      ${diffStr}
+    </div>
+    <div style="font-size:13px;color:#475569;line-height:1.7">${sanitize(summaryShort)}</div>
+  </div>`;
+}
+
+function renderConditionSummarySection(cond, diff) {
+  const text = getConditionLongSummary(cond, diff);
+  return `<div style="margin-bottom:24px">
+    <h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:8px 0 14px">サマリー</h2>
+    <p style="font-size:13.5px;color:#334155;line-height:1.85;margin:0;white-space:pre-line">${sanitize(text)}</p>
+  </div>`;
+}
+
+function renderConditionAnalysisSection(scores, cond, diff) {
+  const bullets = getConditionAnalysisBullets(scores, cond, diff);
+  if (!bullets.length) return '';
+  return `<div style="margin-bottom:24px">
+    <h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:8px 0 14px">直近のコンディション分析</h2>
+    <ul style="font-size:13.5px;color:#334155;line-height:1.85;padding-left:20px;margin:0">${bullets.map(b => `<li style="margin-bottom:10px">${sanitize(b)}</li>`).join('')}</ul>
+  </div>`;
+}
+
+function renderConditionForwardSection(cond, diff) {
+  const bullets = getConditionForwardBullets(cond, diff);
+  if (!bullets.length) return '';
+  return `<div style="margin-bottom:24px">
+    <h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:8px 0 14px">今後の見立て・提案</h2>
+    <ul style="font-size:13.5px;color:#334155;line-height:1.85;padding-left:20px;margin:0">${bullets.map(b => `<li style="margin-bottom:10px">${sanitize(b)}</li>`).join('')}</ul>
+  </div>`;
+}
+
+// 長文サマリー（コンディション × 変動方向）
+function getConditionLongSummary(cond, diff) {
+  if (!cond) return 'まだ月次サーベイへの回答がありません。回答を促し、状況を把握できる体制を整えていきましょう。';
+  const dir = diff === null || diff === undefined ? 'flat' : diff > 5 ? 'up' : diff < -5 ? 'down' : 'flat';
+  const T = {
+    dynamic: {
+      up: 'エネルギーが満ち、周囲を巻き込みながら成果を生み出している状態です。前向きな姿勢が組織全体に良い循環を作っています。この勢いを保つために、自分にとって何が活力源になっているのかを言語化しておくと、今後コンディションが変化したときの拠り所になります。次の挑戦テーマを設定し、影響範囲をさらに広げていきましょう。',
+      down: 'これまでハイレベルなパフォーマンスを発揮してこられたからこそ、わずかな揺らぎが見られるかもしれません。自分への期待値が高い人ほど、些細な停滞にも違和感を覚えやすいものです。今は無理にギアを上げるよりも、これまでの成果と現在地を一度棚卸しし、ご自身を労う時間を意識的にとってみてください。',
+      flat: '高水準で安定したコンディションを維持できています。次のステージへ進むための余白がある状態です。日々のルーティンに小さなチャレンジを織り込み、ストレッチゾーンを楽しめる仕組みを作っていきましょう。',
+    },
+    good: {
+      up: '順調にエンゲージメントが高まっています。チームへの貢献と自分自身の成長が良い形で噛み合っている状態です。今後さらに飛躍するために、これまで培ってきた強みを新しい領域へ応用することを検討してみてください。',
+      down: 'これまで周囲と調和し、高い熱量で多くの成果を積み上げてこられたことと思います。持ち前の明るさと人への細やかな配慮は、チームにとって大きな支えとなってきました。ただ、直近ではご自身の期待する成果や手応えに対して、少しだけ足踏みを感じているかもしれません。これは、あなたがこれまで全力で走り続けてきた証でもあります。今は少し立ち止まり、ご自身の内側にあるエネルギーを再確認するタイミングと捉えてみてはいかがでしょうか。周囲への貢献を大切にするあなただからこそ、まずはご自身の心身を整えることが、結果としてチームへの最大の還元につながります。焦らず、今の自分にできる小さな工夫から始めてみましょう。',
+      flat: '安定感のあるコンディションを保てています。日々の業務をしっかりとこなしながら、周囲との関係も良好に築けている状態です。次の半年に向けて、新しい目標や挑戦のテーマを1on1で設定すると、さらに前向きなエネルギーが生まれてくるはずです。',
+    },
+    normal: {
+      up: '上向きの兆しが見えています。これまでの努力や工夫が少しずつ実を結んでおり、自信を取り戻しつつある段階です。小さな成功体験を可視化し、積み重ねていくことで、次のレベルに向けた土台が整っていきます。',
+      down: '少しずつ変化のサインが出ています。日々の業務に追われる中で、自分にとって何が活力源で、何が消耗の原因になっているかが見えにくくなっているかもしれません。早めに状況を整理し、優先順位を再設定することで、軸を取り戻しやすくなります。',
+      flat: 'フラットなコンディションが続いています。大きな問題はないものの、新鮮さや刺激に少し欠けているかもしれません。新しい役割やプロジェクトに小さく関わってみることで、新たなモチベーションの源が見つかる可能性があります。',
+    },
+    low: {
+      up: 'コンディションは底を打ち、回復に向かい始めています。引き続きサポートを続けながら、本人のペースを尊重して伴走していきましょう。一度離れていた仕事への興味や関心を、少しずつ取り戻すきっかけ作りが鍵となります。',
+      down: 'ストレスや疲労のサインが見られます。仕事量や人間関係のどこかに引っかかりが生じている可能性が高い状態です。1on1で丁寧にヒアリングし、抱えている負担を一緒に整理していきましょう。早めの介入が回復までの時間を大きく短縮します。',
+      flat: '低調なコンディションが続いています。小さなSOSを見逃さず、丁寧に対話する機会を作りましょう。本人にとって安心して話せる場を整えることが、次の一歩を後押しします。',
+    },
+    recovery: {
+      up: '厳しい状況を抜け、回復の兆しが見え始めています。引き続き慎重にケアを続け、無理のない範囲で自信を取り戻すサポートを継続していきましょう。',
+      down: 'コンディションが大きく落ち込んでいます。早急に状況を確認し、業務量・人間関係・健康状態の3点から多面的にケアの方針を立てる必要があります。場合によっては休養や役割の見直しも検討しましょう。',
+      flat: '低い状態が継続しています。優先度を高く設定し、本人と上長・人事が連携しながら丁寧にフォローしていく必要があります。',
+    },
+  };
+  return (T[cond.key] && T[cond.key][dir]) || '';
+}
+
+// 直近のコンディション分析（カテゴリスコアから動的生成）
+function getConditionAnalysisBullets(scores, cond, diff) {
+  if (!scores) return [];
+  const items = Object.entries(scores)
+    .filter(([k, v]) => typeof v === 'number')
+    .map(([k, v]) => ({ k, v }))
+    .sort((a, b) => b.v - a.v);
+  if (items.length === 0) return [];
+  const top = items[0];
+  const low = items[items.length - 1];
+  const second = items[1] || null;
+  const bullets = [];
+  // 強み（最高スコア）
+  bullets.push(`「${top.k}」のスコアが${top.v}点と高く、これがあなたの大きな支えとなっています。${getCategoryStrengthText(top.k)}人とのつながりや日々の活動の手応えを実感できている状態であり、今後もこの強みを活かしていけるはずです。`);
+  // ギャップ（最低スコア）
+  if (low && low.k !== top.k) {
+    bullets.push(`一方で、「${low.k}」については${low.v}点と、他のカテゴリと比較してやや低めの結果でした。${getCategoryGapText(low.k)}この領域に小さな変化を加えることで、全体のコンディションが底上げされていく可能性があります。`);
+  }
+  // 全体傾向
+  if (cond && cond.key === 'good' && diff !== null && diff < -5) {
+    bullets.push('常に周囲のニーズを察知し、期待に応えようとする姿勢は素晴らしいものです。しかし、その優しさゆえに、ご自身のケアが少し後回しになっている可能性があります。今は少しだけ、自分自身を優先する時間を意識的に作ることが、心のゆとりを取り戻す鍵となるでしょう。');
+  } else if (cond && (cond.key === 'low' || cond.key === 'recovery')) {
+    bullets.push('全体としてコンディションに揺らぎが見られます。小さな違和感を放置せず、信頼できる相手に話してみることが、ストレスを軽減する第一歩になります。');
+  } else if (second) {
+    bullets.push(`「${second.k}」も${second.v}点と良好で、複数の要素が組み合わさってあなたのコンディションを支えています。各要素のバランスを保ちながら、引き続きご自身のペースで進めていきましょう。`);
+  }
+  return bullets;
+}
+
+function getCategoryStrengthText(cat) {
+  const map = {
+    'やりがい': '日々の業務に意味や手応えを感じられており、内発的なモチベーションが保たれています。',
+    '成長': '学びや変化を実感できており、前向きな成長サイクルが回っています。',
+    '健康': '心身のコンディションが整っており、パフォーマンスを発揮できる土台が確保されています。',
+    '上司': '上司との信頼関係が構築できており、安心して働ける環境が整っています。',
+    'チーム': 'チームとの関係性が非常に良好で、困った時に助け合える土壌が築かれています。',
+    '承認': '日々の頑張りが周囲から認められており、貢献実感を持てています。',
+    '信頼': '組織への信頼感が安定しており、安心して働ける状態です。',
+    '組織': '組織の方針やビジョンへの共感があり、進むべき方向が見えています。',
+    '業務': '担当業務の進め方や役割が明確で、力を発揮しやすい環境にあります。',
+  };
+  return map[cat] || '';
+}
+
+function getCategoryGapText(cat) {
+  const map = {
+    'やりがい': '業務の意義や手応えを感じにくくなっているサインかもしれません。担当業務の意味づけを改めて整理してみると良いでしょう。',
+    '成長': '日々の中で成長実感が得にくくなっている可能性があります。新しい挑戦や学びの機会を意識的に作ることが効果的です。',
+    '健康': '心身の余裕が少し削られている可能性があります。睡眠・休息の見直しを優先しましょう。',
+    '上司': '上司とのコミュニケーション量や質に改善余地があるかもしれません。1on1の頻度や内容を見直してみましょう。',
+    'チーム': 'チーム内の関係性や役割分担に小さな引っかかりがある可能性があります。気になる点を率直に共有する場を持ちましょう。',
+    '承認': '貢献に対するフィードバックが届きにくい状態かもしれません。意識的に成果を可視化・共有していきましょう。',
+    '信頼': '組織への信頼感に揺らぎが見えています。情報共有や意思決定プロセスを改めて整える機会かもしれません。',
+    '組織': '組織の方針や進む方向が見えにくくなっているかもしれません。目線合わせの機会を作ることが鍵になります。',
+    '業務': '業務の進め方や負荷バランスに調整余地があるかもしれません。優先順位の整理から始めてみましょう。',
+  };
+  return map[cat] || '';
+}
+
+// 今後の見立て・提案
+function getConditionForwardBullets(cond, diff) {
+  const dir = diff === null || diff === undefined ? 'flat' : diff > 5 ? 'up' : diff < -5 ? 'down' : 'flat';
+  const T = {
+    dynamic: [
+      'あなたの持つ前向きなエネルギーは、組織にとって大きな財産です。この強みを活かし、より大きな影響範囲で力を発揮していくフェーズへ移行できます。',
+      '高いパフォーマンスを継続するためには、燃え尽きないための仕組み作りも重要です。意識的にオフの時間を確保し、長期的に走り続ける土台を整えましょう。',
+      '次のステージでは、自分の強みを後進に伝えていく役割も視野に入ると、さらにキャリアの幅が広がっていきます。',
+    ],
+    good: [
+      'あなたが持つ「周囲を巻き込み、調和を生み出す力」は、組織にとってかけがえのない財産です。この強みは今後も変わらず、あなたの活動の軸として大きな役割を果たし続けるはずです。',
+      '期待に応えようとするあまり、ご自身のペースを超えて頑張りすぎてしまうと、持ち前の明るさが少し曇ってしまう懸念があります。今は「完璧を目指す」ことよりも、「自分らしく心地よく進める」ことを優先しても良い時期かもしれません。',
+      'ワークライフバランスが少し揺らいでいる様子が見受けられます。意識的に休息を取り入れたり、業務の優先順位を整理したりすることで、再びエネルギーが満ちてくるはずです。無理をせず、ご自身のペースを大切にしてください。',
+      '今後は、ご自身の感じている「少し物足りない」という感覚を、信頼できる方と共有してみるのも一つの方法です。言葉にすることで、自分自身が何を大切にしたいのかが整理され、次の一歩を踏み出すためのヒントが見えてくるはずです。',
+    ],
+    normal: [
+      '今のフラットな状態から一歩踏み出すために、新しい役割やプロジェクトへの参加を小さく始めてみましょう。新鮮な刺激がモチベーションの再起動につながります。',
+      '日々の業務の中で「これは自分の強み」「ここは伸びしろ」という線引きを言語化していくと、次に向かうべき方向が見えやすくなります。',
+      '上司や同僚との対話の量を少し増やすだけでも、視野が広がり、新しい気づきが得られます。意識的にコミュニケーションの機会を増やしてみましょう。',
+    ],
+    low: [
+      'まずは「何が消耗の原因か」を一緒に整理する場を持ちましょう。本人だけで抱え込まず、上長・人事と連携してケアを進めていく体制が重要です。',
+      '業務量や人間関係に明らかな負担がある場合、一時的な役割調整や役割の再定義も視野に入れましょう。早めの対応が回復までの時間を短縮します。',
+      '心身の休息を最優先にできるよう、業務の優先順位を見直し、本人が安心して立ち止まれる環境を整えていきましょう。',
+    ],
+    recovery: [
+      '優先度を最高に設定し、上長・人事・本人で対話の機会を早急に持ちましょう。場合によっては休養や役割変更も検討に入ります。',
+      '小さな安心感を積み重ねていくことが回復の近道です。日常的なねぎらいや声かけを意識的に行い、安全な環境を確保していきましょう。',
+      '専門家（産業医・カウンセラー等）への相談も視野に入れ、複数の視点から本人を支える体制を構築していきます。',
+    ],
+  };
+  if (!cond) return [];
+  return T[cond.key] || [];
+}
+
 // ===== ステータス・カスタムドロップダウン =====
 let _scoreStatusFilter = '';
 const STATUS_ICONS = {
@@ -4044,7 +4297,7 @@ function renderScoreTab() {
         return `<span style="color:#94a3b8;font-weight:700">→ ±0</span>`;
       })();
       const summary = getConditionSummary(r.cond, r.diff);
-      return `<tr class="clickable" onclick="showDetail('${r.id}')">
+      return `<tr class="clickable" onclick="openConditionDrawer('${r.id}')">
         <td>${memberCell}</td>
         <td>${condCell}</td>
         <td>${diffCell}</td>
@@ -4202,19 +4455,21 @@ async function exportToSpreadsheet() {
 // ===== 社員詳細 =====
 let lastTab = 'employees';
 
-function showDetail(empId) {
+function showDetail(empId, drawerMode) {
   rebuildEmpData();
-  lastTab = document.getElementById('tab-employees').style.display !== 'none' ? 'employees' : 'dashboard';
-  // ブラウザ戻る（トラックパッド2本指スワイプ/マウス戻るボタン）に対応するため履歴に状態を追加
-  // 同じ detail 状態で重複pushしないよう既存stateをチェック
-  if (!window.history.state || window.history.state.screen !== 'detail') {
-    window.history.pushState({ screen: 'detail', empId, lastTab }, '');
-  } else {
-    window.history.replaceState({ screen: 'detail', empId, lastTab }, '');
+  if (!drawerMode) {
+    lastTab = document.getElementById('tab-employees').style.display !== 'none' ? 'employees' : 'dashboard';
+    if (!window.history.state || window.history.state.screen !== 'detail') {
+      window.history.pushState({ screen: 'detail', empId, lastTab }, '');
+    } else {
+      window.history.replaceState({ screen: 'detail', empId, lastTab }, '');
+    }
   }
   const emp = employees[empId];
-  document.getElementById('detail-name').textContent = emp?.name || empId;
-  document.getElementById('detail-dept').textContent = emp?.dept || '';
+  if (!drawerMode) {
+    document.getElementById('detail-name').textContent = emp?.name || empId;
+    document.getElementById('detail-dept').textContent = emp?.dept || '';
+  }
 
   const empProfile = getProfile(empId);
   const empRank = getBizIQData(empId)?.rank16 || calcRank(empProfile.iq, empProfile.battlePower);
@@ -4230,9 +4485,11 @@ function showDetail(empId) {
   const status = latestTotal !== null ? getTotalStatus(latestTotal, diff) : 'ok';
   const hasAnyData = latestScores !== null;
 
-  const badge = document.getElementById('detail-status-badge');
-  badge.className = `badge badge-${status}`;
-  badge.textContent = !hasAnyData ? 'サーベイ未回答' : status === 'alert' ? '⚠️ 要確認' : status === 'warn' ? '注意' : '良好';
+  if (!drawerMode) {
+    const badge = document.getElementById('detail-status-badge');
+    badge.className = `badge badge-${status}`;
+    badge.textContent = !hasAnyData ? 'サーベイ未回答' : status === 'alert' ? '⚠️ 要確認' : status === 'warn' ? '注意' : '良好';
+  }
 
   // ライングラフ（SVG）
   const svgW = 700, svgH = 200, padL = 40, padR = 20, padT = 20, padB = 30;
@@ -4535,8 +4792,9 @@ function showDetail(empId) {
       <div style="font-size:13px;color:#64748b">この社員はまだ月次サーベイに回答していません。回答があると、ここにスコア推移・アラート・推奨対応が表示されます。</div>
     </div>`;
 
-  document.getElementById('detail-content').innerHTML = profileHtml + bizIQHtml + answerDetailHtml + surveySection;
-
+  const detailHtml = profileHtml + bizIQHtml + answerDetailHtml + surveySection;
+  if (drawerMode) return detailHtml;
+  document.getElementById('detail-content').innerHTML = detailHtml;
   showScreen('detail');
 }
 
