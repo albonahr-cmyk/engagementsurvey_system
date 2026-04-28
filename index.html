@@ -2616,8 +2616,10 @@ function inSelectedDept(empId) {
 
 // 仮プレースホルダ部署（社員追加までドロップダウン・スコア表で常時表示）
 const PLACEHOLDER_DEPTS = ['人事', 'VR', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
+// 旧名・廃止部署（プルダウン・ダッシュボードから除外）
+const REMOVED_DEPTS = new Set(['人事部', '新規事業開発', 'RAYSEE']);
 
-// 旧名「人事部」→ 新名「人事」エイリアス（マイグレーション完了までのフォールバック）
+// 旧名のエイリアス（マイグレーション完了までのフォールバック）
 function normalizeDept(d) {
   if (d === '人事部') return '人事';
   if (d === '新規事業開発') return 'M&D';
@@ -2627,7 +2629,10 @@ function normalizeDept(d) {
 function getAllDepts() {
   const set = new Set(PLACEHOLDER_DEPTS);
   Object.values(employees).forEach(e => {
-    if (e.role !== 'admin' && e.dept) set.add(normalizeDept(e.dept));
+    if (e.role !== 'admin' && e.dept) {
+      const d = normalizeDept(e.dept);
+      if (!REMOVED_DEPTS.has(d)) set.add(d);
+    }
   });
   return Array.from(set);
 }
@@ -3306,7 +3311,7 @@ function renderDashboard() {
     Object.entries(employees).forEach(([id, emp]) => {
       if (emp.role === 'admin') return;
       const dept = normalizeDept(emp.dept);
-      if (!dept) return;
+      if (!dept || REMOVED_DEPTS.has(dept)) return;
       if (!deptMap[dept]) deptMap[dept] = { totals: [], memberCount: 0 };
       deptMap[dept].memberCount++;
       const scores = empData[id]?.[month];
@@ -5570,8 +5575,6 @@ function reloadAllSettings() {
 
 // デフォルト部署（必ずプルダウンに表示される）
 const DEFAULT_DEPTS = ['人事', 'VR', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
-// 旧名・廃止部署（プルダウンから除外）
-const REMOVED_DEPTS = new Set(['人事部', '新規事業開発', 'RAYSEE']);
 
 function getDeptsFromEmployees() {
   const empDepts = Object.values(employees).map(e => e.dept).filter(Boolean);
