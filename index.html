@@ -7523,12 +7523,21 @@ function renderBizIQCard(data, empId) {
     データが表示されない場合は、ビジネスIQ管理画面からテキストをコピーして貼り直してください。
   </div>` : '';
 
-  // 左右の列にバランスよく振り分け
-  const leftCol = (commentScoresHtml || '') + (desireHtml || '');
-  const rightCol = (thinkingHtml || '') + (stressHtml || '');
-  const dualSection2 = (leftCol || rightCol)
-    ? `<div class="biziq-dual"><div>${leftCol}</div><div>${rightCol}</div></div>`
-    : '';
+  // 左右の列にバランスよく振り分け（コンテンツに応じて配置を調整）
+  const sections = [commentScoresHtml, desireHtml, thinkingHtml, stressHtml].filter(Boolean);
+  let dualSection2 = '';
+  if (sections.length === 1) {
+    dualSection2 = `<div>${sections[0]}</div>`;
+  } else if (sections.length === 2) {
+    dualSection2 = `<div class="biziq-dual"><div>${sections[0]}</div><div>${sections[1]}</div></div>`;
+  } else if (sections.length === 3) {
+    // 3セクション: 短いものを上に並べ、長いものを下に full-width で
+    // commentScores と thinking は短め、stress と desire は長めの傾向
+    const [a, b, c] = sections;
+    dualSection2 = `<div class="biziq-dual"><div>${a}</div><div>${b}</div></div>${c}`;
+  } else if (sections.length === 4) {
+    dualSection2 = `<div class="biziq-dual"><div>${sections[0]}${sections[2]}</div><div>${sections[1]}${sections[3]}</div></div>`;
+  }
 
   return `<div class="biziq-card" id="biziq-card-${empId}">
     <h3 style="display:flex;align-items:center;gap:8px">${ICON_DOC}ビジネスIQ適性検査 結果</h3>
