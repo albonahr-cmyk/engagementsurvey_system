@@ -717,11 +717,11 @@ if (typeof pdfjsLib !== 'undefined') {
   .rank-info-item.growth .ri-label { color: #a16207; }
 
   /* MBTI */
-  .mbti-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-  .mbti-nt { background: #e9d8f5; color: #5b21b6; border: 1px solid #c4a8e0; }   /* 分析家：薄い紫 */
-  .mbti-nf { background: #d4f0b0; color: #2d6a1f; border: 1px solid #96d468; }   /* 外交官：薄い黄緑 */
-  .mbti-sj { background: #c0d8f0; color: #1a3a6e; border: 1px solid #7ab0d8; }   /* 番人：薄い青 */
-  .mbti-sp { background: #fde5c0; color: #7c3100; border: 1px solid #f5a855; }   /* 探検家：薄いオレンジ */
+  .mbti-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.3px; }
+  .mbti-nt { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }   /* 分析家：紫 */
+  .mbti-nf { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }   /* 外交官：緑 */
+  .mbti-sj { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }   /* 番人：青 */
+  .mbti-sp { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }   /* 探検家：アンバー */
   .persona-card { background: linear-gradient(135deg, #fafafa, #f0fdfa); border: 1px solid #ccfbf1; border-radius: 12px; padding: 16px 18px; margin-top: 16px; }
   .persona-title { font-size: 16px; font-weight: 800; color: #1e1b4b; margin-bottom: 6px; }
   .persona-desc { font-size: 13px; color: #374151; line-height: 1.75; margin-bottom: 10px; }
@@ -872,22 +872,24 @@ if (typeof pdfjsLib !== 'undefined') {
   .status-select.done { border-color: #0d9488; color: #0f766e; background: #f0fdf4; }
   .action-save-btn { padding: 6px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg,#14b8a6,#0d9488); color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
   .action-saved-chip { font-size: 12px; color: #0f766e; font-weight: 700; display: none; }
-  .logic-section { background: white; border-radius: 14px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 28px; border: 1px solid rgba(0,0,0,0.04); }
-  .logic-section h3 { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
-  .logic-section .logic-desc { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.6; }
-  .rank-matrix-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-  .rank-matrix-table th, .rank-matrix-table td { border: 1px solid #e2e8f0; padding: 10px 14px; text-align: center; font-size: 13px; }
-  .rank-matrix-table th { background: #f8fafc; font-weight: 700; color: #475569; font-size: 12px; }
-  .rank-matrix-table .axis-label { background: #f1f5f9; font-weight: 700; color: #334155; font-size: 12px; }
-  .rank-cell { border-radius: 8px; padding: 6px 10px; font-weight: 900; font-size: 14px; color: white; display: inline-block; min-width: 44px; }
-  .rank-cell-s { background: linear-gradient(135deg,#7c3aed,#0d9488); }
-  .rank-cell-a { background: linear-gradient(135deg,#1d4ed8,#0284c7); }
-  .rank-cell-b { background: linear-gradient(135deg,#15803d,#059669); }
-  .rank-cell-c { background: linear-gradient(135deg,#b45309,#dc2626); }
+  .logic-section { background: white; border-radius: 14px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.04); }
+  .logic-section h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 6px; letter-spacing: -0.2px; }
+  .logic-section .logic-desc { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.7; }
+  .rank-matrix-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 8px; border-radius: 12px; overflow: hidden; }
+  .rank-matrix-table th, .rank-matrix-table td { border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; padding: 14px 14px; text-align: center; font-size: 13px; }
+  .rank-matrix-table tr:last-child td { border-bottom: none; }
+  .rank-matrix-table th:last-child, .rank-matrix-table td:last-child { border-right: none; }
+  .rank-matrix-table th { background: #fafbfc; font-weight: 700; color: #475569; font-size: 12px; letter-spacing: 0.3px; }
+  .rank-matrix-table .axis-label { background: #fafbfc; font-weight: 700; color: #475569; font-size: 12px; }
+  .rank-cell { border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 13px; color: white; display: inline-block; min-width: 48px; letter-spacing: 0.5px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .rank-cell-s { background: linear-gradient(135deg,#8b5cf6,#6d28d9); }
+  .rank-cell-a { background: linear-gradient(135deg,#0d9488,#0f766e); }
+  .rank-cell-b { background: linear-gradient(135deg,#3b82f6,#1d4ed8); }
+  .rank-cell-c { background: linear-gradient(135deg,#f59e0b,#b45309); }
   .rank-list-table { width: 100%; border-collapse: collapse; }
-  .rank-list-table th { background: #f8fafc; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb; }
-  .rank-list-table td { padding: 12px 14px; font-size: 13px; color: #334155; border-bottom: 1px solid #f8fafc; vertical-align: top; line-height: 1.55; }
-  .rank-list-table tr:hover td { background: #f9fafb; }
+  .rank-list-table th { background: #fafbfc; padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e5e7eb; }
+  .rank-list-table td { padding: 14px; font-size: 13px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: top; line-height: 1.7; }
+  .rank-list-table tr:hover td { background: #fafbff; }
   .mbti-group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 8px; }
   .mbti-group-block { border-radius: 12px; padding: 18px 20px; border: 1px solid #e2e8f0; }
   .mbti-group-block .mg-title { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
@@ -895,35 +897,37 @@ if (typeof pdfjsLib !== 'undefined') {
   .mbti-type-chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .mbti-type-chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
   .persona-matrix-table { width: 100%; border-collapse: collapse; }
-  .persona-matrix-table th { background: #f8fafc; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb; }
-  .persona-matrix-table td { padding: 14px; font-size: 13px; color: #334155; border-bottom: 1px solid #f8fafc; vertical-align: top; }
-  .persona-matrix-table tr:hover td { background: #fafafa; }
-  .pm-tier { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; font-size: 13px; font-weight: 900; color: white; }
-  .pm-persona { font-size: 13px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+  .persona-matrix-table th { background: #fafbfc; padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e5e7eb; }
+  .persona-matrix-table td { padding: 16px 14px; font-size: 13px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .persona-matrix-table tr:hover td { background: #fafbff; }
+  .pm-tier { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; font-size: 13px; font-weight: 800; color: white; letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .pm-persona { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
   .pm-desc { font-size: 12px; color: #475569; line-height: 1.6; }
-  .pm-watch { font-size: 11px; color: #dc2626; font-weight: 600; margin-top: 6px; background: #fef2f2; padding: 5px 8px; border-radius: 6px; line-height: 1.5; }
+  .pm-watch { font-size: 11px; color: #92400e; font-weight: 500; margin-top: 0; background: #fffbeb; padding: 8px 10px; border-radius: 8px; line-height: 1.6; border-left: 3px solid #f59e0b; }
   .iq-threshold-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-  .threshold-chip { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 14px; font-size: 13px; }
-  .threshold-chip .tc-rank { font-weight: 900; font-size: 14px; }
-  .threshold-chip .tc-range { color: #64748b; font-size: 12px; font-weight: 500; }
+  .threshold-chip { display: flex; align-items: center; gap: 10px; background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; font-size: 13px; transition: all 0.15s; }
+  .threshold-chip:hover { border-color: #ccfbf1; background: #f0fdfa; }
+  .threshold-chip .tc-rank { font-weight: 800; font-size: 13px; min-width: 22px; text-align: center; padding: 2px 0; }
+  .threshold-chip .tc-range { color: #475569; font-size: 12px; font-weight: 600; }
 
   /* マスタ詳細テーブル */
-  .master-section { background: white; border-radius: 14px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 28px; border: 1px solid rgba(0,0,0,0.04); }
-  .master-section h3 { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
-  .master-desc { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.6; }
-  .master-flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; padding: 16px 20px; background: linear-gradient(135deg,#f8fafc,#f1f5f9); border-radius: 12px; border: 1px solid #e2e8f0; }
-  .master-flow-box { padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; text-align: center; min-width: 120px; }
-  .master-flow-arrow { font-size: 20px; color: #94a3b8; flex-shrink: 0; }
+  .master-section { background: white; border-radius: 14px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.04); }
+  .master-section h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 6px; letter-spacing: -0.2px; }
+  .master-desc { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.7; }
+  .master-flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; padding: 18px 20px; background: linear-gradient(135deg,#f8fafc,#f0fdfa); border-radius: 12px; border: 1px solid #e2e8f0; }
+  .master-flow-box { padding: 12px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; text-align: center; min-width: 130px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: all 0.15s; }
+  .master-flow-box:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,148,136,0.12); }
+  .master-flow-arrow { font-size: 18px; color: #14b8a6; flex-shrink: 0; font-weight: 700; }
   .master-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
   .master-table th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
   .master-table td { padding: 10px 14px; font-size: 13px; color: #334155; border-top: 1px solid #f1f5f9; vertical-align: top; line-height: 1.5; }
   .master-table tr:hover td { background: #fafbff; }
   .master-table .cat-header { background: #f8fafc; font-weight: 700; color: #475569; font-size: 12px; }
   .master-table .scale-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-  .master-tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 20px; }
-  .master-tab { padding: 10px 20px; font-size: 13px; font-weight: 700; color: #94a3b8; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; }
-  .master-tab.active { color: #14b8a6; border-bottom-color: #14b8a6; }
-  .master-tab:hover { color: #14b8a6; }
+  .master-tabs { display: flex; gap: 0; border-bottom: 1px solid #e5e7eb; margin-bottom: 24px; }
+  .master-tab { padding: 12px 22px; font-size: 13px; font-weight: 600; color: #94a3b8; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; letter-spacing: 0.3px; }
+  .master-tab.active { color: #0d9488; border-bottom-color: #0d9488; font-weight: 700; }
+  .master-tab:hover { color: #0d9488; }
 
   /* 社員詳細：推奨対応 */
   .recommend-section { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
@@ -1393,16 +1397,16 @@ if (typeof pdfjsLib !== 'undefined') {
 
       <!-- データフロー図 -->
       <div class="master-flow">
-        <div class="master-flow-box" style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);color:#4c1d95;border:1px solid #ddd6fe">
-          📋 ビジネスIQ適性検査<br><span style="font-size:11px;font-weight:500">IQ + 戦闘力 + ランク</span>
+        <div class="master-flow-box" style="background:white;color:#0f766e;border:1px solid #ccfbf1">
+          📋 ビジネスIQ適性検査<br><span style="font-size:11px;font-weight:500;color:#64748b">IQ + 戦闘力 + ランク</span>
         </div>
         <div class="master-flow-arrow">→</div>
-        <div class="master-flow-box" style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);color:#115e59;border:1px solid #99f6e4">
-          🏆 ランク算出<br><span style="font-size:11px;font-weight:500">S1〜C4（16段階）</span>
+        <div class="master-flow-box" style="background:white;color:#0f766e;border:1px solid #ccfbf1">
+          🏆 ランク算出<br><span style="font-size:11px;font-weight:500;color:#64748b">S1〜C4（16段階）</span>
         </div>
         <div class="master-flow-arrow">×</div>
-        <div class="master-flow-box" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);color:#166534;border:1px solid #bbf7d0">
-          🧬 MBTI<br><span style="font-size:11px;font-weight:500">16タイプ → ペルソナ</span>
+        <div class="master-flow-box" style="background:white;color:#0f766e;border:1px solid #ccfbf1">
+          🧬 MBTI<br><span style="font-size:11px;font-weight:500;color:#64748b">16タイプ → ペルソナ</span>
         </div>
       </div>
 
@@ -1417,19 +1421,19 @@ if (typeof pdfjsLib !== 'undefined') {
           <div>
             <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">IQティア基準</div>
             <div class="iq-threshold-row" style="flex-direction:column;gap:6px">
-              <div class="threshold-chip"><span class="tc-rank" style="color:#7c3aed">S</span><span class="tc-range">IQ 121以上</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#2563eb">A</span><span class="tc-range">IQ 111〜120</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#0f766e">B</span><span class="tc-range">IQ 100〜110</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#d97706">C</span><span class="tc-range">IQ 99以下</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:4px 10px;border-radius:6px;letter-spacing:0.5px">S</span><span class="tc-range">IQ 121以上</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:linear-gradient(135deg,#0d9488,#0f766e);padding:4px 10px;border-radius:6px;letter-spacing:0.5px">A</span><span class="tc-range">IQ 111〜120</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:linear-gradient(135deg,#3b82f6,#1d4ed8);padding:4px 10px;border-radius:6px;letter-spacing:0.5px">B</span><span class="tc-range">IQ 100〜110</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:linear-gradient(135deg,#f59e0b,#b45309);padding:4px 10px;border-radius:6px;letter-spacing:0.5px">C</span><span class="tc-range">IQ 99以下</span></div>
             </div>
           </div>
           <div>
             <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">戦闘力ティア基準</div>
             <div class="iq-threshold-row" style="flex-direction:column;gap:6px">
-              <div class="threshold-chip"><span class="tc-rank" style="color:#1e293b">1</span><span class="tc-range">89,000以上</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#1e293b">2</span><span class="tc-range">76,000〜88,999</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#1e293b">3</span><span class="tc-range">63,000〜75,999</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#1e293b">4</span><span class="tc-range">62,999以下</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:#0d9488;padding:4px 10px;border-radius:6px;letter-spacing:0.5px">1</span><span class="tc-range">89,000以上</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:#14b8a6;padding:4px 10px;border-radius:6px;letter-spacing:0.5px">2</span><span class="tc-range">76,000〜88,999</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#0f766e;background:#ccfbf1;padding:4px 10px;border-radius:6px;letter-spacing:0.5px">3</span><span class="tc-range">63,000〜75,999</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#475569;background:#f1f5f9;padding:4px 10px;border-radius:6px;letter-spacing:0.5px">4</span><span class="tc-range">62,999以下</span></div>
             </div>
           </div>
         </div>
@@ -4140,10 +4144,10 @@ function renderLogicTab() {
   // MBTIグループ
   const groupGrid = document.getElementById('mbti-group-grid');
   if (groupGrid) {
-    const groupColorBg = { NT:'#e9d8f5', NF:'#d4f0b0', SJ:'#c0d8f0', SP:'#fde5c0' };
-    const groupColorText = { NT:'#5b21b6', NF:'#2d6a1f', SJ:'#1a3a6e', SP:'#7c3100' };
-    const groupColorBorder = { NT:'#c4a8e0', NF:'#96d468', SJ:'#7ab0d8', SP:'#f5a855' };
-    const chipBg = { NT:'#f0e4fa', NF:'#e2f5c8', SJ:'#d4e8f8', SP:'#fef0d8' };
+    const groupColorBg = { NT:'#f5f3ff', NF:'#f0fdf4', SJ:'#eff6ff', SP:'#fffbeb' };
+    const groupColorText = { NT:'#6d28d9', NF:'#15803d', SJ:'#1d4ed8', SP:'#b45309' };
+    const groupColorBorder = { NT:'#ddd6fe', NF:'#bbf7d0', SJ:'#bfdbfe', SP:'#fde68a' };
+    const chipBg = { NT:'#ede9fe', NF:'#dcfce7', SJ:'#dbeafe', SP:'#fef3c7' };
     const typesByGroup = {};
     Object.entries(mbtiData).forEach(([type, d]) => {
       if (!typesByGroup[d.group]) typesByGroup[d.group] = [];
@@ -4154,7 +4158,7 @@ function renderLogicTab() {
         <div class="mg-title" style="color:${groupColorText[grp]}">${grp} — ${gd.name}</div>
         <div class="mg-style" style="color:${groupColorText[grp]};opacity:0.75">${gd.style}</div>
         <div class="mbti-type-chips">
-          ${(typesByGroup[grp]||[]).map(t => `<span class="mbti-type-chip" style="background:${chipBg[grp]};color:${groupColorText[grp]}">${t.type} <span style="font-weight:500;opacity:0.8">${t.name}</span></span>`).join('')}
+          ${(typesByGroup[grp]||[]).map(t => `<span class="mbti-type-chip" style="background:${chipBg[grp]};color:${groupColorText[grp]};border:1px solid ${groupColorBorder[grp]}">${t.type} <span style="font-weight:500;opacity:0.85">${t.name}</span></span>`).join('')}
         </div>
       </div>`).join('');
   }
@@ -4616,7 +4620,7 @@ function renderPersonaTable() {
   const mbtiFilter  = (document.getElementById('filter-mbti')  || {}).value || '';
   const rankOrder   = ['S1','S2','S3','S4','A1','A2','A3','A4','B1','B2','B3','B4','C1','C2','C3','C4'];
   const mbtiOrder   = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
-  const tierGrad    = { S:'#7c3aed,#0d9488', A:'#1d4ed8,#0284c7', B:'#15803d,#059669', C:'#b45309,#dc2626' };
+  const tierGrad    = { S:'#8b5cf6,#6d28d9', A:'#0d9488,#0f766e', B:'#3b82f6,#1d4ed8', C:'#f59e0b,#b45309' };
   const groupText   = { NT:'#7c3aed', NF:'#2563eb', SJ:'#0f766e', SP:'#d97706' };
 
   const ranks  = rankFilter  ? [rankFilter]  : rankOrder;
