@@ -1302,8 +1302,9 @@ if (typeof pdfjsLib !== 'undefined') {
         </div>
         <div class="form-group">
           <label>所属部署 <span style="color:#ef4444">*</span></label>
-          <input type="text" id="new-emp-dept" placeholder="例：営業部" list="dept-list">
-          <datalist id="dept-list"></datalist>
+          <select id="new-emp-dept">
+            <option value="">部署を選択</option>
+          </select>
         </div>
       </div>
       <div class="form-row" style="margin-bottom:14px">
@@ -1313,7 +1314,11 @@ if (typeof pdfjsLib !== 'undefined') {
         </div>
         <div class="form-group" style="max-width:200px">
           <label>勤務地</label>
-          <input type="text" id="new-emp-workloc" placeholder="例：東京">
+          <select id="new-emp-workloc">
+            <option value="">未選択</option>
+            <option value="東京">東京</option>
+            <option value="福岡">福岡</option>
+          </select>
         </div>
         <div class="form-group" style="max-width:260px">
           <label>メールアドレス</label>
@@ -3521,13 +3526,8 @@ function clearEmpFilters() {
 }
 
 function populateEmpFilterOptions() {
-  const deptSel = document.getElementById('emp-dept-filter');
+  if (typeof updateDeptOptions === 'function') updateDeptOptions();
   const wlSel = document.getElementById('emp-workloc-filter');
-  if (deptSel) {
-    const cur = deptSel.value;
-    const depts = [...new Set(Object.values(employees).map(e => e.dept).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ja'));
-    deptSel.innerHTML = '<option value="">すべての部署</option>' + depts.map(d => `<option${d === cur ? ' selected' : ''}>${d}</option>`).join('');
-  }
   if (wlSel) {
     const cur = wlSel.value;
     const locs = [...new Set(Object.values(employees).map(e => e.workLocation).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ja'));
@@ -5573,9 +5573,12 @@ function removeDept(name) {
 
 function updateDeptOptions() {
   const depts = getDeptsFromEmployees();
-  // ID発行フォームのdatalist
-  const datalist = document.getElementById('dept-list');
-  if (datalist) datalist.innerHTML = depts.map(d => `<option value="${sanitize(d)}">`).join('');
+  // ID発行フォームの部署select
+  const newEmpDept = document.getElementById('new-emp-dept');
+  if (newEmpDept) {
+    const current = newEmpDept.value;
+    newEmpDept.innerHTML = '<option value="">部署を選択</option>' + depts.map(d => `<option value="${sanitize(d)}"${d===current?' selected':''}>${sanitize(d)}</option>`).join('');
+  }
   // 社員一覧のフィルター
   const filter = document.getElementById('emp-dept-filter');
   if (filter) {
