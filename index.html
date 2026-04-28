@@ -2615,10 +2615,14 @@ function inSelectedDept(empId) {
 }
 
 // 仮プレースホルダ部署（社員追加までドロップダウン・スコア表で常時表示）
-const PLACEHOLDER_DEPTS = ['人事', 'VR', 'RAYSEE', 'monomo', 'おぢポ', 'UNSEEN', '本部', '新規事業開発'];
+const PLACEHOLDER_DEPTS = ['人事', 'VR', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
 
 // 旧名「人事部」→ 新名「人事」エイリアス（マイグレーション完了までのフォールバック）
-function normalizeDept(d) { return d === '人事部' ? '人事' : d; }
+function normalizeDept(d) {
+  if (d === '人事部') return '人事';
+  if (d === '新規事業開発') return 'M&D';
+  return d;
+}
 
 function getAllDepts() {
   const set = new Set(PLACEHOLDER_DEPTS);
@@ -5565,40 +5569,48 @@ function reloadAllSettings() {
 }
 
 // デフォルト部署（必ずプルダウンに表示される）
-const DEFAULT_DEPTS = ['人事', 'VR', 'RAYSEE', 'monomo', 'おぢポ', 'UNSEEN', '本部', '新規事業開発'];
+const DEFAULT_DEPTS = ['人事', 'VR', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
+// 旧名・廃止部署（プルダウンから除外）
+const REMOVED_DEPTS = new Set(['人事部', '新規事業開発', 'RAYSEE']);
 
 function getDeptsFromEmployees() {
   const empDepts = Object.values(employees).map(e => e.dept).filter(Boolean);
-  // 「人事部」は「人事」へリネーム済みなので除外
   return [...new Set([...DEFAULT_DEPTS, ...deptList, ...empDepts])]
-    .filter(d => d !== '人事部')
+    .filter(d => !REMOVED_DEPTS.has(d))
     .sort();
 }
 
 function syncDeptListFromEmployees() {
   const empDepts = [...new Set(Object.values(employees).filter(e => e.role !== 'admin').map(e => e.dept).filter(Boolean))];
   deptList = [...new Set([...DEFAULT_DEPTS, ...deptList, ...empDepts])]
-    .filter(d => d !== '人事部')
+    .filter(d => !REMOVED_DEPTS.has(d))
     .sort();
   localStorage.setItem('es_dept_list', JSON.stringify(deptList));
 }
 
-// 「人事部」→「人事」マイグレーション（管理者ログイン時に1回だけ実行）
+// 部署リネームのマイグレーション（管理者ログイン時に1回だけ実行）
+const DEPT_RENAMES = [
+  { from: '人事部', to: '人事', flag: 'es_jinji_migrated' },
+  { from: '新規事業開発', to: 'M&D', flag: 'es_md_migrated' },
+];
 async function migrateJinjiDept() {
-  if (localStorage.getItem('es_jinji_migrated') === '1') return;
-  const targets = Object.entries(employees).filter(([id, e]) => e.dept === '人事部');
-  if (targets.length === 0) {
-    localStorage.setItem('es_jinji_migrated', '1');
-    return;
+  let changed = false;
+  for (const { from, to, flag } of DEPT_RENAMES) {
+    if (localStorage.getItem(flag) === '1') continue;
+    const targets = Object.entries(employees).filter(([id, e]) => e.dept === from);
+    if (targets.length === 0) {
+      localStorage.setItem(flag, '1');
+      continue;
+    }
+    for (const [empId, emp] of targets) {
+      try {
+        const res = await apiPost('employee-save', { empId, dept: to });
+        if (res?.ok) { employees[empId].dept = to; changed = true; }
+      } catch (e) { console.error('migrate dept failed', empId, from, '→', to, e); }
+    }
+    localStorage.setItem(flag, '1');
   }
-  for (const [empId, emp] of targets) {
-    try {
-      const res = await apiPost('employee-save', { empId, dept: '人事' });
-      if (res?.ok) employees[empId].dept = '人事';
-    } catch (e) { console.error('migrate dept failed', empId, e); }
-  }
-  localStorage.setItem('es_jinji_migrated', '1');
-  if (typeof renderEmployeeList === 'function') renderEmployeeList();
+  if (changed && typeof renderEmployeeList === 'function') renderEmployeeList();
 }
 
 function renderDeptManager() {
