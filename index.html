@@ -3534,7 +3534,7 @@ function renderEmployeeList() {
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
-      <th>社員</th><th>事業部</th><th>職種</th><th>役職</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
+      <th>社員ID</th><th>社員</th><th>事業部</th><th>職種</th><th>役職</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
     </tr></thead>
     <tbody>${rows.map(r => {
       const emp = employees[r.id] || {};
@@ -3545,6 +3545,7 @@ function renderEmployeeList() {
       const monthNum = parseInt(month.split('-')[1]);
       return `
       <tr class="clickable" onclick="showDetail('${r.id}')">
+        <td onclick="event.stopPropagation()"><span class="id-badge id-link" onclick="showAccountInfo('${r.id}')" title="アカウント情報を表示">🔗 ${r.id}</span></td>
         <td>
           <div class="em-name">${sanitize(r.name)}</div>
           <div class="em-meta">
