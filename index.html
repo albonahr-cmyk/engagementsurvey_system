@@ -6767,13 +6767,11 @@ function renderActionPlan() {
   if (empListEl) {
     empListEl.innerHTML = empList.length ? empList.map(({ id, emp, alertCount, doneCount, actionCount, total }) => {
       const isSelected = id === selectedActionEmpId;
-      const profile = getProfile(id);
-      const rankInfo = calcRank(profile.iq, profile.battlePower) || '';
       return `<div onclick="selectActionEmployee('${id}')" class="action-emp-card${isSelected?' active':''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
           <div style="min-width:0">
             <div style="font-size:13px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(emp.name)}</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(emp.dept)}${rankInfo ? ' · ' + rankInfo : ''}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(emp.dept)}</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
             <div style="font-size:14px;font-weight:800;color:#1e293b">${total}<span style="font-size:10px;font-weight:600;color:#94a3b8;margin-left:1px">点</span></div>
