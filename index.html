@@ -6908,7 +6908,7 @@ function renderActionDetail(empId, month) {
             <span style="margin-left:10px;font-size:19px;font-weight:900;color:${catStatus==='alert'?'#dc2626':catStatus==='warn'?'#d97706':'#0f766e'}">${score}点</span>
             <span style="margin-left:8px;font-size:12px;color:#94a3b8">${diffText}</span>
           </div>
-          <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:${catStatus==='alert'?'#fef2f2':catStatus==='warn'?'#fffbeb':'#f0fdf4'};color:${catStatus==='alert'?'#dc2626':catStatus==='warn'?'#d97706':'#0f766e'};display:inline-flex;align-items:center">${catStatusLabel}</span>
+          ${catStatus !== 'ok' ? `<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:${catStatus==='alert'?'#fef2f2':'#fffbeb'};color:${catStatus==='alert'?'#dc2626':'#d97706'};display:inline-flex;align-items:center">${catStatusLabel}</span>` : ''}
         </div>
         <div class="action-rec-label"><span style="display:inline-flex;align-items:center;gap:5px;color:#d97706">${svgBulb}推奨アクション（参考）</span>${isPersonalized ? '<span style="font-size:10px;background:#f0fdfa;color:#14b8a6;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:700">個別カスタマイズ</span>' : ''}</div>
         <div class="action-rec-box">${recText.replace(/\n/g, '<br>')}</div>
