@@ -2615,14 +2615,15 @@ function inSelectedDept(empId) {
 }
 
 // 仮プレースホルダ部署（社員追加までドロップダウン・スコア表で常時表示）
-const PLACEHOLDER_DEPTS = ['人事', 'TTS', 'IG', 'X', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
+const PLACEHOLDER_DEPTS = ['人事管理', 'VR', 'AX', 'インキュベーション', 'Monomo', 'ポイポイ', '代理店', 'TTS', 'RAYSEE'];
 // 旧名・廃止部署（プルダウン・ダッシュボードから除外）
-const REMOVED_DEPTS = new Set(['人事部', '新規事業開発', 'RAYSEE', 'VR']);
+const REMOVED_DEPTS = new Set(['人事部', '人事', 'monomo', 'おぢポ', 'M&D', '新規事業開発', 'IG', 'X', 'UNSEEN', '本部']);
 
 // 旧名のエイリアス（マイグレーション完了までのフォールバック）
 function normalizeDept(d) {
-  if (d === '人事部') return '人事';
-  if (d === '新規事業開発') return 'M&D';
+  if (d === '人事部' || d === '人事') return '人事管理';
+  if (d === 'monomo') return 'Monomo';
+  if (d === 'おぢポ') return 'ポイポイ';
   return d;
 }
 
@@ -5584,7 +5585,7 @@ function reloadAllSettings() {
 }
 
 // デフォルト部署（必ずプルダウンに表示される）
-const DEFAULT_DEPTS = ['人事', 'TTS', 'IG', 'X', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
+const DEFAULT_DEPTS = ['人事管理', 'VR', 'AX', 'インキュベーション', 'Monomo', 'ポイポイ', '代理店', 'TTS', 'RAYSEE'];
 
 function getDeptsFromEmployees() {
   const empDepts = Object.values(employees).map(e => e.dept).filter(Boolean);
@@ -5603,8 +5604,10 @@ function syncDeptListFromEmployees() {
 
 // 部署リネームのマイグレーション（管理者ログイン時に1回だけ実行）
 const DEPT_RENAMES = [
-  { from: '人事部', to: '人事', flag: 'es_jinji_migrated' },
-  { from: '新規事業開発', to: 'M&D', flag: 'es_md_migrated' },
+  { from: '人事部', to: '人事管理', flag: 'es_jinjikanri_v1' },
+  { from: '人事', to: '人事管理', flag: 'es_jinjikanri_v2' },
+  { from: 'monomo', to: 'Monomo', flag: 'es_monomo_migrated' },
+  { from: 'おぢポ', to: 'ポイポイ', flag: 'es_poipoi_migrated' },
 ];
 async function migrateJinjiDept() {
   let changed = false;
