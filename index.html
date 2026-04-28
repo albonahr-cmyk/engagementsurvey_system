@@ -1313,6 +1313,17 @@ if (typeof pdfjsLib !== 'undefined') {
           <input type="text" id="new-emp-position" placeholder="例：マネージャー">
         </div>
         <div class="form-group" style="max-width:200px">
+          <label>雇用形態</label>
+          <select id="new-emp-jobtype">
+            <option value="">未選択</option>
+            <option value="正社員">正社員</option>
+            <option value="アルバイト">アルバイト</option>
+            <option value="インターン">インターン</option>
+            <option value="業務委託">業務委託</option>
+            <option value="派遣">派遣</option>
+          </select>
+        </div>
+        <div class="form-group" style="max-width:200px">
           <label>勤務地</label>
           <select id="new-emp-workloc">
             <option value="">未選択</option>
@@ -1392,6 +1403,17 @@ if (typeof pdfjsLib !== 'undefined') {
             <option>A1</option><option>A2</option><option>A3</option><option>A4</option>
             <option>B1</option><option>B2</option><option>B3</option><option>B4</option>
             <option>C1</option><option>C2</option><option>C3</option><option>C4</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:160px">
+          <label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">雇用形態</label>
+          <select id="emp-jobtype-filter" onchange="resetEmpPage()" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;background:white">
+            <option value="">すべての雇用形態</option>
+            <option>正社員</option>
+            <option>アルバイト</option>
+            <option>インターン</option>
+            <option>業務委託</option>
+            <option>派遣</option>
           </select>
         </div>
         <div style="flex:1;min-width:160px">
@@ -3530,7 +3552,7 @@ function toggleEmpFilters() {
 }
 
 function clearEmpFilters() {
-  ['emp-dept-filter', 'emp-rank-filter', 'emp-workloc-filter'].forEach(id => {
+  ['emp-dept-filter', 'emp-rank-filter', 'emp-jobtype-filter', 'emp-workloc-filter'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   resetEmpPage();
@@ -3554,9 +3576,10 @@ function renderEmployeeList() {
   const search = (document.getElementById('emp-search')||{}).value?.toLowerCase()||'';
   const deptFilter = (document.getElementById('emp-dept-filter')||{}).value||'';
   const rankFilter = (document.getElementById('emp-rank-filter')||{}).value||'';
+  const jobTypeFilter = (document.getElementById('emp-jobtype-filter')||{}).value||'';
   const wlFilter = (document.getElementById('emp-workloc-filter')||{}).value||'';
 
-  const activeCount = [deptFilter, rankFilter, wlFilter].filter(Boolean).length;
+  const activeCount = [deptFilter, rankFilter, jobTypeFilter, wlFilter].filter(Boolean).length;
   const countBadge = document.getElementById('emp-filter-count');
   if (countBadge) {
     if (activeCount > 0) { countBadge.style.display = 'inline-flex'; countBadge.textContent = activeCount; }
@@ -3567,6 +3590,7 @@ function renderEmployeeList() {
   const rows = Object.entries(employees).filter(([id, emp]) => {
     if (search && !id.toLowerCase().includes(search) && !(emp.name||'').toLowerCase().includes(search)) return false;
     if (deptFilter && emp.dept !== deptFilter) return false;
+    if (jobTypeFilter && emp.jobType !== jobTypeFilter) return false;
     if (wlFilter && emp.workLocation !== wlFilter) return false;
     const biziq = getBizIQData(id);
     const r16 = biziq?.rank16 || '';
@@ -3616,12 +3640,13 @@ function renderEmployeeList() {
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
-      <th>社員ID</th><th>社員</th><th>事業部</th><th>役職</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
+      <th>社員ID</th><th>社員</th><th>事業部</th><th>役職</th><th>雇用形態</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
     </tr></thead>
     <tbody>${pageRows.map(r => {
       const emp = employees[r.id] || {};
       const email = emp.email || '';
       const position = emp.position || '';
+      const jobType = emp.jobType || '';
       const workLocation = emp.workLocation || '';
       const monthNum = parseInt(month.split('-')[1]);
       return `
@@ -3635,6 +3660,7 @@ function renderEmployeeList() {
         </td>
         <td>${r.dept ? `<span class="em-chip">${sanitize(r.dept)}</span>` : ''}</td>
         <td>${position ? sanitize(position) : ''}</td>
+        <td>${jobType ? `<span class="em-chip">${sanitize(jobType)}</span>` : ''}</td>
         <td>${workLocation ? `<span class="em-chip">${sanitize(workLocation)}</span>` : ''}</td>
         <td style="font-size:12px;font-weight:600;white-space:nowrap">${emp.hasPassword ? '<span style="color:#0f766e">設定済</span>' : '<span style="color:#94a3b8">未設定</span>'}</td>
         <td style="text-align:center;white-space:nowrap" onclick="event.stopPropagation()">
@@ -4774,6 +4800,7 @@ function issueNewId() {
   if (!name) { showToast('⚠️ 氏名を入力してください'); return; }
   if (!dept) { showToast('⚠️ 所属部署を入力してください'); return; }
   const position     = document.getElementById('new-emp-position').value.trim();
+  const jobType      = document.getElementById('new-emp-jobtype').value || '';
   const workLocation = document.getElementById('new-emp-workloc').value.trim();
   const email        = document.getElementById('new-emp-email').value.trim();
   const mbti         = document.getElementById('new-emp-mbti').value || '';
@@ -4781,7 +4808,7 @@ function issueNewId() {
   const pw = generatePassword();
 
   showToast('登録中...');
-  apiPost('employee-save', { empId: newId, name, dept, role: 'employee', position, workLocation, mbti, email, password: pw }).then(saveRes => {
+  apiPost('employee-save', { empId: newId, name, dept, role: 'employee', position, jobType, workLocation, mbti, email, password: pw }).then(saveRes => {
     if (!saveRes?.ok) { showToast('❌ 保存に失敗しました'); return Promise.reject(); }
     return fetchEmployeesFromServer();
   }).then(emps => {
@@ -4805,6 +4832,7 @@ function issueNewId() {
     document.getElementById('new-emp-name').value = '';
     document.getElementById('new-emp-dept').value = '';
     document.getElementById('new-emp-position').value = '';
+    document.getElementById('new-emp-jobtype').value = '';
     document.getElementById('new-emp-workloc').value = '';
     document.getElementById('new-emp-email').value = '';
     document.getElementById('new-emp-mbti').value = '';
@@ -4959,6 +4987,7 @@ function _renderAccountView(empId) {
       <div class="account-info-row"><div class="label">氏名</div><div class="value">${sanitize(emp.name || '—')}</div></div>
       <div class="account-info-row"><div class="label">事業部</div><div class="value">${sanitize(emp.dept || '—')}</div></div>
       <div class="account-info-row"><div class="label">役職</div><div class="value">${sanitize(emp.position || '—')}</div></div>
+      <div class="account-info-row"><div class="label">雇用形態</div><div class="value">${sanitize(emp.jobType || '—')}</div></div>
       <div class="account-info-row"><div class="label">勤務地</div><div class="value">${sanitize(emp.workLocation || '—')}</div></div>
       <div class="account-info-row"><div class="label">メールアドレス</div><div class="value">${emp.email ? sanitize(emp.email) : '—'}</div></div>
     </div>
@@ -4983,7 +5012,14 @@ function _renderAccountEdit(empId) {
       <div class="account-info-row"><div class="label">氏名</div><input id="ai-edit-name" value="${sanitize(emp.name || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">事業部</div><input id="ai-edit-dept" value="${sanitize(emp.dept || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">役職</div><input id="ai-edit-position" value="${sanitize(emp.position || '')}" placeholder="例：一般社員、マネージャー" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
-      <div class="account-info-row" style="margin-top:10px"><div class="label">勤務地</div><input id="ai-edit-workloc" value="${sanitize(emp.workLocation || '')}" placeholder="例：東京、福岡" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">雇用形態</div><select id="ai-edit-jobtype" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
+        <option value=""${!emp.jobType ? ' selected' : ''}>未選択</option>
+        ${['正社員','アルバイト','インターン','業務委託','派遣'].map(t => `<option value="${t}"${emp.jobType === t ? ' selected' : ''}>${t}</option>`).join('')}
+      </select></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">勤務地</div><select id="ai-edit-workloc" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
+        <option value=""${!emp.workLocation ? ' selected' : ''}>未選択</option>
+        ${['東京','福岡'].map(l => `<option value="${l}"${emp.workLocation === l ? ' selected' : ''}>${l}</option>`).join('')}
+      </select></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">メールアドレス</div><input id="ai-edit-email" value="${sanitize(emp.email || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">新しいパスワード（変更する場合のみ）</div><input id="ai-edit-pw" type="text" placeholder="空欄なら変更なし" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
     </div>`;
@@ -4997,16 +5033,17 @@ function _accountSave(empId) {
   const name = document.getElementById('ai-edit-name').value.trim();
   const dept = document.getElementById('ai-edit-dept').value.trim();
   const position = document.getElementById('ai-edit-position').value.trim();
-  const workLocation = document.getElementById('ai-edit-workloc').value.trim();
+  const jobType = document.getElementById('ai-edit-jobtype').value || '';
+  const workLocation = document.getElementById('ai-edit-workloc').value || '';
   const email = document.getElementById('ai-edit-email').value.trim();
   const pw = document.getElementById('ai-edit-pw').value.trim();
   if (!name) { showToast('氏名を入力してください'); return; }
-  const payload = { empId, name, dept, email, position, workLocation };
+  const payload = { empId, name, dept, email, position, jobType, workLocation };
   if (pw) payload.password = pw;
   showToast('保存中...');
   apiPost('employee-save', payload).then(res => {
     if (res?.ok) {
-      employees[empId] = { ...employees[empId], name, dept, email, position, workLocation };
+      employees[empId] = { ...employees[empId], name, dept, email, position, jobType, workLocation };
       if (pw) employees[empId].hasPassword = true;
       renderEmployeeList();
       _renderAccountView(empId);
