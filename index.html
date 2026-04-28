@@ -724,10 +724,11 @@ if (typeof pdfjsLib !== 'undefined') {
   /* ランクバッジ */
   .rank-badge-lg { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 16px; font-size: 22px; font-weight: 900; color: white; flex-shrink: 0; letter-spacing: -0.5px; }
   .rank-badge-sm { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 8px; font-size: 12px; font-weight: 900; color: white; }
-  .rank-s { background: linear-gradient(135deg, #0f766e, #134e4a); box-shadow: 0 4px 14px rgba(15,118,110,0.35); }
-  .rank-a { background: linear-gradient(135deg, #0d9488, #0f766e); box-shadow: 0 4px 14px rgba(13,148,136,0.32); }
-  .rank-b { background: linear-gradient(135deg, #14b8a6, #0d9488); box-shadow: 0 4px 14px rgba(20,184,166,0.3); }
-  .rank-c { background: linear-gradient(135deg, #5eead4, #14b8a6); box-shadow: 0 4px 14px rgba(94,234,212,0.3); }
+  /* ティア別ソリッドカラー（S=濃 → C=薄） */
+  .rank-s { background: #0f766e; color: white; box-shadow: 0 4px 14px rgba(15,118,110,0.30); }
+  .rank-a { background: #0d9488; color: white; box-shadow: 0 4px 14px rgba(13,148,136,0.28); }
+  .rank-b { background: #14b8a6; color: white; box-shadow: 0 4px 14px rgba(20,184,166,0.26); }
+  .rank-c { background: #5eead4; color: #134e4a; box-shadow: 0 4px 14px rgba(94,234,212,0.30); }
   .rank-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
   .rank-copy { font-size: 18px; font-weight: 800; color: #1e293b; }
   .rank-label { font-size: 12px; color: #94a3b8; font-weight: 500; }
@@ -904,11 +905,12 @@ if (typeof pdfjsLib !== 'undefined') {
   .rank-matrix-table th:last-child, .rank-matrix-table td:last-child { border-right: none; }
   .rank-matrix-table th { background: #fafbfc; font-weight: 700; color: #475569; font-size: 12px; letter-spacing: 0.3px; }
   .rank-matrix-table .axis-label { background: #fafbfc; font-weight: 700; color: #475569; font-size: 12px; }
-  .rank-cell { border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 13px; color: white; display: inline-block; min-width: 48px; letter-spacing: 0.5px; }
-  .rank-cell-s { background: linear-gradient(135deg,#0f766e,#134e4a); }
-  .rank-cell-a { background: linear-gradient(135deg,#0d9488,#0f766e); }
-  .rank-cell-b { background: linear-gradient(135deg,#14b8a6,#0d9488); }
-  .rank-cell-c { background: linear-gradient(135deg,#5eead4,#14b8a6); }
+  .rank-cell { border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 13px; display: inline-block; min-width: 48px; letter-spacing: 0.5px; }
+  /* ティアごとにソリッドカラー（S=濃 → C=薄） */
+  .rank-cell-s { background: #0f766e; color: white; }
+  .rank-cell-a { background: #0d9488; color: white; }
+  .rank-cell-b { background: #14b8a6; color: white; }
+  .rank-cell-c { background: #5eead4; color: #134e4a; }
   .rank-list-table { width: 100%; border-collapse: collapse; }
   .rank-list-table th { background: #fafbfc; padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e5e7eb; }
   .rank-list-table td { padding: 14px; font-size: 13px; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: top; line-height: 1.7; }
@@ -1556,10 +1558,10 @@ if (typeof pdfjsLib !== 'undefined') {
           <div>
             <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">IQティア基準</div>
             <div class="iq-threshold-row" style="flex-direction:column;gap:6px">
-              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:4px 10px;border-radius:6px;letter-spacing:0.5px">S</span><span class="tc-range">IQ 121以上</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:linear-gradient(135deg,#0d9488,#0f766e);padding:4px 10px;border-radius:6px;letter-spacing:0.5px">A</span><span class="tc-range">IQ 111〜120</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:linear-gradient(135deg,#3b82f6,#1d4ed8);padding:4px 10px;border-radius:6px;letter-spacing:0.5px">B</span><span class="tc-range">IQ 100〜110</span></div>
-              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:linear-gradient(135deg,#f59e0b,#b45309);padding:4px 10px;border-radius:6px;letter-spacing:0.5px">C</span><span class="tc-range">IQ 99以下</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:#0f766e;padding:4px 10px;border-radius:6px;letter-spacing:0.5px">S</span><span class="tc-range">IQ 121以上</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:#0d9488;padding:4px 10px;border-radius:6px;letter-spacing:0.5px">A</span><span class="tc-range">IQ 111〜120</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#fff;background:#14b8a6;padding:4px 10px;border-radius:6px;letter-spacing:0.5px">B</span><span class="tc-range">IQ 100〜110</span></div>
+              <div class="threshold-chip"><span class="tc-rank" style="color:#134e4a;background:#5eead4;padding:4px 10px;border-radius:6px;letter-spacing:0.5px">C</span><span class="tc-range">IQ 99以下</span></div>
             </div>
           </div>
           <div>
@@ -2280,7 +2282,7 @@ const rankData = {
   C4: { thinking:'課題が大きい。基礎的な業務理解にも時間を要する',                      execution:'低い。自発的な行動が起きにくい',                                         growth:'手順書を徹底整備し、判断ポイントを減らす。成功体験で自信を醸成' },
 };
 
-const rankTierColor = { S:'#7c3aed', A:'#2563eb', B:'#0f766e', C:'#d97706' };
+const rankTierColor = { S:'#0f766e', A:'#0d9488', B:'#14b8a6', C:'#0d9488' };
 
 function calcRank(iq, bp) {
   if (!iq || !bp) return null;
@@ -5411,7 +5413,8 @@ function renderPersonaTable() {
   const mbtiFilter  = (document.getElementById('filter-mbti')  || {}).value || '';
   const rankOrder   = ['S1','S2','S3','S4','A1','A2','A3','A4','B1','B2','B3','B4','C1','C2','C3','C4'];
   const mbtiOrder   = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
-  const tierGrad    = { S:'#8b5cf6,#6d28d9', A:'#0d9488,#0f766e', B:'#3b82f6,#1d4ed8', C:'#f59e0b,#b45309' };
+  const tierBg      = { S:'#0f766e', A:'#0d9488', B:'#14b8a6', C:'#5eead4' };
+  const tierFg      = { S:'#ffffff', A:'#ffffff', B:'#ffffff', C:'#134e4a' };
   const groupText   = { NT:'#7c3aed', NF:'#2563eb', SJ:'#0f766e', SP:'#d97706' };
 
   const ranks  = rankFilter  ? [rankFilter]  : rankOrder;
@@ -5424,7 +5427,7 @@ function renderPersonaTable() {
     const tier = rank[0];
     return `<tr>
       <td>
-        <span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,${tierGrad[tier]});color:white;font-weight:900;font-size:14px">${rank}</span>
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:${tierBg[tier]};color:${tierFg[tier]};font-weight:900;font-size:14px">${rank}</span>
       </td>
       <td>
         <span class="mbti-badge mbti-${grp.toLowerCase()}">${mbtiType}</span>
@@ -6524,7 +6527,7 @@ function renderActionDetail(empId, month) {
   const empRank = calcRank(profile.iq, profile.battlePower);
   const mbtiType = profile.mbti || emp.mbti;
   const planData = getActionPlanData();
-  const tierColorMap = { S:'#7c3aed', A:'#2563eb', B:'#0f766e', C:'#d97706' };
+  const tierColorMap = { S:'#0f766e', A:'#0d9488', B:'#14b8a6', C:'#0d9488' };
 
   const items = catKeys.map(k => {
     const score = scores[k]; if (score == null) return null;
