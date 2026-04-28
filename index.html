@@ -1799,7 +1799,13 @@ ALBONA 人事部</textarea>
       <div id="mail-schedule-current" style="margin-top:16px;font-size:13px;color:#64748b;background:#f8fafc;padding:10px 14px;border-radius:8px;display:inline-block"></div>
     </div>
     <div id="unsubmitted-section" style="display:none;margin-top:32px">
-      <div class="section-title">📬 未回答者一覧 <span id="unsubmitted-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:12px">
+        <div class="section-title" style="margin-bottom:0">📬 未回答者一覧 <span id="unsubmitted-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <label style="font-size:13px;font-weight:600;color:#475569">配信月：</label>
+          <select id="unsubmitted-month-select" onchange="renderUnsubmittedList(this.value)" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;min-width:140px"></select>
+        </div>
+      </div>
       <div id="unsubmitted-names-inline" style="font-size:13px;color:#475569;margin-bottom:12px;line-height:1.7"></div>
       <div id="unsubmitted-list" style="margin-bottom:32px"></div>
     </div>
@@ -2116,11 +2122,11 @@ function initMonthSelects() {
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const defaultMonth = months.includes(currentMonth) ? currentMonth : months[months.length - 1];
-  ['month-select', 'emp-month-select', 'action-month-select', 'id-month-select'].forEach(id => {
+  ['month-select', 'emp-month-select', 'action-month-select', 'id-month-select', 'unsubmitted-month-select'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     const prev = el.value;
-    const useFull = (id === 'month-select' || id === 'action-month-select' || id === 'emp-month-select' || id === 'id-month-select');
+    const useFull = (id === 'month-select' || id === 'action-month-select' || id === 'emp-month-select' || id === 'id-month-select' || id === 'unsubmitted-month-select');
     el.innerHTML = months.map(m =>
       `<option value="${m}"${m === (prev && months.includes(prev) ? prev : defaultMonth) ? ' selected' : ''}>${useFull ? monthLabelsFull[m] : monthLabels[m]}</option>`
     ).join('');
@@ -2786,7 +2792,9 @@ function getMonthData(month, deptFilter) {
 function renderUnsubmittedList(monthArg) {
   const unsubSection = document.getElementById('unsubmitted-section');
   if (!unsubSection) return;
-  const month = monthArg || getSurveyMonth();
+  const sel = document.getElementById('unsubmitted-month-select');
+  const month = monthArg || (sel && sel.value) || getSurveyMonth();
+  if (sel && sel.value !== month && months.includes(month)) sel.value = month;
   const submittedIds = getSubmittedIds(month);
   const unsubmitted = Object.entries(employees)
     .filter(([id, emp]) => emp.role !== 'admin' && !submittedIds.includes(id))
@@ -4178,7 +4186,7 @@ function switchTab(name, btn) {
   });
   if (name === 'employees') { initMonthSelects(); renderEmployeeList(); }
   if (name === 'logic') renderLogicTab();
-  if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); renderUnsubmittedList(); }
+  if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); initMonthSelects(); renderUnsubmittedList(); }
   if (name === 'settings') { renderSettingsTab(); initBizIQMasterUI(); }
   if (name === 'actions') { initMonthSelects(); renderActionPlan(); }
 }
