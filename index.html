@@ -4957,15 +4957,24 @@ function deleteEmployee(id) {
 }
 
 function toggleMailExcluded(empId, excluded) {
+  if (!employees[empId]) return;
+  // 楽観的更新：即UIに反映してから API を投げる
+  const prev = employees[empId].mailExcluded;
+  employees[empId].mailExcluded = excluded;
+  if (typeof renderEmployeeList === 'function') renderEmployeeList();
+  if (typeof renderIdList === 'function') renderIdList();
   apiPost('employee-save', { empId, mailExcluded: excluded }).then(res => {
-    if (res?.ok) {
-      employees[empId].mailExcluded = excluded;
-      renderIdList();
-      showToast(excluded ? '📧 配信除外に設定しました' : '📧 配信対象に戻しました');
-    } else {
+    if (!res?.ok) {
+      employees[empId].mailExcluded = prev;
+      if (typeof renderEmployeeList === 'function') renderEmployeeList();
+      if (typeof renderIdList === 'function') renderIdList();
       showToast('⚠️ 更新に失敗しました');
-      renderIdList();
     }
+  }).catch(() => {
+    employees[empId].mailExcluded = prev;
+    if (typeof renderEmployeeList === 'function') renderEmployeeList();
+    if (typeof renderIdList === 'function') renderIdList();
+    showToast('⚠️ 更新に失敗しました');
   });
 }
 
