@@ -1001,6 +1001,23 @@ if (typeof pdfjsLib !== 'undefined') {
     background: #f1f5f9; padding: 6px 12px; border-radius: 999px;
   }
   .persona-count strong { color: #0d9488; font-weight: 800; }
+  .persona-toggle-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 11px 22px; border: none; border-radius: 12px;
+    background: #f1f5f9; color: #0d9488;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .persona-toggle-btn:hover { background: #e2e8f0; }
+  .persona-toggle-btn.expanded {
+    background: #0d9488; color: white;
+    box-shadow: 0 2px 8px rgba(13,148,136,0.26);
+  }
+  .persona-toggle-btn.expanded:hover { background: #0f766e; }
+  .persona-toggle-chevron { transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
+  .persona-toggle-btn.expanded .persona-toggle-chevron { transform: rotate(180deg); }
+  @keyframes personaTableFade { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  #persona-table-wrap.expanded { animation: personaTableFade 0.3s cubic-bezier(0.4,0,0.2,1); }
 
   /* 社員詳細：推奨対応 */
   .recommend-section { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
@@ -1741,7 +1758,13 @@ if (typeof pdfjsLib !== 'undefined') {
         </button>
         <span id="persona-count-label" class="persona-count"></span>
       </div>
-      <div style="overflow-x:auto">
+      <div style="margin-bottom:14px">
+        <button type="button" class="persona-toggle-btn" id="persona-toggle-btn" onclick="togglePersonaTable()">
+          <svg class="persona-toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          <span id="persona-toggle-label">ペルソナ一覧を表示</span>
+        </button>
+      </div>
+      <div id="persona-table-wrap" style="overflow-x:auto;display:none">
         <table class="persona-matrix-table" id="persona-matrix-table"></table>
       </div>
     </div>
@@ -5452,6 +5475,26 @@ function resetThresholds() {
 // ===== ペルソナテーブル（フィルター付き 256パターン）=====
 let _personaTier = '';
 let _personaSubRank = '';
+let _personaExpanded = false;
+
+function togglePersonaTable() {
+  _personaExpanded = !_personaExpanded;
+  const wrap = document.getElementById('persona-table-wrap');
+  const btn = document.getElementById('persona-toggle-btn');
+  const label = document.getElementById('persona-toggle-label');
+  if (!wrap) return;
+  if (_personaExpanded) {
+    wrap.style.display = 'block';
+    wrap.classList.remove('expanded'); void wrap.offsetWidth; wrap.classList.add('expanded');
+    if (btn) btn.classList.add('expanded');
+    if (label) label.textContent = 'ペルソナ一覧を閉じる';
+  } else {
+    wrap.style.display = 'none';
+    wrap.classList.remove('expanded');
+    if (btn) btn.classList.remove('expanded');
+    if (label) label.textContent = 'ペルソナ一覧を表示';
+  }
+}
 
 function setPersonaTier(tier) {
   _personaTier = tier;
