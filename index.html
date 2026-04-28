@@ -1371,25 +1371,6 @@ if (typeof pdfjsLib !== 'undefined') {
         </div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px">
-      <div class="section-title" style="margin:0">👥 社員ID一覧</div>
-      <div class="month-selector" style="margin:0">
-        <label>リセット対象月：</label>
-        <select id="id-month-select" onchange="renderIdList()"></select>
-      </div>
-    </div>
-    <div class="id-table-wrap" id="id-table"></div>
-
-    <!-- 回答リセット（ID入力） -->
-    <div style="background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin:24px 0;border:1px solid rgba(0,0,0,0.04)">
-      <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:4px">🔄 回答リセット（ID入力）</div>
-      <p style="font-size:12px;color:#94a3b8;margin-bottom:12px">一覧に表示されない社員IDの回答もリセットできます</p>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input id="reset-emp-id" type="text" placeholder="社員ID（例: EMP011）" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;width:200px">
-        <button class="btn btn-secondary btn-sm" onclick="manualResetSurvey()">回答をリセット</button>
-      </div>
-      <div id="reset-result" style="font-size:12px;margin-top:8px;color:#64748b"></div>
-    </div>
   </div>
 
   <!-- ロジック一覧 -->
@@ -4702,6 +4683,7 @@ function issueNewId() {
 
 function renderIdList() {
   const table = document.getElementById('id-table');
+  if (!table) return;
   const month = document.getElementById('id-month-select')?.value || months[months.length - 1] || getSurveyMonth();
   const rows = Object.entries(employees).map(([id, emp]) => {
     const profile  = getProfile(id);
@@ -4760,27 +4742,6 @@ async function refreshSurveyData() {
   } catch(e) {
     showToast('⚠️ データ取得に失敗しました');
   }
-}
-
-function manualResetSurvey() {
-  var empId = document.getElementById('reset-emp-id').value.trim();
-  if (!empId) { showToast('社員IDを入力してください'); return; }
-  var currentMonth = getSurveyMonth();
-  if (!confirm(empId + ' の今月（' + currentMonth + '）の回答をリセットしますか？')) return;
-  document.getElementById('reset-result').textContent = 'リセット中...';
-  apiPost('survey-reset', { empId: empId, month: currentMonth }).then(function(res) {
-    if (res && res.ok) {
-      localStorage.removeItem('es_' + empId + '_' + currentMonth);
-      localStorage.removeItem('es_draft_' + empId);
-      document.getElementById('reset-result').textContent = '✅ リセット完了（' + empId + ' / ' + currentMonth + '）';
-      document.getElementById('reset-result').style.color = '#0f766e';
-      showToast('✅ 回答をリセットしました');
-    } else {
-      document.getElementById('reset-result').textContent = '❌ リセット失敗';
-      document.getElementById('reset-result').style.color = '#dc2626';
-      showToast('⚠️ リセットに失敗しました');
-    }
-  });
 }
 
 function resetSurvey(id, targetMonth) {
