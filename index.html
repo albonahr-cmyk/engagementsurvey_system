@@ -5521,11 +5521,10 @@ function getDeptsFromEmployees() {
   return [...new Set([...deptList, ...empDepts])].sort();
 }
 
-// 社員データからdeptListを自動同期（実データにある部署を追加、社員がいない部署を除去）
+// 社員データからdeptListを自動同期（実データの部署をマスタに追加。マスタの部署は削除しない）
 function syncDeptListFromEmployees() {
   const empDepts = [...new Set(Object.values(employees).filter(e => e.role !== 'admin').map(e => e.dept).filter(Boolean))];
-  // 実際に社員が存在する部署のみ残す
-  deptList = empDepts.sort();
+  deptList = [...new Set([...deptList, ...empDepts])].sort();
   localStorage.setItem('es_dept_list', JSON.stringify(deptList));
 }
 
