@@ -1036,6 +1036,64 @@ if (typeof pdfjsLib !== 'undefined') {
     box-shadow: 0 2px 8px rgba(13,148,136,0.26);
   }
   .persona-toggle-btn.expanded:hover { background: #0f766e; }
+
+  /* アクションプラン：左ペインの社員カード */
+  .action-emp-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 11px 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .action-emp-card:hover {
+    border-color: #5eead4;
+    box-shadow: 0 2px 6px rgba(13,148,136,0.08);
+    transform: translateY(-1px);
+  }
+  .action-emp-card.active {
+    background: #f0fdfa;
+    border-color: #0d9488;
+    box-shadow: 0 2px 8px rgba(13,148,136,0.16);
+  }
+
+  /* アクションプラン：右ペイン空状態 */
+  .action-empty {
+    background: white;
+    border-radius: 16px;
+    border: 1px dashed #cbd5e1;
+    padding: 56px 32px;
+    text-align: center;
+    color: #64748b;
+    min-height: 360px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px;
+  }
+  .action-empty h3 { font-size: 16px; font-weight: 800; color: #1e293b; margin-top: 14px; letter-spacing: -0.2px; }
+  .action-empty p { font-size: 13px; color: #94a3b8; line-height: 1.7; max-width: 360px; margin-top: 2px; }
+  .action-empty-stats {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    margin-top: 28px; width: 100%; max-width: 480px;
+  }
+  .aes-card {
+    flex: 1; min-width: 110px;
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .aes-card .aes-num { font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
+  .aes-card .aes-num .aes-unit { font-size: 12px; font-weight: 600; color: #94a3b8; margin-left: 2px; }
+  .aes-card .aes-num.aes-alert { color: #dc2626; }
+  .aes-card .aes-num.aes-done { color: #0d9488; }
+  .aes-card .aes-label { font-size: 11px; font-weight: 600; color: #64748b; margin-top: 4px; letter-spacing: 0.3px; }
+
+  /* スクロールバーの装飾（左ペイン） */
+  #action-emp-list::-webkit-scrollbar { width: 6px; }
+  #action-emp-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  #action-emp-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  #action-emp-list::-webkit-scrollbar-track { background: transparent; }
   .persona-toggle-chevron { transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
   .persona-toggle-btn.expanded .persona-toggle-chevron { transform: rotate(180deg); }
   @keyframes personaTableFade { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
@@ -2025,24 +2083,24 @@ ALBONA 人事部</textarea>
   <div id="tab-actions" class="admin-body" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
       <div>
-        <div class="section-title" style="margin-bottom:4px">📋 アクションプラン管理</div>
+        <div class="section-title" style="margin-bottom:4px;display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2" fill="#ccfbf1"/><rect x="9" y="2" width="6" height="4" rx="1" fill="#0d9488" stroke="#0f766e"/><path d="M9 13l2 2 4-4" stroke-width="2.2"/></svg>アクションプラン管理</div>
         <p style="font-size:13px;color:#64748b">対象者ごとに、推奨アクションを参考にしながら実際の対応を記録・進捗管理します。</p>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <label style="font-size:13px;font-weight:600;color:#475569">対象月：</label>
-        <select id="action-month-select" onchange="renderActionPlan()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;min-width:140px"></select>
+        <select id="action-month-select" class="persona-mbti-select" onchange="renderActionPlan()" style="min-width:140px"></select>
       </div>
     </div>
     <!-- 2ペインレイアウト -->
     <div style="display:flex;gap:20px;align-items:flex-start">
       <!-- 左：社員リスト -->
       <div style="width:280px;flex-shrink:0">
-        <input type="text" id="action-emp-search" placeholder="名前・IDで検索..." oninput="renderActionPlan()" style="width:100%;padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:10px">
-        <div id="action-emp-list" style="display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 260px);overflow-y:auto"></div>
+        <input type="text" id="action-emp-search" placeholder="名前・IDで検索..." oninput="renderActionPlan()" style="width:100%;padding:9px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-family:inherit;margin-bottom:10px;color:#334155">
+        <div id="action-emp-list" style="display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 260px);overflow-y:auto;padding-right:4px"></div>
       </div>
       <!-- 右：選択社員のアクション詳細 -->
       <div style="flex:1;min-width:0">
-        <div id="action-plan-detail" style="color:#94a3b8;font-size:14px;padding:40px;text-align:center">← 左の一覧から対象者を選択してください</div>
+        <div id="action-plan-detail"></div>
       </div>
     </div>
   </div>
@@ -6660,31 +6718,78 @@ function renderActionPlan() {
 
   // 左：社員リスト描画
   const empListEl = document.getElementById('action-emp-list');
+  const alertSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b" stroke="#92400e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="#92400e"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="#92400e" stroke-width="2"/></svg>`;
+  const okSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg>`;
   if (empListEl) {
     empListEl.innerHTML = empList.length ? empList.map(({ id, emp, alertCount, doneCount, actionCount, total }) => {
       const isSelected = id === selectedActionEmpId;
       const profile = getProfile(id);
       const rankInfo = calcRank(profile.iq, profile.battlePower) || '';
-      return `<div onclick="selectActionEmployee('${id}')" style="background:${isSelected?'#f0fdfa':'white'};border:2px solid ${isSelected?'#14b8a6':'#e2e8f0'};border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.15s">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#1e293b">${sanitize(emp.name)}</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px">${sanitize(emp.dept)}${rankInfo ? ' · ' + rankInfo : ''}</div>
+      return `<div onclick="selectActionEmployee('${id}')" class="action-emp-card${isSelected?' active':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div style="min-width:0">
+            <div style="font-size:13px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(emp.name)}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitize(emp.dept)}${rankInfo ? ' · ' + rankInfo : ''}</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:14px;font-weight:800;color:#1e293b">${total}点</div>
-            ${alertCount > 0 ? `<div style="font-size:10px;color:#dc2626;font-weight:700">⚠️ ${alertCount}件</div>` : `<div style="font-size:10px;color:#0f766e;font-weight:700">✅</div>`}
+            <div style="font-size:14px;font-weight:800;color:#1e293b">${total}<span style="font-size:10px;font-weight:600;color:#94a3b8;margin-left:1px">点</span></div>
+            ${alertCount > 0 ? `<div style="font-size:10px;color:#dc2626;font-weight:700;margin-top:1px">${alertSvg}${alertCount}件</div>` : `<div style="font-size:10px;color:#0d9488;font-weight:700;margin-top:1px">${okSvg}</div>`}
           </div>
         </div>
-        ${actionCount > 0 ? `<div style="margin-top:8px;background:#f1f5f9;border-radius:4px;height:4px;overflow:hidden"><div style="height:100%;width:${Math.round(doneCount/actionCount*100)}%;background:linear-gradient(90deg,#2dd4bf,#0d9488);border-radius:4px"></div></div>` : ''}
+        ${actionCount > 0 ? `<div style="margin-top:8px;background:#f1f5f9;border-radius:4px;height:3px;overflow:hidden"><div style="height:100%;width:${Math.round(doneCount/actionCount*100)}%;background:linear-gradient(90deg,#2dd4bf,#0d9488);border-radius:4px"></div></div>` : ''}
       </div>`;
     }).join('') : '<div style="color:#94a3b8;font-size:13px;padding:20px;text-align:center">該当者なし</div>';
   }
 
-  // 右：選択中の社員がいれば詳細を再描画
+  // 右：選択中の社員がいれば詳細を再描画、なければ空状態
   if (selectedActionEmpId && empList.find(e => e.id === selectedActionEmpId)) {
     renderActionDetail(selectedActionEmpId, month);
+  } else {
+    renderActionEmptyState(empList, month);
   }
+}
+
+function renderActionEmptyState(empList, month) {
+  const detail = document.getElementById('action-plan-detail');
+  if (!detail) return;
+  const total = empList.length;
+  const totalAlerts = empList.reduce((s, e) => s + (e.alertCount || 0), 0);
+  const totalActions = empList.reduce((s, e) => s + (e.actionCount || 0), 0);
+  const totalDone = empList.reduce((s, e) => s + (e.doneCount || 0), 0);
+  const donePercent = totalActions > 0 ? Math.round(totalDone / totalActions * 100) : 0;
+  const alertMembers = empList.filter(e => e.alertCount > 0).length;
+  detail.innerHTML = `
+    <div class="action-empty">
+      <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="aeGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#ccfbf1"/>
+            <stop offset="1" stop-color="#5eead4"/>
+          </linearGradient>
+        </defs>
+        <rect x="32" y="22" width="56" height="76" rx="6" fill="url(#aeGrad)" stroke="#0d9488" stroke-width="2"/>
+        <rect x="46" y="14" width="28" height="14" rx="3" fill="#0d9488" stroke="#0f766e" stroke-width="2"/>
+        <path d="M44 50l8 8 18-20" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="44" y1="74" x2="76" y2="74" stroke="white" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+        <line x1="44" y1="84" x2="68" y2="84" stroke="white" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+      </svg>
+      <h3>対象者を選択してください</h3>
+      <p>左のリストから対象者を選ぶと、推奨アクションと進捗が表示されます。</p>
+      <div class="action-empty-stats">
+        <div class="aes-card">
+          <div class="aes-num">${total}<span class="aes-unit">名</span></div>
+          <div class="aes-label">対象者</div>
+        </div>
+        <div class="aes-card">
+          <div class="aes-num aes-alert">${alertMembers}<span class="aes-unit">名</span></div>
+          <div class="aes-label">要対応</div>
+        </div>
+        <div class="aes-card">
+          <div class="aes-num aes-done">${donePercent}<span class="aes-unit">%</span></div>
+          <div class="aes-label">対応進捗</div>
+        </div>
+      </div>
+    </div>`;
 }
 
 function selectActionEmployee(empId) {
