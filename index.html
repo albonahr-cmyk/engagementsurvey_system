@@ -1359,7 +1359,7 @@ if (typeof pdfjsLib !== 'undefined') {
       <div class="section-title" style="margin:0">👥 社員ID一覧</div>
       <div class="month-selector" style="margin:0">
         <label>リセット対象月：</label>
-        <select id="id-month-select" onchange="renderIdList()"></select>
+        <select id="id-month-select" onchange="renderIdList(); renderEmployeeList();"></select>
       </div>
     </div>
     <div class="id-table-wrap" id="id-table"></div>
@@ -3484,7 +3484,7 @@ function renderEmployeeKpis() {
 
 function renderEmployeeList() {
   renderEmployeeKpis();
-  const month = document.getElementById('emp-month-select')?.value || months[months.length - 1];
+  const month = document.getElementById('id-month-select')?.value || document.getElementById('emp-month-select')?.value || months[months.length - 1];
   const prev = months[months.indexOf(month) - 1];
   const search = (document.getElementById('emp-search')||{}).value?.toLowerCase()||'';
   const deptFilter = (document.getElementById('emp-dept-filter')||{}).value||'';
@@ -3530,7 +3530,7 @@ function renderEmployeeList() {
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
-      <th>社員</th><th>事業部</th><th>職種</th><th>役職</th><th>勤務地</th>
+      <th>社員</th><th>事業部</th><th>職種</th><th>役職</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
     </tr></thead>
     <tbody>${rows.map(r => {
       const emp = employees[r.id] || {};
@@ -3538,6 +3538,7 @@ function renderEmployeeList() {
       const jobType = emp.jobType || '';
       const position = emp.position || '';
       const workLocation = emp.workLocation || '';
+      const monthNum = parseInt(month.split('-')[1]);
       return `
       <tr class="clickable" onclick="showDetail('${r.id}')">
         <td>
@@ -3550,6 +3551,18 @@ function renderEmployeeList() {
         <td>${jobType ? sanitize(jobType) : ''}</td>
         <td>${position ? sanitize(position) : ''}</td>
         <td>${workLocation ? `<span class="em-chip">${sanitize(workLocation)}</span>` : ''}</td>
+        <td style="font-size:12px;font-weight:600;white-space:nowrap">${emp.hasPassword ? '<span style="color:#0f766e">設定済</span>' : '<span style="color:#94a3b8">未設定</span>'}</td>
+        <td style="text-align:center;white-space:nowrap" onclick="event.stopPropagation()">
+          <label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">
+            <input type="checkbox" ${emp.mailExcluded ? 'checked' : ''} onchange="toggleMailExcluded('${r.id}', this.checked)" style="opacity:0;width:0;height:0">
+            <span style="position:absolute;inset:0;background:${emp.mailExcluded ? '#d1d5db' : '#ef4444'};border-radius:10px;transition:.2s"></span>
+            <span style="position:absolute;top:2px;left:${emp.mailExcluded ? '2px' : '18px'};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+          </label>
+          <div style="font-size:9px;color:${emp.mailExcluded ? '#94a3b8' : '#ef4444'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
+        </td>
+        <td style="text-align:center" onclick="event.stopPropagation()">
+          <button class="action-label-btn" onclick="resetSurvey('${r.id}', '${month}')" title="${month} の回答をリセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>${monthNum}月分をリセット</button>
+        </td>
       </tr>`;
     }).join('')}
     </tbody>
