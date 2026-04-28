@@ -3824,7 +3824,7 @@ function populateScoreFilters() {
   if (sel) {
     const cur = sel.value;
     const depts = getDeptsFromEmployees();
-    sel.innerHTML = '<option value="">👥 グループ</option><option value="__all__"' + (cur === '__all__' ? ' selected' : '') + '>全メンバー</option>' +
+    sel.innerHTML = '<option value="">グループ</option><option value="__all__"' + (cur === '__all__' ? ' selected' : '') + '>全メンバー</option>' +
       depts.map(d => `<option value="${sanitize(d)}"${d === cur ? ' selected' : ''}>${sanitize(d)}</option>`).join('');
   }
   buildScoreCondPanel();
