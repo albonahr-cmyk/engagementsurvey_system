@@ -1356,12 +1356,12 @@ if (typeof pdfjsLib !== 'undefined') {
     </div>
 
     <div style="display:flex;gap:10px;margin:32px 0 20px;flex-wrap:wrap;align-items:center">
-      <input type="text" id="emp-search" placeholder="名前・IDで検索..." oninput="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;width:180px;font-family:inherit">
-      <select id="emp-dept-filter" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
+      <input type="text" id="emp-search" placeholder="名前・IDで検索..." oninput="resetEmpPage()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;width:180px;font-family:inherit">
+      <select id="emp-dept-filter" onchange="resetEmpPage()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
         <option value="">すべての部署</option>
         <option>営業部</option><option>開発部</option><option>総務部</option><option>マーケ部</option><option>人事部</option><option>経理部</option>
       </select>
-      <select id="emp-rank-filter" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
+      <select id="emp-rank-filter" onchange="resetEmpPage()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
         <option value="">すべてのランク</option>
         <option>S1</option><option>S2</option><option>S3</option><option>S4</option>
         <option>A1</option><option>A2</option><option>A3</option><option>A4</option>
@@ -1373,8 +1373,9 @@ if (typeof pdfjsLib !== 'undefined') {
         <select id="emp-month-select" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit"></select>
       </div>
     </div>
-    <span id="emp-count-label" style="display:none"></span>
+    <div id="emp-count-bar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:13px;color:#64748b"></div>
     <div class="response-table" id="emp-table"></div>
+    <div id="emp-pagination" style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:20px"></div>
   </div>
 
 
@@ -3470,6 +3471,11 @@ function renderEmployeeKpis() {
   }
 }
 
+let empListPage = 1;
+const EMP_LIST_PAGE_SIZE = 20;
+function resetEmpPage() { empListPage = 1; renderEmployeeList(); }
+function goEmpPage(p) { empListPage = p; renderEmployeeList(); window.scrollTo({ top: document.getElementById('emp-count-bar')?.offsetTop - 100, behavior: 'smooth' }); }
+
 function renderEmployeeList() {
   renderEmployeeKpis();
   const month = document.getElementById('emp-month-select')?.value || months[months.length - 1];
@@ -3513,14 +3519,26 @@ function renderEmployeeList() {
     return a.name.localeCompare(b.name, 'ja');
   });
 
-  document.getElementById('emp-count-label').textContent = `（${rows.length}名）`;
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / EMP_LIST_PAGE_SIZE));
+  if (empListPage > totalPages) empListPage = totalPages;
+  const startIdx = (empListPage - 1) * EMP_LIST_PAGE_SIZE;
+  const endIdx = Math.min(startIdx + EMP_LIST_PAGE_SIZE, total);
+  const pageRows = rows.slice(startIdx, endIdx);
+
+  const countBar = document.getElementById('emp-count-bar');
+  if (countBar) {
+    countBar.innerHTML = total > 0
+      ? `<span>検索結果 <strong style="color:#0f766e;font-weight:700">${startIdx + 1} - ${endIdx}</strong> <span style="color:#94a3b8">/</span> ${total}</span>`
+      : '<span style="color:#94a3b8">該当する社員がいません</span>';
+  }
 
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
       <th>社員ID</th><th>社員</th><th>事業部</th><th>職種</th><th>役職</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
     </tr></thead>
-    <tbody>${rows.map(r => {
+    <tbody>${pageRows.map(r => {
       const emp = employees[r.id] || {};
       const email = emp.email || '';
       const jobType = emp.jobType || '';
@@ -3556,6 +3574,28 @@ function renderEmployeeList() {
     }).join('')}
     </tbody>
   </table>`;
+
+  renderEmpPagination(totalPages);
+}
+
+function renderEmpPagination(totalPages) {
+  const pag = document.getElementById('emp-pagination');
+  if (!pag) return;
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+  const cur = empListPage;
+  const pages = [];
+  const range = 2;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= cur - range && i <= cur + range)) pages.push(i);
+    else if (pages[pages.length - 1] !== '…') pages.push('…');
+  }
+  const btnBase = 'min-width:34px;height:34px;padding:0 10px;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.15s;border:1px solid #e2e8f0;background:white;color:#475569';
+  const arrow = (dir, disabled, target) => `<button onclick="goEmpPage(${target})" ${disabled ? 'disabled style="' + btnBase + ';opacity:.4;cursor:not-allowed"' : 'style="' + btnBase + '"'} onmouseover="if(!this.disabled){this.style.background='#f0fdfa';this.style.borderColor='#5eead4';this.style.color='#0d9488'}" onmouseout="if(!this.disabled){this.style.background='white';this.style.borderColor='#e2e8f0';this.style.color='#475569'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${dir === 'prev' ? '<polyline points="15 18 9 12 15 6"/>' : '<polyline points="9 18 15 12 9 6"/>'}</svg></button>`;
+  pag.innerHTML = arrow('prev', cur === 1, cur - 1) + pages.map(p => {
+    if (p === '…') return `<span style="color:#94a3b8;padding:0 4px">…</span>`;
+    if (p === cur) return `<button style="${btnBase};background:#0d9488;color:white;border-color:#0d9488;font-weight:700">${p}</button>`;
+    return `<button onclick="goEmpPage(${p})" style="${btnBase}" onmouseover="this.style.background='#f0fdfa';this.style.borderColor='#5eead4';this.style.color='#0d9488'" onmouseout="this.style.background='white';this.style.borderColor='#e2e8f0';this.style.color='#475569'">${p}</button>`;
+  }).join('') + arrow('next', cur === totalPages, cur + 1);
 }
 
 function exportEmployeeCSV() {
