@@ -2615,9 +2615,9 @@ function inSelectedDept(empId) {
 }
 
 // 仮プレースホルダ部署（社員追加までドロップダウン・スコア表で常時表示）
-const PLACEHOLDER_DEPTS = ['人事', 'VR', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
+const PLACEHOLDER_DEPTS = ['人事', 'TTS', 'IG', 'X', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
 // 旧名・廃止部署（プルダウン・ダッシュボードから除外）
-const REMOVED_DEPTS = new Set(['人事部', '新規事業開発', 'RAYSEE']);
+const REMOVED_DEPTS = new Set(['人事部', '新規事業開発', 'RAYSEE', 'VR']);
 
 // 旧名のエイリアス（マイグレーション完了までのフォールバック）
 function normalizeDept(d) {
@@ -5574,7 +5574,7 @@ function reloadAllSettings() {
 }
 
 // デフォルト部署（必ずプルダウンに表示される）
-const DEFAULT_DEPTS = ['人事', 'VR', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
+const DEFAULT_DEPTS = ['人事', 'TTS', 'IG', 'X', 'monomo', 'おぢポ', 'UNSEEN', '本部', 'M&D'];
 
 function getDeptsFromEmployees() {
   const empDepts = Object.values(employees).map(e => e.dept).filter(Boolean);
