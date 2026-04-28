@@ -1303,13 +1303,13 @@ if (typeof pdfjsLib !== 'undefined') {
         </div>
       </div>
       <div class="form-row" style="margin-bottom:14px">
-        <div class="form-group" style="max-width:140px">
-          <label>IQスコア</label>
-          <input type="number" id="new-emp-iq" placeholder="例：115" min="60" max="200">
+        <div class="form-group" style="max-width:200px">
+          <label>役職</label>
+          <input type="text" id="new-emp-position" placeholder="例：マネージャー">
         </div>
-        <div class="form-group" style="max-width:180px">
-          <label>戦闘力</label>
-          <input type="number" id="new-emp-bp" placeholder="例：8500" min="0">
+        <div class="form-group" style="max-width:200px">
+          <label>勤務地</label>
+          <input type="text" id="new-emp-workloc" placeholder="例：東京">
         </div>
         <div class="form-group" style="max-width:260px">
           <label>メールアドレス</label>
@@ -3536,12 +3536,11 @@ function renderEmployeeList() {
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
-      <th>社員ID</th><th>社員</th><th>事業部</th><th>職種</th><th>役職</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
+      <th>社員ID</th><th>社員</th><th>事業部</th><th>役職</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
     </tr></thead>
     <tbody>${pageRows.map(r => {
       const emp = employees[r.id] || {};
       const email = emp.email || '';
-      const jobType = emp.jobType || '';
       const position = emp.position || '';
       const workLocation = emp.workLocation || '';
       const monthNum = parseInt(month.split('-')[1]);
@@ -3555,7 +3554,6 @@ function renderEmployeeList() {
           </div>
         </td>
         <td>${r.dept ? `<span class="em-chip">${sanitize(r.dept)}</span>` : ''}</td>
-        <td>${jobType ? sanitize(jobType) : ''}</td>
         <td>${position ? sanitize(position) : ''}</td>
         <td>${workLocation ? `<span class="em-chip">${sanitize(workLocation)}</span>` : ''}</td>
         <td style="font-size:12px;font-weight:600;white-space:nowrap">${emp.hasPassword ? '<span style="color:#0f766e">設定済</span>' : '<span style="color:#94a3b8">未設定</span>'}</td>
@@ -4694,15 +4692,15 @@ function issueNewId() {
   const dept = document.getElementById('new-emp-dept').value.trim();
   if (!name) { showToast('⚠️ 氏名を入力してください'); return; }
   if (!dept) { showToast('⚠️ 所属部署を入力してください'); return; }
-  const iq         = parseInt(document.getElementById('new-emp-iq').value) || 0;
-  const battlePower = parseInt(document.getElementById('new-emp-bp').value) || 0;
-  const email      = document.getElementById('new-emp-email').value.trim();
-  const mbti       = document.getElementById('new-emp-mbti').value || '';
+  const position     = document.getElementById('new-emp-position').value.trim();
+  const workLocation = document.getElementById('new-emp-workloc').value.trim();
+  const email        = document.getElementById('new-emp-email').value.trim();
+  const mbti         = document.getElementById('new-emp-mbti').value || '';
   const newId = nextEmpId();
   const pw = generatePassword();
 
   showToast('登録中...');
-  apiPost('employee-save', { empId: newId, name, dept, role: 'employee', iq, battlePower, mbti, email, password: pw }).then(saveRes => {
+  apiPost('employee-save', { empId: newId, name, dept, role: 'employee', position, workLocation, mbti, email, password: pw }).then(saveRes => {
     if (!saveRes?.ok) { showToast('❌ 保存に失敗しました'); return Promise.reject(); }
     return fetchEmployeesFromServer();
   }).then(emps => {
@@ -4712,7 +4710,6 @@ function issueNewId() {
     lastIssuedId = newId;
     lastIssuedPw = pw;
 
-    const rank = calcRank(iq, battlePower);
     const result = document.getElementById('issued-result');
     result.style.display = 'block';
     result.style.animation = 'none';
@@ -4720,14 +4717,14 @@ function issueNewId() {
     result.style.animation = '';
     document.getElementById('issued-id-value').textContent = newId;
     const subParts = [`${sanitize(name)}（${sanitize(dept)}）`];
-    if (rank) subParts.push(`ランク ${rank}`);
+    if (position) subParts.push(sanitize(position));
     if (mbti) subParts.push(mbti);
     document.getElementById('issued-name-value').textContent = subParts.join(' ／ ');
     document.getElementById('issued-pw-value').textContent = `PW: ${pw}`;
     document.getElementById('new-emp-name').value = '';
     document.getElementById('new-emp-dept').value = '';
-    document.getElementById('new-emp-iq').value = '';
-    document.getElementById('new-emp-bp').value = '';
+    document.getElementById('new-emp-position').value = '';
+    document.getElementById('new-emp-workloc').value = '';
     document.getElementById('new-emp-email').value = '';
     document.getElementById('new-emp-mbti').value = '';
     rebuildEmpData();
@@ -4880,7 +4877,6 @@ function _renderAccountView(empId) {
       <div class="section-label">社員情報</div>
       <div class="account-info-row"><div class="label">氏名</div><div class="value">${sanitize(emp.name || '—')}</div></div>
       <div class="account-info-row"><div class="label">事業部</div><div class="value">${sanitize(emp.dept || '—')}</div></div>
-      <div class="account-info-row"><div class="label">職種</div><div class="value">${sanitize(emp.jobType || '—')}</div></div>
       <div class="account-info-row"><div class="label">役職</div><div class="value">${sanitize(emp.position || '—')}</div></div>
       <div class="account-info-row"><div class="label">勤務地</div><div class="value">${sanitize(emp.workLocation || '—')}</div></div>
       <div class="account-info-row"><div class="label">メールアドレス</div><div class="value">${emp.email ? sanitize(emp.email) : '—'}</div></div>
@@ -4905,7 +4901,6 @@ function _renderAccountEdit(empId) {
       <div class="section-label">社員情報を編集</div>
       <div class="account-info-row"><div class="label">氏名</div><input id="ai-edit-name" value="${sanitize(emp.name || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">事業部</div><input id="ai-edit-dept" value="${sanitize(emp.dept || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
-      <div class="account-info-row" style="margin-top:10px"><div class="label">職種</div><input id="ai-edit-jobtype" value="${sanitize(emp.jobType || '')}" placeholder="例：マーケティング、エンジニア" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">役職</div><input id="ai-edit-position" value="${sanitize(emp.position || '')}" placeholder="例：一般社員、マネージャー" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">勤務地</div><input id="ai-edit-workloc" value="${sanitize(emp.workLocation || '')}" placeholder="例：東京、福岡" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">メールアドレス</div><input id="ai-edit-email" value="${sanitize(emp.email || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
@@ -4920,18 +4915,17 @@ function _renderAccountEdit(empId) {
 function _accountSave(empId) {
   const name = document.getElementById('ai-edit-name').value.trim();
   const dept = document.getElementById('ai-edit-dept').value.trim();
-  const jobType = document.getElementById('ai-edit-jobtype').value.trim();
   const position = document.getElementById('ai-edit-position').value.trim();
   const workLocation = document.getElementById('ai-edit-workloc').value.trim();
   const email = document.getElementById('ai-edit-email').value.trim();
   const pw = document.getElementById('ai-edit-pw').value.trim();
   if (!name) { showToast('氏名を入力してください'); return; }
-  const payload = { empId, name, dept, email, jobType, position, workLocation };
+  const payload = { empId, name, dept, email, position, workLocation };
   if (pw) payload.password = pw;
   showToast('保存中...');
   apiPost('employee-save', payload).then(res => {
     if (res?.ok) {
-      employees[empId] = { ...employees[empId], name, dept, email, jobType, position, workLocation };
+      employees[empId] = { ...employees[empId], name, dept, email, position, workLocation };
       if (pw) employees[empId].hasPassword = true;
       renderEmployeeList();
       _renderAccountView(empId);
