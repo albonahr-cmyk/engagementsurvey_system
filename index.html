@@ -4339,6 +4339,7 @@ function doLogin() {
         ]).then(() => {
           reloadAllSettings();
           syncDeptListFromEmployees();
+          migrateJinjiDept();
           initMonthSelects();
           rebuildEmpData();
           renderDashboard();
@@ -5515,17 +5516,41 @@ function reloadAllSettings() {
   loadMailSchedule();
 }
 
+// デフォルト部署（必ずプルダウンに表示される）
+const DEFAULT_DEPTS = ['人事', 'VR', 'RAYSEE', 'monomo', 'おぢポ', 'UNSEEN', '本部', '新規事業開発'];
+
 function getDeptsFromEmployees() {
-  // deptList + 実際の社員データの部署をマージ（実データ優先）
   const empDepts = Object.values(employees).map(e => e.dept).filter(Boolean);
-  return [...new Set([...deptList, ...empDepts])].sort();
+  // 「人事部」は「人事」へリネーム済みなので除外
+  return [...new Set([...DEFAULT_DEPTS, ...deptList, ...empDepts])]
+    .filter(d => d !== '人事部')
+    .sort();
 }
 
-// 社員データからdeptListを自動同期（実データの部署をマスタに追加。マスタの部署は削除しない）
 function syncDeptListFromEmployees() {
   const empDepts = [...new Set(Object.values(employees).filter(e => e.role !== 'admin').map(e => e.dept).filter(Boolean))];
-  deptList = [...new Set([...deptList, ...empDepts])].sort();
+  deptList = [...new Set([...DEFAULT_DEPTS, ...deptList, ...empDepts])]
+    .filter(d => d !== '人事部')
+    .sort();
   localStorage.setItem('es_dept_list', JSON.stringify(deptList));
+}
+
+// 「人事部」→「人事」マイグレーション（管理者ログイン時に1回だけ実行）
+async function migrateJinjiDept() {
+  if (localStorage.getItem('es_jinji_migrated') === '1') return;
+  const targets = Object.entries(employees).filter(([id, e]) => e.dept === '人事部');
+  if (targets.length === 0) {
+    localStorage.setItem('es_jinji_migrated', '1');
+    return;
+  }
+  for (const [empId, emp] of targets) {
+    try {
+      const res = await apiPost('employee-save', { empId, dept: '人事' });
+      if (res?.ok) employees[empId].dept = '人事';
+    } catch (e) { console.error('migrate dept failed', empId, e); }
+  }
+  localStorage.setItem('es_jinji_migrated', '1');
+  if (typeof renderEmployeeList === 'function') renderEmployeeList();
 }
 
 function renderDeptManager() {
@@ -7106,6 +7131,7 @@ function switchMasterTab(name, btn) {
       ]).then(() => {
         reloadAllSettings();
         syncDeptListFromEmployees();
+        migrateJinjiDept();
         initMonthSelects();
         rebuildEmpData();
         renderDashboard();
