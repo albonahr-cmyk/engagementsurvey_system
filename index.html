@@ -1580,18 +1580,6 @@ if (typeof pdfjsLib !== 'undefined') {
       </div>
     </div>
 
-    <!-- 質問文カスタマイズ -->
-    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
-      <div class="section-title" style="margin-bottom:8px">📝 サーベイ質問文カスタマイズ</div>
-      <p style="font-size:13px;color:#64748b;margin-bottom:16px">質問文を編集できます。カテゴリ分類・スコア計算のロジックは変わりません。</p>
-      <div id="question-editor-list"></div>
-      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="saveCustomQuestions()">💾 保存</button>
-        <button class="btn btn-secondary" onclick="resetCustomQuestions()">↩️ 初期値に戻す</button>
-        <span id="q-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
-      </div>
-    </div>
-
     <!-- 適性検査マスタ -->
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
       <div class="section-title" style="margin-bottom:8px">📋 ビジネスIQ適性検査 マスタ管理</div>
@@ -1623,6 +1611,18 @@ if (typeof pdfjsLib !== 'undefined') {
           <thead><tr><th>社員ID</th><th>氏名</th><th>所属</th><th>16ランク</th><th>IQ</th><th>戦闘力</th><th>信頼</th><th>登録日</th><th></th></tr></thead>
           <tbody id="biziq-master-tbody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- 質問文カスタマイズ -->
+    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
+      <div class="section-title" style="margin-bottom:8px">📝 サーベイ質問文カスタマイズ</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px">質問文を編集できます。カテゴリ分類・スコア計算のロジックは変わりません。</p>
+      <div id="question-editor-list"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveCustomQuestions()">💾 保存</button>
+        <button class="btn btn-secondary" onclick="resetCustomQuestions()">↩️ 初期値に戻す</button>
+        <span id="q-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
       </div>
     </div>
 
