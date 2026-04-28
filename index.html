@@ -1375,15 +1375,6 @@ if (typeof pdfjsLib !== 'undefined') {
     </div>
     <span id="emp-count-label" style="display:none"></span>
     <div class="response-table" id="emp-table"></div>
-
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:32px 0 12px">
-      <div class="section-title" style="margin:0">👥 社員ID一覧</div>
-      <div class="month-selector" style="margin:0">
-        <label>リセット対象月：</label>
-        <select id="id-month-select" onchange="renderIdList()"></select>
-      </div>
-    </div>
-    <div class="id-table-wrap" id="id-table"></div>
   </div>
 
   <!-- ID管理 -->
@@ -4082,7 +4073,7 @@ function switchTab(name, btn) {
       el.style.display = 'none';
     }
   });
-  if (name === 'employees') { initMonthSelects(); renderEmployeeList(); renderIdList(); }
+  if (name === 'employees') { initMonthSelects(); renderEmployeeList(); }
   if (name === 'logic') renderLogicTab();
   if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); renderUnsubmittedList(); }
   if (name === 'settings') { renderSettingsTab(); initBizIQMasterUI(); }
