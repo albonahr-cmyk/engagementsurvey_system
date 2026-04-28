@@ -1355,16 +1355,7 @@ if (typeof pdfjsLib !== 'undefined') {
       </div>
     </div>
 
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:32px 0 12px">
-      <div class="section-title" style="margin:0">👥 社員ID一覧</div>
-      <div class="month-selector" style="margin:0">
-        <label>リセット対象月：</label>
-        <select id="id-month-select" onchange="renderIdList(); renderEmployeeList();"></select>
-      </div>
-    </div>
-    <div class="id-table-wrap" id="id-table"></div>
-
-    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;margin-top:24px">
+    <div style="display:flex;gap:10px;margin:32px 0 20px;flex-wrap:wrap;align-items:center">
       <input type="text" id="emp-search" placeholder="名前・IDで検索..." oninput="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;width:180px;font-family:inherit">
       <select id="emp-dept-filter" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
         <option value="">すべての部署</option>
@@ -1377,6 +1368,10 @@ if (typeof pdfjsLib !== 'undefined') {
         <option>B1</option><option>B2</option><option>B3</option><option>B4</option>
         <option>C1</option><option>C2</option><option>C3</option><option>C4</option>
       </select>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;color:#64748b;font-weight:600">リセット対象月：</label>
+        <select id="emp-month-select" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit"></select>
+      </div>
     </div>
     <span id="emp-count-label" style="display:none"></span>
     <div class="response-table" id="emp-table"></div>
@@ -3484,7 +3479,7 @@ function renderEmployeeKpis() {
 
 function renderEmployeeList() {
   renderEmployeeKpis();
-  const month = document.getElementById('id-month-select')?.value || document.getElementById('emp-month-select')?.value || months[months.length - 1];
+  const month = document.getElementById('emp-month-select')?.value || months[months.length - 1];
   const prev = months[months.indexOf(month) - 1];
   const search = (document.getElementById('emp-search')||{}).value?.toLowerCase()||'';
   const deptFilter = (document.getElementById('emp-dept-filter')||{}).value||'';
