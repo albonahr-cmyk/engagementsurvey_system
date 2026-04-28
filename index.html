@@ -3913,7 +3913,8 @@ document.addEventListener('click', (e) => {
 function openConditionDrawer(empId) {
   const emp = employees[empId];
   if (!emp) return;
-  const month = months[months.length - 1];
+  rebuildEmpData();
+  const month = getSurveyMonth();
   const prev = months[months.indexOf(month) - 1] || null;
   const data = empData[empId] || {};
   const cur = data[month] || null;
@@ -4228,7 +4229,8 @@ function renderScoreTab() {
   const condFilter = _scoreCondFilter || '';
   const statusFilter = _scoreStatusFilter || '';
 
-  const month = months[months.length - 1];
+  rebuildEmpData();
+  const month = getSurveyMonth();
   const prevMonth = months[months.indexOf(month) - 1] || null;
 
   const rows = Object.entries(employees)
