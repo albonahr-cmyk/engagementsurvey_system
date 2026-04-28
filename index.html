@@ -1441,9 +1441,13 @@ if (typeof pdfjsLib !== 'undefined') {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="score-search" placeholder="名前、アドレス" oninput="renderScoreTab()" style="padding:8px 12px 8px 34px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;width:220px;font-family:inherit;background:white">
       </div>
-      <select id="score-group-filter" onchange="renderScoreTab()" style="padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer">
-        <option value="">👥 グループ</option>
-      </select>
+      <div style="position:relative;display:inline-flex;align-items:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;pointer-events:none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <select id="score-group-filter" onchange="renderScoreTab()" style="padding:8px 30px 8px 36px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer;color:#475569;font-weight:600;appearance:none;-webkit-appearance:none">
+          <option value="">グループ</option>
+        </select>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;right:12px;pointer-events:none"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
       <div style="position:relative">
         <button type="button" id="score-cond-btn" onclick="event.stopPropagation();toggleScoreCondDropdown()" style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer;color:#475569;font-weight:600">
           <span id="score-cond-btn-icon" style="display:inline-flex;align-items:center"></span>
@@ -1452,13 +1456,14 @@ if (typeof pdfjsLib !== 'undefined') {
         </button>
         <div id="score-cond-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:1500;background:white;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15),0 2px 8px rgba(0,0,0,0.06);border:1px solid #e2e8f0;min-width:200px;padding:6px"></div>
       </div>
-      <select id="score-status-filter" onchange="renderScoreTab()" style="padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer">
-        <option value="">ⓘ ステータス</option>
-        <option value="ok">正常</option>
-        <option value="error">エラー</option>
-        <option value="expired">期限切れ</option>
-        <option value="nodata">データなし</option>
-      </select>
+      <div style="position:relative">
+        <button type="button" id="score-status-btn" onclick="event.stopPropagation();toggleScoreStatusDropdown()" style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 12px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer;color:#475569;font-weight:600">
+          <span id="score-status-btn-icon" style="display:inline-flex;align-items:center"></span>
+          <span id="score-status-btn-label">ステータス</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="score-status-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:1500;background:white;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15),0 2px 8px rgba(0,0,0,0.06);border:1px solid #e2e8f0;min-width:170px;padding:6px"></div>
+      </div>
     </div>
     <div id="score-count-bar" style="font-size:13px;color:#64748b;margin-bottom:10px"></div>
     <div id="score-table" class="response-table"></div>
@@ -3824,6 +3829,8 @@ function populateScoreFilters() {
   }
   buildScoreCondPanel();
   updateScoreCondBtn();
+  buildScoreStatusPanel();
+  updateScoreStatusBtn();
 }
 
 // ===== コンディション・カスタムドロップダウン =====
@@ -3887,13 +3894,80 @@ document.addEventListener('click', (e) => {
   panel.style.display = 'none';
 });
 
+// ===== ステータス・カスタムドロップダウン =====
+let _scoreStatusFilter = '';
+const STATUS_ICONS = {
+  '': `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  ok: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8.5 12 11 14.5 16 9.5"/></svg>`,
+  error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="7" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg>`,
+  expired: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg>`,
+  nodata: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+};
+const STATUS_OPTIONS = [
+  { key: '',        label: 'ステータス' },
+  { key: 'ok',      label: '正常' },
+  { key: 'error',   label: 'エラー' },
+  { key: 'expired', label: '期限切れ' },
+  { key: 'nodata',  label: 'データなし' },
+];
+
+function buildScoreStatusPanel() {
+  const panel = document.getElementById('score-status-panel');
+  if (!panel) return;
+  panel.innerHTML = STATUS_OPTIONS.map(it => {
+    const sel = it.key === _scoreStatusFilter;
+    const bg = sel ? 'background:#ccfbf1;color:#0f766e' : 'color:#334155';
+    return `<div onclick="selectScoreStatus('${it.key}')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;${bg};transition:background .1s" onmouseover="if(!${sel}){this.style.background='#f1f5f9'}" onmouseout="if(!${sel}){this.style.background='transparent'}">
+      <span style="display:inline-flex;align-items:center;width:20px;flex-shrink:0">${STATUS_ICONS[it.key]}</span>
+      <span>${sanitize(it.label)}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateScoreStatusBtn() {
+  const iconEl = document.getElementById('score-status-btn-icon');
+  const labelEl = document.getElementById('score-status-btn-label');
+  if (!iconEl || !labelEl) return;
+  const opt = STATUS_OPTIONS.find(o => o.key === _scoreStatusFilter) || STATUS_OPTIONS[0];
+  iconEl.innerHTML = STATUS_ICONS[opt.key] || STATUS_ICONS[''];
+  labelEl.textContent = opt.label;
+}
+
+function toggleScoreStatusDropdown() {
+  const panel = document.getElementById('score-status-panel');
+  if (!panel) return;
+  if (panel.style.display === 'none' || !panel.style.display) {
+    buildScoreStatusPanel();
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function selectScoreStatus(key) {
+  _scoreStatusFilter = key;
+  updateScoreStatusBtn();
+  const panel = document.getElementById('score-status-panel');
+  if (panel) panel.style.display = 'none';
+  renderScoreTab();
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('score-status-panel');
+  const btn = document.getElementById('score-status-btn');
+  if (!panel || !btn) return;
+  if (panel.style.display !== 'block') return;
+  if (panel.contains(e.target) || btn.contains(e.target)) return;
+  panel.style.display = 'none';
+});
+
 function renderScoreTab() {
   const tbl = document.getElementById('score-table');
   if (!tbl) return;
   const search = (document.getElementById('score-search')?.value || '').toLowerCase().trim();
   const groupFilter = document.getElementById('score-group-filter')?.value || '';
   const condFilter = _scoreCondFilter || '';
-  const statusFilter = document.getElementById('score-status-filter')?.value || '';
+  const statusFilter = _scoreStatusFilter || '';
 
   const month = months[months.length - 1];
   const prevMonth = months[months.indexOf(month) - 1] || null;
