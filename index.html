@@ -1444,14 +1444,14 @@ if (typeof pdfjsLib !== 'undefined') {
       <select id="score-group-filter" onchange="renderScoreTab()" style="padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer">
         <option value="">👥 グループ</option>
       </select>
-      <select id="score-condition-filter" onchange="renderScoreTab()" style="padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer">
-        <option value="">🔋 コンディション</option>
-        <option value="dynamic">躍動</option>
-        <option value="good">快調</option>
-        <option value="normal">ふつう</option>
-        <option value="low">低調</option>
-        <option value="recovery">要回復</option>
-      </select>
+      <div style="position:relative">
+        <button type="button" id="score-cond-btn" onclick="event.stopPropagation();toggleScoreCondDropdown()" style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer;color:#475569;font-weight:600">
+          <span id="score-cond-btn-icon" style="display:inline-flex;align-items:center"></span>
+          <span id="score-cond-btn-label">コンディション</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="score-cond-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:1500;background:white;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15),0 2px 8px rgba(0,0,0,0.06);border:1px solid #e2e8f0;min-width:200px;padding:6px"></div>
+      </div>
       <select id="score-status-filter" onchange="renderScoreTab()" style="padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer">
         <option value="">ⓘ ステータス</option>
         <option value="ok">正常</option>
@@ -3740,10 +3740,23 @@ function getCondition(score) {
   return CONDITION_LEVELS.find(c => score >= c.min) || CONDITION_LEVELS[CONDITION_LEVELS.length - 1];
 }
 
-function renderConditionIcon(cond, size) {
+// 色付きバッテリーアイコン（ドロップダウン・テーブル共通）
+function getConditionIconHtml(key, size) {
   const w = size || 22;
-  const h = Math.round(w * 14 / 22);
-  return `<svg width="${w}" height="${h}" viewBox="0 0 24 14" fill="none" style="vertical-align:-2px"><rect x="1" y="1" width="20" height="12" rx="2.5" stroke="${cond.color}" stroke-width="1.5"/><rect x="22" y="5" width="1.6" height="4" rx="0.5" fill="${cond.color}"/><rect x="3" y="3" width="${cond.fill}" height="8" rx="1" fill="${cond.color}"/></svg>`;
+  const h = Math.round(w * 20 / 28);
+  const icons = {
+    dynamic: `<svg width="${w}" height="${h}" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="#d1fae5" stroke="#059669" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#059669"/><rect x="4" y="4" width="5" height="12" rx="1" fill="#10b981"/><rect x="10" y="4" width="5" height="12" rx="1" fill="#10b981"/><rect x="16" y="4" width="6" height="12" rx="1" fill="#10b981"/><path d="M14.5 4.5 L11 11 L13 11 L11.5 15.5 L16 9 L14 9 Z" fill="#fef08a" stroke="#ca8a04" stroke-width="0.6" stroke-linejoin="round"/></svg>`,
+    good: `<svg width="${w}" height="${h}" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="white" stroke="#0d9488" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#0d9488"/><rect x="4" y="4" width="5" height="12" rx="1" fill="#14b8a6"/><rect x="10" y="4" width="5" height="12" rx="1" fill="#14b8a6"/><rect x="16" y="4" width="6" height="12" rx="1" fill="#a7f3d0"/></svg>`,
+    normal: `<svg width="${w}" height="${h}" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="white" stroke="#a16207" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#a16207"/><rect x="4" y="4" width="5" height="12" rx="1" fill="#eab308"/><rect x="10" y="4" width="5" height="12" rx="1" fill="#eab308"/><rect x="16" y="4" width="6" height="12" rx="1" fill="#fef3c7"/></svg>`,
+    low: `<svg width="${w}" height="${h}" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="white" stroke="#c2410c" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#c2410c"/><rect x="4" y="4" width="5" height="12" rx="1" fill="#f97316"/><rect x="10" y="4" width="5" height="12" rx="1" fill="#fed7aa"/><rect x="16" y="4" width="6" height="12" rx="1" fill="#fed7aa"/></svg>`,
+    recovery: `<svg width="${w}" height="${h}" viewBox="0 0 28 22" fill="none" style="vertical-align:-3px"><path d="M14 1 C15 3 16 4 16 5.5 C16 6.6 15.1 7.5 14 7.5 C12.9 7.5 12 6.6 12 5.5 C12 4 13 3 14 1 Z" fill="#f97316"/><rect x="2" y="6" width="22" height="14" rx="3" fill="white" stroke="#b91c1c" stroke-width="1.6"/><rect x="24" y="10" width="2.4" height="6" rx="0.8" fill="#b91c1c"/><rect x="4" y="8" width="5" height="10" rx="1" fill="#fecaca"/><rect x="10" y="8" width="5" height="10" rx="1" fill="#fecaca"/><rect x="16" y="8" width="6" height="10" rx="1" fill="#fecaca"/><rect x="11" y="11" width="6" height="4" rx="1" fill="#dc2626"/></svg>`,
+  };
+  return icons[key] || '';
+}
+
+// 後方互換：既存呼び出し向け
+function renderConditionIcon(cond, size) {
+  return getConditionIconHtml(cond.key, size);
 }
 
 function getScoreStatus(hasData) {
@@ -3803,19 +3816,83 @@ function getConditionSummary(cond, diff) {
 
 function populateScoreFilters() {
   const sel = document.getElementById('score-group-filter');
-  if (!sel) return;
-  const cur = sel.value;
-  const depts = getDeptsFromEmployees();
-  sel.innerHTML = '<option value="">👥 グループ</option><option value="__all__"' + (cur === '__all__' ? ' selected' : '') + '>全メンバー</option>' +
-    depts.map(d => `<option value="${sanitize(d)}"${d === cur ? ' selected' : ''}>${sanitize(d)}</option>`).join('');
+  if (sel) {
+    const cur = sel.value;
+    const depts = getDeptsFromEmployees();
+    sel.innerHTML = '<option value="">👥 グループ</option><option value="__all__"' + (cur === '__all__' ? ' selected' : '') + '>全メンバー</option>' +
+      depts.map(d => `<option value="${sanitize(d)}"${d === cur ? ' selected' : ''}>${sanitize(d)}</option>`).join('');
+  }
+  buildScoreCondPanel();
+  updateScoreCondBtn();
 }
+
+// ===== コンディション・カスタムドロップダウン =====
+let _scoreCondFilter = '';
+const COND_DEFAULT_ICON = `<svg width="22" height="16" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="white" stroke="#94a3b8" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#94a3b8"/></svg>`;
+
+function buildScoreCondPanel() {
+  const panel = document.getElementById('score-cond-panel');
+  if (!panel) return;
+  const items = [{ key: '', label: 'コンディション', icon: COND_DEFAULT_ICON }]
+    .concat(CONDITION_LEVELS.map(c => ({ key: c.key, label: c.label, icon: getConditionIconHtml(c.key, 24) })));
+  panel.innerHTML = items.map(it => {
+    const sel = it.key === _scoreCondFilter;
+    const bg = sel ? 'background:#ccfbf1;color:#0f766e' : 'color:#334155';
+    return `<div onclick="selectScoreCond('${it.key}')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;${bg};transition:background .1s" onmouseover="if(!${sel}){this.style.background='#f1f5f9'}" onmouseout="if(!${sel}){this.style.background='transparent'}">
+      <span style="display:inline-flex;align-items:center;width:28px;flex-shrink:0">${it.icon}</span>
+      <span>${sanitize(it.label)}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateScoreCondBtn() {
+  const iconEl = document.getElementById('score-cond-btn-icon');
+  const labelEl = document.getElementById('score-cond-btn-label');
+  if (!iconEl || !labelEl) return;
+  if (_scoreCondFilter) {
+    const c = CONDITION_LEVELS.find(x => x.key === _scoreCondFilter);
+    iconEl.innerHTML = getConditionIconHtml(_scoreCondFilter, 22);
+    labelEl.textContent = c ? c.label : 'コンディション';
+  } else {
+    iconEl.innerHTML = COND_DEFAULT_ICON;
+    labelEl.textContent = 'コンディション';
+  }
+}
+
+function toggleScoreCondDropdown() {
+  const panel = document.getElementById('score-cond-panel');
+  if (!panel) return;
+  if (panel.style.display === 'none' || !panel.style.display) {
+    buildScoreCondPanel();
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function selectScoreCond(key) {
+  _scoreCondFilter = key;
+  updateScoreCondBtn();
+  const panel = document.getElementById('score-cond-panel');
+  if (panel) panel.style.display = 'none';
+  renderScoreTab();
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('score-cond-panel');
+  const btn = document.getElementById('score-cond-btn');
+  if (!panel || !btn) return;
+  if (panel.style.display !== 'block') return;
+  if (panel.contains(e.target) || btn.contains(e.target)) return;
+  panel.style.display = 'none';
+});
 
 function renderScoreTab() {
   const tbl = document.getElementById('score-table');
   if (!tbl) return;
   const search = (document.getElementById('score-search')?.value || '').toLowerCase().trim();
   const groupFilter = document.getElementById('score-group-filter')?.value || '';
-  const condFilter = document.getElementById('score-condition-filter')?.value || '';
+  const condFilter = _scoreCondFilter || '';
   const statusFilter = document.getElementById('score-status-filter')?.value || '';
 
   const month = months[months.length - 1];
