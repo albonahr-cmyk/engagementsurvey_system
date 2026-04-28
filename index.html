@@ -1390,38 +1390,6 @@ if (typeof pdfjsLib !== 'undefined') {
       </div>
       <div id="reset-result" style="font-size:12px;margin-top:8px;color:#64748b"></div>
     </div>
-
-    <!-- 適性検査マスタ -->
-    <div class="section-title" style="margin-top:32px">📋 ビジネスIQ適性検査 マスタ管理</div>
-    <p style="font-size:13px;color:#64748b;margin-bottom:16px">社員マスタとしてビジネスIQ適性検査の結果を登録します。IQ・戦闘力・ランクは自動反映されます。</p>
-    <div class="id-issue-card">
-      <div class="form-row" style="margin-bottom:14px;align-items:flex-end">
-        <div class="form-group" style="max-width:280px;position:relative">
-          <label>対象社員</label>
-          <input type="text" id="biziq-target-emp-search" placeholder="名前・社員ID・部署で検索..." autocomplete="off"
-            oninput="filterBizIQTargetList()" onfocus="showBizIQTargetList()" onblur="hideBizIQTargetListDelayed()" onkeydown="handleBizIQTargetKeydown(event)"
-            style="width:100%;padding:11px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;color:#1e293b;font-weight:500;background:white">
-          <input type="hidden" id="biziq-target-emp" value="">
-          <div id="biziq-target-emp-list" style="position:absolute;top:100%;left:0;right:0;max-height:280px;overflow-y:auto;background:white;border:2px solid #e5e7eb;border-radius:10px;margin-top:4px;display:none;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,0.12)"></div>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('biziq-paste-master').style.display=document.getElementById('biziq-paste-master').style.display==='none'?'block':'none'" style="height:44px">📋 テキスト貼り付けで登録</button>
-        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('biziq-file-master').click()" style="height:44px">📄 PDFアップロード</button>
-        <input type="file" id="biziq-file-master" accept=".pdf" style="display:none" onchange="handleMasterPDF(this)">
-      </div>
-      <div id="biziq-paste-master" style="display:none;margin-top:12px">
-        <p style="font-size:12px;color:#64748b;margin-bottom:8px;line-height:1.6">
-          <strong>手順：</strong>business-iq.co.jp の結果ページ → Ctrl+A（全選択）→ Ctrl+C（コピー）→ 下に貼り付け → 「登録」
-        </p>
-        <textarea id="biziq-textarea-master" rows="6" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:inherit;resize:vertical;color:#1e293b" placeholder="ここにビジネスIQ適性検査の結果テキストを貼り付け..."></textarea>
-        <button class="btn btn-primary btn-sm" onclick="handleMasterPaste()" style="margin-top:8px">登録する</button>
-      </div>
-    </div>
-    <div class="id-table-wrap" style="margin-top:16px">
-      <table id="biziq-master-table">
-        <thead><tr><th>社員ID</th><th>氏名</th><th>所属</th><th>16ランク</th><th>IQ</th><th>戦闘力</th><th>信頼</th><th>登録日</th><th></th></tr></thead>
-        <tbody id="biziq-master-tbody"></tbody>
-      </table>
-    </div>
   </div>
 
   <!-- ロジック一覧 -->
@@ -1640,6 +1608,40 @@ if (typeof pdfjsLib !== 'undefined') {
         <button class="btn btn-primary" onclick="saveCustomQuestions()">💾 保存</button>
         <button class="btn btn-secondary" onclick="resetCustomQuestions()">↩️ 初期値に戻す</button>
         <span id="q-save-msg" style="font-size:13px;color:#0f766e;font-weight:600;display:none">✅ 保存しました</span>
+      </div>
+    </div>
+
+    <!-- 適性検査マスタ -->
+    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
+      <div class="section-title" style="margin-bottom:8px">📋 ビジネスIQ適性検査 マスタ管理</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px">社員マスタとしてビジネスIQ適性検査の結果を登録します。IQ・戦闘力・ランクは自動反映されます。</p>
+      <div class="id-issue-card">
+        <div class="form-row" style="margin-bottom:14px;align-items:flex-end">
+          <div class="form-group" style="max-width:280px;position:relative">
+            <label>対象社員</label>
+            <input type="text" id="biziq-target-emp-search" placeholder="名前・社員ID・部署で検索..." autocomplete="off"
+              oninput="filterBizIQTargetList()" onfocus="showBizIQTargetList()" onblur="hideBizIQTargetListDelayed()" onkeydown="handleBizIQTargetKeydown(event)"
+              style="width:100%;padding:11px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;color:#1e293b;font-weight:500;background:white">
+            <input type="hidden" id="biziq-target-emp" value="">
+            <div id="biziq-target-emp-list" style="position:absolute;top:100%;left:0;right:0;max-height:280px;overflow-y:auto;background:white;border:2px solid #e5e7eb;border-radius:10px;margin-top:4px;display:none;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,0.12)"></div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('biziq-paste-master').style.display=document.getElementById('biziq-paste-master').style.display==='none'?'block':'none'" style="height:44px">📋 テキスト貼り付けで登録</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('biziq-file-master').click()" style="height:44px">📄 PDFアップロード</button>
+          <input type="file" id="biziq-file-master" accept=".pdf" style="display:none" onchange="handleMasterPDF(this)">
+        </div>
+        <div id="biziq-paste-master" style="display:none;margin-top:12px">
+          <p style="font-size:12px;color:#64748b;margin-bottom:8px;line-height:1.6">
+            <strong>手順：</strong>business-iq.co.jp の結果ページ → Ctrl+A（全選択）→ Ctrl+C（コピー）→ 下に貼り付け → 「登録」
+          </p>
+          <textarea id="biziq-textarea-master" rows="6" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:inherit;resize:vertical;color:#1e293b" placeholder="ここにビジネスIQ適性検査の結果テキストを貼り付け..."></textarea>
+          <button class="btn btn-primary btn-sm" onclick="handleMasterPaste()" style="margin-top:8px">登録する</button>
+        </div>
+      </div>
+      <div class="id-table-wrap" style="margin-top:16px">
+        <table id="biziq-master-table">
+          <thead><tr><th>社員ID</th><th>氏名</th><th>所属</th><th>16ランク</th><th>IQ</th><th>戦闘力</th><th>信頼</th><th>登録日</th><th></th></tr></thead>
+          <tbody id="biziq-master-tbody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -4066,10 +4068,10 @@ function switchTab(name, btn) {
     }
   });
   if (name === 'employees') renderEmployeeList();
-  if (name === 'idmgmt') { initMonthSelects(); renderIdList(); initBizIQMasterUI(); }
+  if (name === 'idmgmt') { initMonthSelects(); renderIdList(); }
   if (name === 'logic') renderLogicTab();
   if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); renderUnsubmittedList(); }
-  if (name === 'settings') renderSettingsTab();
+  if (name === 'settings') { renderSettingsTab(); initBizIQMasterUI(); }
   if (name === 'actions') { initMonthSelects(); renderActionPlan(); }
 }
 
