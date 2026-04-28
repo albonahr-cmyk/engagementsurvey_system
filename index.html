@@ -1352,6 +1352,15 @@ if (typeof pdfjsLib !== 'undefined') {
       </div>
     </div>
 
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:32px 0 12px">
+      <div class="section-title" style="margin:0">👥 社員ID一覧</div>
+      <div class="month-selector" style="margin:0">
+        <label>リセット対象月：</label>
+        <select id="id-month-select" onchange="renderIdList()"></select>
+      </div>
+    </div>
+    <div class="id-table-wrap" id="id-table"></div>
+
     <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;margin-top:24px">
       <input type="text" id="emp-search" placeholder="名前・IDで検索..." oninput="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;width:180px;font-family:inherit">
       <select id="emp-dept-filter" onchange="renderEmployeeList()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit">
@@ -4045,7 +4054,7 @@ function switchTab(name, btn) {
       el.style.display = 'none';
     }
   });
-  if (name === 'employees') renderEmployeeList();
+  if (name === 'employees') { initMonthSelects(); renderEmployeeList(); renderIdList(); }
   if (name === 'logic') renderLogicTab();
   if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); renderUnsubmittedList(); }
   if (name === 'settings') { renderSettingsTab(); initBizIQMasterUI(); }
