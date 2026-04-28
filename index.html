@@ -954,6 +954,54 @@ if (typeof pdfjsLib !== 'undefined') {
   .master-tab.active { color: #0d9488; border-bottom-color: #0d9488; font-weight: 700; }
   .master-tab:hover { color: #0d9488; }
 
+  /* ペルソナ一覧のフィルター（ランク2段ピッカー＋MBTI＋リセット） */
+  .persona-filter { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 20px; }
+  .persona-filter-group { display: flex; flex-direction: column; gap: 8px; }
+  .persona-filter-group .pf-label { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.6px; text-transform: uppercase; }
+  .persona-pill-row { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: #f1f5f9; border-radius: 12px; align-self: flex-start; }
+  .persona-pill {
+    border: none; background: transparent; cursor: pointer;
+    padding: 8px 16px; border-radius: 9px;
+    font-size: 13px; font-weight: 700; color: #64748b;
+    transition: all 0.15s; letter-spacing: 0.3px;
+    min-width: 44px;
+  }
+  .persona-pill:hover { background: rgba(255,255,255,0.7); color: #334155; }
+  .persona-pill.active { background: white; color: #0d9488; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .persona-pill[data-tier="S"].active { background: #0f766e; color: white; box-shadow: 0 2px 8px rgba(15,118,110,0.28); }
+  .persona-pill[data-tier="A"].active { background: #0d9488; color: white; box-shadow: 0 2px 8px rgba(13,148,136,0.26); }
+  .persona-pill[data-tier="B"].active { background: #14b8a6; color: white; box-shadow: 0 2px 8px rgba(20,184,166,0.24); }
+  .persona-pill[data-tier="C"].active { background: #5eead4; color: #134e4a; box-shadow: 0 2px 8px rgba(94,234,212,0.30); }
+  .persona-subrow { animation: subrowFade 0.25s cubic-bezier(0.4,0,0.2,1); }
+  @keyframes subrowFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .persona-mbti-select {
+    padding: 9px 36px 9px 14px; border: 1px solid #e2e8f0; border-radius: 10px;
+    font-size: 13px; font-weight: 600; color: #334155;
+    background-color: white; cursor: pointer;
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    transition: all 0.15s;
+  }
+  .persona-mbti-select:hover { border-color: #cbd5e1; }
+  .persona-mbti-select:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.10); }
+  .persona-reset-btn {
+    padding: 9px 16px; border: 1px solid #e2e8f0; border-radius: 10px;
+    background: white; color: #64748b; cursor: pointer;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
+    transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+    align-self: flex-start; margin-top: 22px;
+  }
+  .persona-reset-btn:hover { background: #f8fafc; color: #0d9488; border-color: #ccfbf1; }
+  .persona-count {
+    font-size: 12px; color: #64748b; font-weight: 600;
+    align-self: flex-start; margin-top: 28px;
+    background: #f1f5f9; padding: 6px 12px; border-radius: 999px;
+  }
+  .persona-count strong { color: #0d9488; font-weight: 800; }
+
   /* 社員詳細：推奨対応 */
   .recommend-section { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
   .recommend-section h3 { font-size: 15px; font-weight: 700; color: #1f2937; margin-bottom: 16px; }
@@ -1665,28 +1713,21 @@ if (typeof pdfjsLib !== 'undefined') {
     <div class="logic-section">
       <h3 style="display:flex;align-items:center;gap:10px"><svg width="24" height="22" viewBox="0 0 28 24" fill="none" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6c0-1 1-2 2.5-2h7c1.5 0 2.5 1 2.5 2v6c0 4-3 7-6 7S2 16 2 12z" fill="#ccfbf1"/><circle cx="6" cy="10" r="0.7" fill="#0d9488"/><circle cx="10" cy="10" r="0.7" fill="#0d9488"/><path d="M6.5 13c1 0.8 2.5 0.8 3.5 0"/><path d="M14 6c0-1 1-2 2.5-2h7c1.5 0 2.5 1 2.5 2v6c0 4-3 7-6 7s-6-3-6-7z" fill="#5eead4"/><circle cx="18" cy="10" r="0.7" fill="#0f766e"/><circle cx="22" cy="10" r="0.7" fill="#0f766e"/><path d="M18.5 14c1-0.6 2.5-0.6 3.5 0"/></svg>ランク（S1〜C4）× MBTIタイプ　ペルソナ一覧（256パターン）</h3>
       <p class="logic-desc">16ランク × 16MBTIタイプの組み合わせで動的生成されるペルソナ定義です。</p>
-      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end">
-        <div>
-          <label style="display:block;font-size:12px;font-weight:700;color:#64748b;margin-bottom:5px">ランクで絞り込み</label>
-          <select id="filter-rank" onchange="renderPersonaTable()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:600;color:#334155">
-            <option value="">すべてのランク</option>
-            <optgroup label="S ティア（IQ121+）">
-              <option>S1</option><option>S2</option><option>S3</option><option>S4</option>
-            </optgroup>
-            <optgroup label="A ティア（IQ111〜120）">
-              <option>A1</option><option>A2</option><option>A3</option><option>A4</option>
-            </optgroup>
-            <optgroup label="B ティア（IQ100〜110）">
-              <option>B1</option><option>B2</option><option>B3</option><option>B4</option>
-            </optgroup>
-            <optgroup label="C ティア（IQ〜99）">
-              <option>C1</option><option>C2</option><option>C3</option><option>C4</option>
-            </optgroup>
-          </select>
+      <div class="persona-filter">
+        <div class="persona-filter-group">
+          <span class="pf-label">ランクで絞り込み</span>
+          <div class="persona-pill-row">
+            <button type="button" class="persona-pill active" data-tier="" onclick="setPersonaTier('')">すべて</button>
+            <button type="button" class="persona-pill" data-tier="S" onclick="setPersonaTier('S')">S</button>
+            <button type="button" class="persona-pill" data-tier="A" onclick="setPersonaTier('A')">A</button>
+            <button type="button" class="persona-pill" data-tier="B" onclick="setPersonaTier('B')">B</button>
+            <button type="button" class="persona-pill" data-tier="C" onclick="setPersonaTier('C')">C</button>
+          </div>
+          <div id="persona-subrank-row" class="persona-pill-row persona-subrow" style="display:none"></div>
         </div>
-        <div>
-          <label style="display:block;font-size:12px;font-weight:700;color:#64748b;margin-bottom:5px">MBTIタイプで絞り込み</label>
-          <select id="filter-mbti" onchange="renderPersonaTable()" style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:600;color:#334155">
+        <div class="persona-filter-group">
+          <span class="pf-label">MBTIタイプで絞り込み</span>
+          <select id="filter-mbti" class="persona-mbti-select" onchange="renderPersonaTable()">
             <option value="">すべてのタイプ</option>
             <optgroup label="NT（分析家）"><option>INTJ</option><option>INTP</option><option>ENTJ</option><option>ENTP</option></optgroup>
             <optgroup label="NF（外交官）"><option>INFJ</option><option>INFP</option><option>ENFJ</option><option>ENFP</option></optgroup>
@@ -1694,8 +1735,11 @@ if (typeof pdfjsLib !== 'undefined') {
             <optgroup label="SP（探検家）"><option>ISTP</option><option>ISFP</option><option>ESTP</option><option>ESFP</option></optgroup>
           </select>
         </div>
-        <button onclick="document.getElementById('filter-rank').value='';document.getElementById('filter-mbti').value='';renderPersonaTable()" class="btn btn-secondary btn-sm">リセット</button>
-        <span id="persona-count-label" style="font-size:12px;color:#94a3b8;font-weight:500;align-self:center"></span>
+        <button type="button" class="persona-reset-btn" onclick="resetPersonaFilters()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6V2h4"/><path d="M12 8v4H8"/><path d="M2 6c0.6-2.5 3-4 5.5-4c2.5 0 4.5 1.5 5 3.5"/><path d="M12 8c-0.6 2.5-3 4-5.5 4c-2.5 0-4.5-1.5-5-3.5"/></svg>
+          リセット
+        </button>
+        <span id="persona-count-label" class="persona-count"></span>
       </div>
       <div style="overflow-x:auto">
         <table class="persona-matrix-table" id="persona-matrix-table"></table>
@@ -5406,18 +5450,71 @@ function resetThresholds() {
 }
 
 // ===== ペルソナテーブル（フィルター付き 256パターン）=====
+let _personaTier = '';
+let _personaSubRank = '';
+
+function setPersonaTier(tier) {
+  _personaTier = tier;
+  _personaSubRank = '';
+  updatePersonaFilterUI();
+  renderPersonaTable();
+}
+
+function setPersonaSubRank(rank) {
+  _personaSubRank = rank;
+  updatePersonaFilterUI();
+  renderPersonaTable();
+}
+
+function resetPersonaFilters() {
+  _personaTier = '';
+  _personaSubRank = '';
+  const mbti = document.getElementById('filter-mbti');
+  if (mbti) mbti.value = '';
+  updatePersonaFilterUI();
+  renderPersonaTable();
+}
+
+function updatePersonaFilterUI() {
+  document.querySelectorAll('.persona-pill[data-tier]').forEach(p => {
+    p.classList.toggle('active', p.dataset.tier === _personaTier);
+  });
+  const subrow = document.getElementById('persona-subrank-row');
+  if (!subrow) return;
+  if (_personaTier) {
+    const t = _personaTier;
+    const tierBg = { S:'#0f766e', A:'#0d9488', B:'#14b8a6', C:'#5eead4' };
+    const tierFg = { S:'#ffffff', A:'#ffffff', B:'#ffffff', C:'#134e4a' };
+    const tierShadow = { S:'rgba(15,118,110,0.28)', A:'rgba(13,148,136,0.26)', B:'rgba(20,184,166,0.24)', C:'rgba(94,234,212,0.30)' };
+    const ranks = [`${t}1`, `${t}2`, `${t}3`, `${t}4`];
+    const sty = (a) => a ? `background:${tierBg[t]};color:${tierFg[t]};box-shadow:0 2px 8px ${tierShadow[t]};` : '';
+    const allActive = !_personaSubRank;
+    subrow.innerHTML = `
+      <button type="button" class="persona-pill ${allActive ? 'active' : ''}" style="${sty(allActive)}" onclick="setPersonaSubRank('')">全${t}ランク</button>
+      ${ranks.map(r => {
+        const a = _personaSubRank === r;
+        return `<button type="button" class="persona-pill ${a ? 'active' : ''}" style="${sty(a)}" onclick="setPersonaSubRank('${r}')">${r}</button>`;
+      }).join('')}
+    `;
+    subrow.style.display = 'inline-flex';
+  } else {
+    subrow.style.display = 'none';
+    subrow.innerHTML = '';
+  }
+}
+
 function renderPersonaTable() {
   const table = document.getElementById('persona-matrix-table');
   if (!table) return;
-  const rankFilter  = (document.getElementById('filter-rank')  || {}).value || '';
   const mbtiFilter  = (document.getElementById('filter-mbti')  || {}).value || '';
   const rankOrder   = ['S1','S2','S3','S4','A1','A2','A3','A4','B1','B2','B3','B4','C1','C2','C3','C4'];
   const mbtiOrder   = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
   const tierBg      = { S:'#0f766e', A:'#0d9488', B:'#14b8a6', C:'#5eead4' };
   const tierFg      = { S:'#ffffff', A:'#ffffff', B:'#ffffff', C:'#134e4a' };
-  const groupText   = { NT:'#7c3aed', NF:'#2563eb', SJ:'#0f766e', SP:'#d97706' };
 
-  const ranks  = rankFilter  ? [rankFilter]  : rankOrder;
+  const ranks = _personaSubRank
+    ? [_personaSubRank]
+    : (_personaTier ? rankOrder.filter(r => r[0] === _personaTier) : rankOrder);
   const mbtis  = mbtiFilter  ? [mbtiFilter]  : mbtiOrder;
   const rows   = ranks.flatMap(rank => mbtis.map(mbtiType => {
     const insight = getPersonaInsight(rank, mbtiType) || {};
@@ -5441,7 +5538,7 @@ function renderPersonaTable() {
 
   const total = rows.length;
   const countEl = document.getElementById('persona-count-label');
-  if (countEl) countEl.textContent = `${total}件表示`;
+  if (countEl) countEl.innerHTML = `<strong>${total}</strong> / 256 件`;
 
   table.innerHTML = `
     <thead><tr>
