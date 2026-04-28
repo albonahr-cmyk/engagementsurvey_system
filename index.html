@@ -1523,27 +1523,27 @@ if (typeof pdfjsLib !== 'undefined') {
   <!-- ロジック一覧 -->
   <div id="tab-logic" class="admin-body" style="display:none">
     <div style="margin-bottom:28px">
-      <div class="section-title">📖 ランク・MBTIロジック一覧</div>
+      <div class="section-title" style="display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z" fill="#ccfbf1"/><path d="M22 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z" fill="#ccfbf1"/><line x1="11" y1="7" x2="11" y2="20"/><line x1="13" y1="7" x2="13" y2="20"/></svg>ランク・MBTIロジック一覧</div>
       <p style="font-size:13px;color:#64748b;font-weight:500">ランク算出・MBTIペルソナの設計ロジックをまとめたリファレンスです。定期的に見直してブラッシュアップしてください。</p>
     </div>
 
     <!-- ===== ランク算出マトリクス＋詳細マスタ ===== -->
     <div class="master-section">
-      <h3>🧮 ランク算出マトリクス</h3>
+      <h3 style="display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="#ccfbf1"/><rect x="14" y="3" width="7" height="7" rx="1.5" fill="#5eead4"/><rect x="3" y="14" width="7" height="7" rx="1.5" fill="#5eead4"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="#0d9488" stroke="#0f766e"/></svg>ランク算出マトリクス</h3>
       <p class="master-desc">IQスコア × ビジネス戦闘力の組み合わせで16ランクを算出します。</p>
 
       <!-- データフロー図 -->
       <div class="master-flow">
         <div class="master-flow-box" style="background:white;color:#0f766e;border:1px solid #ccfbf1">
-          📋 ビジネスIQ適性検査<br><span style="font-size:11px;font-weight:500;color:#64748b">IQ + 戦闘力 + ランク</span>
+          <span style="display:inline-flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="18" rx="2" fill="#ccfbf1"/><rect x="9" y="2" width="6" height="4" rx="1" fill="#0d9488" stroke="#0f766e"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>ビジネスIQ適性検査</span><br><span style="font-size:11px;font-weight:500;color:#64748b">IQ + 戦闘力 + ランク</span>
         </div>
         <div class="master-flow-arrow">→</div>
         <div class="master-flow-box" style="background:white;color:#0f766e;border:1px solid #ccfbf1">
-          🏆 ランク算出<br><span style="font-size:11px;font-weight:500;color:#64748b">S1〜C4（16段階）</span>
+          <span style="display:inline-flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z" fill="#5eead4"/><path d="M7 6H4v2a3 3 0 0 0 3 3"/><path d="M17 6h3v2a3 3 0 0 1-3 3"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="8" y1="20" x2="16" y2="20" stroke-width="2.4"/><line x1="9" y1="17" x2="15" y2="17"/></svg>ランク算出</span><br><span style="font-size:11px;font-weight:500;color:#64748b">S1〜C4（16段階）</span>
         </div>
         <div class="master-flow-arrow">×</div>
         <div class="master-flow-box" style="background:white;color:#0f766e;border:1px solid #ccfbf1">
-          🧬 MBTI<br><span style="font-size:11px;font-weight:500;color:#64748b">16タイプ → ペルソナ</span>
+          <span style="display:inline-flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3c0 6 14 6 14 12c0 3-2.5 6-7 6"/><path d="M19 3c0 3-2.5 6-7 6c-4.5 0-7 3-7 6c0 3 2.5 6 7 6"/><line x1="7.5" y1="6" x2="13.5" y2="6"/><line x1="10.5" y1="9" x2="16.5" y2="9"/><line x1="7.5" y1="15" x2="13.5" y2="15"/><line x1="10.5" y1="18" x2="16.5" y2="18"/></svg>MBTI</span><br><span style="font-size:11px;font-weight:500;color:#64748b">16タイプ → ペルソナ</span>
         </div>
       </div>
 
@@ -1623,7 +1623,7 @@ if (typeof pdfjsLib !== 'undefined') {
 
     <!-- カテゴリ別目標スコア設定 -->
     <div class="logic-section">
-      <h3>🎯 カテゴリ別目標スコア設定</h3>
+      <h3 style="display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#ccfbf1"/><circle cx="12" cy="12" r="6" fill="#5eead4"/><circle cx="12" cy="12" r="2.5" fill="#0d9488" stroke="#0f766e"/></svg>カテゴリ別目標スコア設定</h3>
       <p class="logic-desc">各カテゴリのスコア目標値を設定します。スコアカードに目標ラインが表示され、達成状況を可視化します。</p>
       <div id="target-editor"></div>
       <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
@@ -1647,7 +1647,7 @@ if (typeof pdfjsLib !== 'undefined') {
 
     <!-- ランク詳細一覧 -->
     <div class="logic-section">
-      <h3>🏆 ランク詳細定義（S1〜C4）</h3>
+      <h3 style="display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z" fill="#5eead4"/><path d="M7 6H4v2a3 3 0 0 0 3 3"/><path d="M17 6h3v2a3 3 0 0 1-3 3"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="8" y1="20" x2="16" y2="20" stroke-width="2.4"/><line x1="9" y1="17" x2="15" y2="17"/></svg>ランク詳細定義（S1〜C4）</h3>
       <p class="logic-desc">各ランクの思考力・実行力・育成方針を定義します。</p>
       <div style="overflow-x:auto">
         <table class="rank-list-table" id="rank-detail-table"></table>
@@ -1656,14 +1656,14 @@ if (typeof pdfjsLib !== 'undefined') {
 
     <!-- MBTIグループ -->
     <div class="logic-section">
-      <h3>🧠 MBTIグループ定義</h3>
+      <h3 style="display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 3a2.3 2.3 0 0 1 2.5 2.3v13.4a2.3 2.3 0 0 1-4.55.4 2.3 2.3 0 0 1-2.7-2.8 2.7 2.7 0 0 1-.3-5 2.3 2.3 0 0 1 1.2-3.9 2.3 2.3 0 0 1 1.8-2.7A2.3 2.3 0 0 1 9.5 3z" fill="#ccfbf1"/><path d="M14.5 3a2.3 2.3 0 0 0-2.5 2.3v13.4a2.3 2.3 0 0 0 4.55.4 2.3 2.3 0 0 0 2.7-2.8 2.7 2.7 0 0 0 .3-5 2.3 2.3 0 0 0-1.2-3.9 2.3 2.3 0 0 0-1.8-2.7A2.3 2.3 0 0 0 14.5 3z" fill="#5eead4"/></svg>MBTIグループ定義</h3>
       <p class="logic-desc">16種類のMBTIタイプを4グループに分類し、それぞれの傾向をまとめています。</p>
       <div class="mbti-group-grid" id="mbti-group-grid"></div>
     </div>
 
     <!-- MBTI × Rank ペルソナ一覧 -->
     <div class="logic-section">
-      <h3>🎭 ランク（S1〜C4）× MBTIタイプ　ペルソナ一覧（256パターン）</h3>
+      <h3 style="display:flex;align-items:center;gap:10px"><svg width="24" height="22" viewBox="0 0 28 24" fill="none" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6c0-1 1-2 2.5-2h7c1.5 0 2.5 1 2.5 2v6c0 4-3 7-6 7S2 16 2 12z" fill="#ccfbf1"/><circle cx="6" cy="10" r="0.7" fill="#0d9488"/><circle cx="10" cy="10" r="0.7" fill="#0d9488"/><path d="M6.5 13c1 0.8 2.5 0.8 3.5 0"/><path d="M14 6c0-1 1-2 2.5-2h7c1.5 0 2.5 1 2.5 2v6c0 4-3 7-6 7s-6-3-6-7z" fill="#5eead4"/><circle cx="18" cy="10" r="0.7" fill="#0f766e"/><circle cx="22" cy="10" r="0.7" fill="#0f766e"/><path d="M18.5 14c1-0.6 2.5-0.6 3.5 0"/></svg>ランク（S1〜C4）× MBTIタイプ　ペルソナ一覧（256パターン）</h3>
       <p class="logic-desc">16ランク × 16MBTIタイプの組み合わせで動的生成されるペルソナ定義です。</p>
       <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end">
         <div>
