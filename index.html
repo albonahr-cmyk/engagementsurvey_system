@@ -1680,6 +1680,14 @@ if (typeof pdfjsLib !== 'undefined') {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:12px;pointer-events:none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="score-search" placeholder="名前、アドレス" oninput="renderScoreTab()" style="padding:8px 12px 8px 34px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;width:220px;font-family:inherit;background:white">
       </div>
+      <div style="position:relative">
+        <button type="button" id="score-month-btn" onclick="event.stopPropagation();toggleScoreMonthDropdown()" style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 12px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer;color:#475569;font-weight:600">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span id="score-month-btn-label">対象月</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="score-month-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:1500;background:white;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15),0 2px 8px rgba(0,0,0,0.06);border:1px solid #e2e8f0;min-width:200px;padding:6px;max-height:340px;overflow-y:auto"></div>
+      </div>
       <div style="position:relative;display:inline-flex;align-items:center">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:20px;pointer-events:none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <select id="score-group-filter" onchange="renderScoreTab()" style="padding:8px 30px 8px 44px;border:1.5px solid #e2e8f0;border-radius:999px;font-size:13px;font-family:inherit;background:white;cursor:pointer;color:#475569;font-weight:600;appearance:none;-webkit-appearance:none">
@@ -4097,7 +4105,68 @@ function populateScoreFilters() {
   updateScoreCondBtn();
   buildScoreStatusPanel();
   updateScoreStatusBtn();
+  buildScoreMonthPanel();
+  updateScoreMonthBtn();
 }
+
+// ===== 対象月・カスタムドロップダウン =====
+let _scoreMonthFilter = '';
+function getScoreMonth() {
+  const m = _scoreMonthFilter;
+  return (m && months.includes(m)) ? m : getSurveyMonth();
+}
+
+function formatScoreMonthLabel(m) {
+  const [y, mo] = m.split('-').map(Number);
+  const d = new Date(y, mo - 1, 1);
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${y}/${String(mo).padStart(2,'0')}/01(${dow})`;
+}
+
+function buildScoreMonthPanel() {
+  const panel = document.getElementById('score-month-panel');
+  if (!panel) return;
+  const cur = getScoreMonth();
+  panel.innerHTML = months.slice().reverse().map(m => {
+    const sel = m === cur;
+    const bg = sel ? 'background:#ccfbf1;color:#0f766e' : 'color:#334155';
+    return `<div onclick="selectScoreMonth('${m}')" style="padding:10px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;${bg};transition:background .1s" onmouseover="if(!${sel}){this.style.background='#f1f5f9'}" onmouseout="if(!${sel}){this.style.background='transparent'}">${formatScoreMonthLabel(m)}</div>`;
+  }).join('');
+}
+
+function updateScoreMonthBtn() {
+  const labelEl = document.getElementById('score-month-btn-label');
+  if (!labelEl) return;
+  labelEl.textContent = formatScoreMonthLabel(getScoreMonth());
+}
+
+function toggleScoreMonthDropdown() {
+  const panel = document.getElementById('score-month-panel');
+  if (!panel) return;
+  if (panel.style.display === 'none' || !panel.style.display) {
+    buildScoreMonthPanel();
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function selectScoreMonth(month) {
+  _scoreMonthFilter = month;
+  updateScoreMonthBtn();
+  const panel = document.getElementById('score-month-panel');
+  if (panel) panel.style.display = 'none';
+  renderScoreTab();
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('score-month-panel');
+  const btn = document.getElementById('score-month-btn');
+  if (!panel || !btn) return;
+  if (panel.style.display !== 'block') return;
+  if (panel.contains(e.target) || btn.contains(e.target)) return;
+  panel.style.display = 'none';
+});
 
 // スコア列ソート方向（'desc' = 高い順、'asc' = 低い順）
 let _scoreSortDir = 'desc';
@@ -4172,7 +4241,7 @@ function openConditionDrawer(empId) {
   const emp = employees[empId];
   if (!emp) return;
   rebuildEmpData();
-  const month = getSurveyMonth();
+  const month = (typeof getScoreMonth === 'function') ? getScoreMonth() : getSurveyMonth();
   const prev = months[months.indexOf(month) - 1] || null;
   const data = empData[empId] || {};
   const cur = data[month] || null;
@@ -4488,7 +4557,7 @@ function renderScoreTab() {
   const statusFilter = _scoreStatusFilter || '';
 
   rebuildEmpData();
-  const month = getSurveyMonth();
+  const month = getScoreMonth();
   const prevMonth = months[months.indexOf(month) - 1] || null;
 
   const rows = Object.entries(employees)
@@ -4937,9 +5006,8 @@ function showDetail(empId, drawerMode) {
         }
         const isReverse = reverseScoreQs.has(q.id);
         const c = isReverse ? (ansColorsReverse[val] || '#94a3b8') : (ansColors[val] || '#94a3b8');
-        const reverseLabel = isReverse ? ` <span style="font-size:11px;color:#94a3b8;font-weight:400">（反転：${8 - val}）</span>` : '';
         groupBuf += `<div class="answer-row">
-          <div class="answer-q">${q.text}${reverseLabel}</div>
+          <div class="answer-q">${q.text}</div>
           <div class="answer-bar-wrap">
             <div class="answer-bar"><div class="answer-bar-fill" style="width:${val/7*100}%;background:${c}"></div></div>
             <div class="answer-val" style="color:${c}">${val}</div>
