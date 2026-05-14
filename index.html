@@ -6061,7 +6061,10 @@ function _renderAccountEdit(empId) {
     <div class="account-info-section">
       <div class="section-label">社員情報を編集</div>
       <div class="account-info-row"><div class="label">氏名</div><input id="ai-edit-name" value="${sanitize(emp.name || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
-      <div class="account-info-row" style="margin-top:10px"><div class="label">事業部</div><input id="ai-edit-dept" value="${sanitize(emp.dept || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">事業部</div><select id="ai-edit-dept" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
+        <option value=""${!emp.dept ? ' selected' : ''}>部署を選択</option>
+        ${getDeptsFromEmployees().map(d => `<option value="${sanitize(d)}"${emp.dept === d ? ' selected' : ''}>${sanitize(d)}</option>`).join('')}
+      </select></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">役職</div><input id="ai-edit-position" value="${sanitize(emp.position || '')}" placeholder="例：一般社員、マネージャー" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">雇用形態</div><select id="ai-edit-jobtype" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
         <option value=""${!emp.jobType ? ' selected' : ''}>未選択</option>
