@@ -1560,7 +1560,7 @@ if (typeof pdfjsLib !== 'undefined') {
             <option value="アルバイト">アルバイト</option>
             <option value="インターン">インターン</option>
             <option value="業務委託">業務委託</option>
-            <option value="派遣">派遣</option>
+            <option value="派遣社員">派遣社員</option>
           </select>
         </div>
         <div class="form-group" style="max-width:200px">
@@ -1656,7 +1656,7 @@ if (typeof pdfjsLib !== 'undefined') {
             <option>アルバイト</option>
             <option>インターン</option>
             <option>業務委託</option>
-            <option>派遣</option>
+            <option>派遣社員</option>
           </select>
         </div>
         <div style="flex:1;min-width:160px">
@@ -6065,7 +6065,7 @@ function _renderAccountEdit(empId) {
       <div class="account-info-row" style="margin-top:10px"><div class="label">役職</div><input id="ai-edit-position" value="${sanitize(emp.position || '')}" placeholder="例：一般社員、マネージャー" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">雇用形態</div><select id="ai-edit-jobtype" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
         <option value=""${!emp.jobType ? ' selected' : ''}>未選択</option>
-        ${['正社員','契約社員','アルバイト','インターン','業務委託','派遣'].map(t => `<option value="${t}"${emp.jobType === t ? ' selected' : ''}>${t}</option>`).join('')}
+        ${['正社員','契約社員','アルバイト','インターン','業務委託','派遣社員'].map(t => `<option value="${t}"${emp.jobType === t ? ' selected' : ''}>${t}</option>`).join('')}
       </select></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">勤務地</div><select id="ai-edit-workloc" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
         <option value=""${!emp.workLocation ? ' selected' : ''}>未選択</option>
