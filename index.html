@@ -320,14 +320,14 @@ if (typeof pdfjsLib !== 'undefined') {
   .admin-nav { background: #faf8f4; color: #1e293b; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 80px; flex-shrink: 0; }
   .admin-nav .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: #1e293b; }
   .admin-nav .user-info { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 12px; font-weight: 500; }
-  .admin-nav .logout-btn { background: #f1f5f9; color: #475569; padding: 7px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; transition: all 0.15s; }
-  .admin-nav .logout-btn:hover { background: #e2e8f0; color: #334155; }
+  .admin-nav .logout-btn { background: #2d8a6f; color: white; padding: 8px 18px; border: 1px solid #2d8a6f; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 700; transition: all 0.15s; box-shadow: 0 2px 6px rgba(45,138,111,0.25); }
+  .admin-nav .logout-btn:hover { background: #1f604c; border-color: #1f604c; color: white; box-shadow: 0 3px 10px rgba(45,138,111,0.35); }
 
   /* サイドバー＋メインレイアウト */
   .admin-layout { display: flex; flex: 1; overflow: hidden; height: 0; min-height: 0; }
 
   /* 左サイドバー */
-  .admin-sidebar { width: 340px; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; padding: 0 0 16px; overflow-y: auto; }
+  .admin-sidebar { width: 340px; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; padding: 20px 0 16px; overflow-y: auto; }
   .sidebar-logo { display: flex; align-items: center; gap: 14px; padding: 0 24px; height: 80px; margin-bottom: 24px; }
   .sidebar-logo-icon { flex-shrink: 0; border-radius: 8px; }
   .sidebar-logo-text { display: flex; flex-direction: column; min-width: 0; }
@@ -671,7 +671,8 @@ if (typeof pdfjsLib !== 'undefined') {
   .guide-card.warn { border-left-color: #f59e0b; }
   .guide-card.ok { border-left-color: #2d8a6f; }
   .guide-card-score { flex: 0 0 110px; }
-  .guide-cat-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; font-size: 26px; background: #eef6f1; margin-bottom: 6px; }
+  .guide-cat-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; background: #eef6f1; margin-bottom: 6px; }
+  .guide-cat-icon svg { width: 26px; height: 26px; }
   .guide-score-num { font-size: 26px; font-weight: 700; }
   .guide-score-num.alert { color: #dc2626; }
   .guide-score-num.warn { color: #d97706; }
@@ -2764,7 +2765,18 @@ function getPersonalizedCategoryAction(cat, level, rank, mbtiType) {
 }
 
 const catKeys = ['やりがい', '成長', '健康', '上司', 'チーム', '承認', '信頼', '組織', '業務'];
-const catIcons = { やりがい:'💼', 成長:'🌱', 健康:'💪', 上司:'🤝', チーム:'👥', 承認:'⭐', 信頼:'🧭', 組織:'🏢', 業務:'🌿' };
+const catIcons = {
+  やりがい: `<svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M6 9H4a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><path d="M6 9a6 6 0 0 1 12 0v3a6 6 0 0 1-12 0Z" fill="#fef3c7"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>`,
+  成長: `<svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M7 17.5C5 17.5 3 15.5 3 12.5C3 8 7 5 12 4C11 8 11 12 12 14C13 11 16 9 20 9C19 13 17 17 12 18C10 18 8 18 7 17.5Z" fill="#d1fae5"/><path d="M12 21v-7"/></svg>`,
+  健康: `<svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" fill="#fecaca"/></svg>`,
+  上司: `<svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M11 12L14 9l3 3-3 3z" fill="#dbeafe"/><path d="M9 11l-3 3 3 3"/><path d="M19 9l3 3-3 3"/><path d="M6 14h13"/></svg>`,
+  チーム: `<svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><circle cx="9" cy="8" r="3.5" fill="#ede9fe"/><circle cx="17" cy="9" r="3" fill="#ede9fe"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M22 21v-1.5a3 3 0 0 0-2.5-2.95"/></svg>`,
+  承認: `<svg viewBox="0 0 24 24" fill="#fef3c7" stroke="#eab308" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  信頼: `<svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><circle cx="12" cy="12" r="10" fill="#ccfbf1"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#5eead4"/></svg>`,
+  組織: `<svg viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><rect x="3" y="6" width="18" height="15" rx="1.5" fill="#f1f5f9"/><path d="M9 21V11h6v10"/><line x1="3" y1="11" x2="21" y2="11"/><polyline points="12 6 12 3"/><polyline points="9 3 15 3"/></svg>`,
+  業務: `<svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M12 21C12 16 8 13 4 13C4 17 7 21 12 21Z" fill="#d1fae5"/><path d="M12 21C12 14 16 11 20 11C20 16 17 21 12 21Z" fill="#a7f3d0"/><path d="M12 21V11C12 7 14 4 18 3" /></svg>`,
+};
+const ICON_CHART = `<svg viewBox="0 0 24 24" fill="none" stroke="#2d8a6f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="vertical-align:-3px;margin-right:4px;flex-shrink:0"><rect x="3" y="13" width="4" height="8" rx="1" fill="#bedfd0"/><rect x="10" y="8" width="4" height="13" rx="1" fill="#5fb89e"/><rect x="17" y="4" width="4" height="17" rx="1" fill="#2d8a6f"/></svg>`;
 const catNames = { やりがい:'職務', 成長:'自己成長', 健康:'健康', 上司:'支援', チーム:'人間関係', 承認:'承認', 信頼:'理念戦略', 組織:'組織風土', 業務:'環境' };
 
 // キードライバー用のカラーイラストSVGアイコン（絵文字の代わり）
@@ -3517,13 +3529,13 @@ function renderDashboard() {
       return `
         <div class="guide-card ${status}">
           <div class="guide-card-score">
-            <div class="guide-cat-icon cat-icon-${status}">${catIcons[k] || '📊'}</div>
+            <div class="guide-cat-icon cat-icon-${status}">${catIcons[k] || ICON_CHART}</div>
             <div class="guide-score-num ${status}">${score}点</div>
             <div class="guide-cat-name">${catNames[k]}</div>
             ${diffText}
           </div>
           <div class="guide-card-body">
-            <div class="guide-eval">📊 ${guide.eval}</div>
+            <div class="guide-eval">${ICON_CHART}${guide.eval}</div>
             <div class="guide-action-label">推奨アクション</div>
             <div class="guide-action-text">${guide.action}</div>
           </div>
@@ -3593,7 +3605,7 @@ function renderDashboard() {
 
     radarEl.innerHTML = `
       <div class="radar-wrap">
-        <svg viewBox="-50 -35 ${radarSize+100} ${radarSize+70}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;max-width:${radarSize+100}px;display:block;margin:0 auto;overflow:visible">
+        <svg viewBox="-50 -35 ${radarSize+100} ${radarSize+70}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;max-width:480px;display:block;margin:0 auto;overflow:visible">
           ${gridPolygons}
           ${axisLines}
           ${prevDataPoints ? `<polygon points="${prevDataPoints}" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>` : ''}
