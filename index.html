@@ -1496,7 +1496,7 @@ if (typeof pdfjsLib !== 'undefined') {
       <button class="tab-btn" data-tab="actions" onclick="switchTab('actions', this)"><span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>アクションプラン</button>
     </div>
     <div class="sidebar-tree" aria-hidden="true">
-      <svg viewBox="0 0 280 320" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox="0 -150 280 470" preserveAspectRatio="xMidYMid meet">
         <g class="tree-extras"></g>
         <ellipse cx="140" cy="295" rx="78" ry="6" fill="#c4e090" opacity="0.55"/>
         <path d="M134 200 L131 295 L149 295 L146 200 Z" fill="#b08862"/>
@@ -8675,13 +8675,13 @@ function switchMasterTab(name, btn) {
       const minX = cx - scale * 17, maxX = cx + scale * 17;
       const minY = cy - scale * 16, maxY = cy + scale * 12;
       let attempts = 0;
-      // 葉と葉の最小距離を確保して間隔を空ける
-      while (items.length < 110 && attempts < 6000) {
+      // 葉と葉の最小距離を確保して間隔を空ける（密度ダウン）
+      while (items.length < 70 && attempts < 6000) {
         attempts++;
         const px = minX + Math.random() * (maxX - minX);
         const py = minY + Math.random() * (maxY - minY);
         if (!inHeart(px, py)) continue;
-        if (tooClose(px, py, items, 11)) continue;
+        if (tooClose(px, py, items, 14)) continue;
         items.push({
           x: px,
           y: py,
@@ -8693,15 +8693,15 @@ function switchMasterTab(name, btn) {
       cluster.innerHTML = items.map(p =>
         `<path d="${leafPath}" fill="${p.col}" class="tree-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/>`
       ).join('');
-      // 周りの舞う葉っぱ（ふわふわ漂う）
+      // 周りの舞う葉っぱ（ふわふわ漂う）— 木の上の方〜横〜下まで広範囲に配置
       const extraItems = [];
       let extraAttempts = 0;
-      while (extraItems.length < 24 && extraAttempts < 600) {
+      while (extraItems.length < 32 && extraAttempts < 1000) {
         extraAttempts++;
-        const px = 8 + Math.random() * 264;
-        const py = 30 + Math.random() * 240;
+        const px = 6 + Math.random() * 268;
+        const py = -140 + Math.random() * 410; // 上方140まで広げる
         if (inHeart(px, py)) continue;
-        if (tooClose(px, py, extraItems, 22)) continue;
+        if (tooClose(px, py, extraItems, 26)) continue;
         extraItems.push({
           x: px,
           y: py,
