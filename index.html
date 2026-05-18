@@ -340,18 +340,19 @@ if (typeof pdfjsLib !== 'undefined') {
   /* サイドバー下部のハートの木 */
   .sidebar-tree { margin-top: auto; padding: 24px 16px 8px; pointer-events: none; }
   .sidebar-tree svg { width: 100%; height: auto; max-width: 260px; display: block; margin: 0 auto; overflow: visible; }
-  .tree-leaf { transform-box: fill-box; transform-origin: center; animation: leafBlink 4s ease-in-out infinite both; }
-  .tree-extras .tree-leaf { animation: leafFloat 5s ease-in-out infinite both; }
-  @keyframes leafBlink {
-    0%, 100% { opacity: 0.95; }
-    50% { opacity: 0.45; }
-  }
-  @keyframes leafFloat {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 0.85; }
+  /* 木についてる葉は静止 */
+  .tree-cluster .tree-leaf { opacity: 0.95; }
+  /* 周りの舞ってる葉だけふわふわ漂う */
+  .tree-leaf-floater { transform-box: fill-box; transform-origin: center; animation: leafDrift 6s ease-in-out infinite both; }
+  @keyframes leafDrift {
+    0%   { opacity: 0; transform: translate(0, 6px) rotate(-6deg); }
+    20%  { opacity: 0.55; }
+    50%  { opacity: 0.95; transform: translate(-2px, -8px) rotate(8deg); }
+    80%  { opacity: 0.55; }
+    100% { opacity: 0; transform: translate(0, 6px) rotate(-6deg); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .tree-leaf, .tree-extras .tree-leaf { animation: none; opacity: 0.9; }
+    .tree-leaf-floater { animation: none; opacity: 0.7; }
   }
   .tab-btn:hover { background: #f1f5f9; color: #334155; }
   .tab-btn.active { background: #eef6f1; color: #2d8a6f; font-weight: 600; }
@@ -1493,11 +1494,10 @@ if (typeof pdfjsLib !== 'undefined') {
     <div class="sidebar-tree" aria-hidden="true">
       <svg viewBox="0 0 280 320" preserveAspectRatio="xMidYMid meet">
         <g class="tree-extras"></g>
-        <ellipse cx="140" cy="295" rx="90" ry="7" fill="#bedba0" opacity="0.6"/>
-        <path d="M126 200 L120 295 L160 295 L154 200 Z" fill="#a87b53"/>
-        <path d="M130 200 Q118 178 105 158" stroke="#9c7549" stroke-width="10" fill="none" stroke-linecap="round"/>
-        <path d="M150 200 Q162 178 175 158" stroke="#9c7549" stroke-width="10" fill="none" stroke-linecap="round"/>
-        <path d="M140 220 L140 200" stroke="#8e6438" stroke-width="2" fill="none" opacity="0.4"/>
+        <ellipse cx="140" cy="295" rx="78" ry="6" fill="#c4e090" opacity="0.55"/>
+        <path d="M134 200 L131 295 L149 295 L146 200 Z" fill="#b08862"/>
+        <path d="M138 200 Q123 178 112 158" stroke="#9c7549" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+        <path d="M142 200 Q157 178 168 158" stroke="#9c7549" stroke-width="5.5" fill="none" stroke-linecap="round"/>
         <g class="tree-cluster"></g>
       </svg>
     </div>
@@ -8654,57 +8654,63 @@ function switchMasterTab(name, btn) {
       // ハート形状の判定関数（内側 true）
       const cx = 140, cy = 118, scale = 5.6;
       function inHeart(px, py) {
-        // 正規化座標
         const x = (px - cx) / scale / 16;
         const y = -(py - cy) / scale / 13;
-        // ハートの陰関数: (x²+y²-1)³ - x²·y³ <= 0
         const a = x*x + y*y - 1;
         return a*a*a - x*x*y*y*y <= 0;
       }
+      function tooClose(x, y, arr, minDist) {
+        const m2 = minDist * minDist;
+        for (let i = 0; i < arr.length; i++) {
+          const dx = arr[i].x - x, dy = arr[i].y - y;
+          if (dx*dx + dy*dy < m2) return true;
+        }
+        return false;
+      }
       const items = [];
-      // 内部を密に埋める（rejection sampling）
       const minX = cx - scale * 17, maxX = cx + scale * 17;
       const minY = cy - scale * 16, maxY = cy + scale * 12;
       let attempts = 0;
-      while (items.length < 180 && attempts < 3000) {
+      // 葉と葉の最小距離を確保して間隔を空ける
+      while (items.length < 110 && attempts < 6000) {
         attempts++;
         const px = minX + Math.random() * (maxX - minX);
         const py = minY + Math.random() * (maxY - minY);
         if (!inHeart(px, py)) continue;
+        if (tooClose(px, py, items, 11)) continue;
         items.push({
           x: px,
           y: py,
-          s: 1.8 + Math.random() * 1.8,
-          rot: Math.random() * 360,
-          col: colors[Math.floor(Math.random() * colors.length)],
-          delay: (Math.random() * 4).toFixed(2),
-          dur: (3 + Math.random() * 3).toFixed(2)
+          s: 1.8 + Math.random() * 1.6,
+          rot: -25 + Math.random() * 50,
+          col: colors[Math.floor(Math.random() * colors.length)]
         });
       }
       cluster.innerHTML = items.map(p =>
-        `<path d="${leafPath}" fill="${p.col}" class="tree-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})" style="animation-delay:${p.delay}s;animation-duration:${p.dur}s"/>`
+        `<path d="${leafPath}" fill="${p.col}" class="tree-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/>`
       ).join('');
-      // 周りの飛び葉っぱ（明滅）
+      // 周りの舞う葉っぱ（ふわふわ漂う）
       const extraItems = [];
-      for (let i = 0; i < 22; i++) {
-        let px, py, ok = false;
-        for (let k = 0; k < 20 && !ok; k++) {
-          px = 8 + Math.random() * 264;
-          py = 30 + Math.random() * 230;
-          ok = !inHeart(px, py); // ハート外のみ
-        }
+      let extraAttempts = 0;
+      while (extraItems.length < 24 && extraAttempts < 600) {
+        extraAttempts++;
+        const px = 8 + Math.random() * 264;
+        const py = 30 + Math.random() * 240;
+        if (inHeart(px, py)) continue;
+        if (tooClose(px, py, extraItems, 22)) continue;
         extraItems.push({
           x: px,
           y: py,
-          s: 1.4 + Math.random() * 1.6,
-          rot: Math.random() * 360,
+          s: 1.4 + Math.random() * 1.5,
+          rot: -45 + Math.random() * 90,
           col: colors[Math.floor(Math.random() * colors.length)],
           delay: (Math.random() * 5).toFixed(2),
-          dur: (3.5 + Math.random() * 3.5).toFixed(2)
+          dur: (4 + Math.random() * 4).toFixed(2)
         });
       }
+      // 親<g>で位置、内側のpathでrotate/scale、CSSアニメは間に挟んだ<g>で
       extras.innerHTML = extraItems.map(p =>
-        `<path d="${leafPath}" fill="${p.col}" class="tree-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})" style="animation-delay:${p.delay}s;animation-duration:${p.dur}s"/>`
+        `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})"><g class="tree-leaf-floater" style="animation-delay:${p.delay}s;animation-duration:${p.dur}s"><path d="${leafPath}" fill="${p.col}" transform="rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/></g></g>`
       ).join('');
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildTree);
