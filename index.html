@@ -8683,12 +8683,12 @@ function switchMasterTab(name, btn) {
       const minY = cy - scale * 16, maxY = cy + scale * 12;
       let attempts = 0;
       // 葉と葉の最小距離を確保して間隔を空ける（密度ダウン）
-      while (items.length < 70 && attempts < 6000) {
+      while (items.length < 38 && attempts < 6000) {
         attempts++;
         const px = minX + Math.random() * (maxX - minX);
         const py = minY + Math.random() * (maxY - minY);
         if (!inHeart(px, py)) continue;
-        if (tooClose(px, py, items, 14)) continue;
+        if (tooClose(px, py, items, 20)) continue;
         items.push({
           x: px,
           y: py,
@@ -8703,12 +8703,12 @@ function switchMasterTab(name, btn) {
       // 周りの舞う葉っぱ（ふわふわ漂う）— 木の上の方〜横〜下まで広範囲に配置
       const extraItems = [];
       let extraAttempts = 0;
-      while (extraItems.length < 32 && extraAttempts < 1000) {
+      while (extraItems.length < 16 && extraAttempts < 1000) {
         extraAttempts++;
         const px = 6 + Math.random() * 268;
         const py = -140 + Math.random() * 410; // 上方140まで広げる
         if (inHeart(px, py)) continue;
-        if (tooClose(px, py, extraItems, 26)) continue;
+        if (tooClose(px, py, extraItems, 36)) continue;
         extraItems.push({
           x: px,
           y: py,
