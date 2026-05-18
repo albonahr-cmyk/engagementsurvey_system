@@ -8516,50 +8516,52 @@ function switchMasterTab(name, btn) {
   </div>
 </div>
 
-<!-- お花を運ぶ鳥（時折画面を飛ぶ） -->
+<!-- オリーブの枝をくわえた鳥（時折アクションプラン付近から右に飛ぶ） -->
 <div id="flying-bird-wrap" aria-hidden="true">
-  <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" width="140" height="112">
-    <path d="M68 78 Q48 56 32 28" stroke="#5fa886" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    <g transform="translate(32 24)">
-      <circle cx="0" cy="-15" r="9.5" fill="#f5a23e"/>
-      <circle cx="13" cy="-7" r="9.5" fill="#f5a23e"/>
-      <circle cx="13" cy="7" r="9.5" fill="#f5a23e"/>
-      <circle cx="0" cy="15" r="9.5" fill="#f5a23e"/>
-      <circle cx="-13" cy="7" r="9.5" fill="#f5a23e"/>
-      <circle cx="-13" cy="-7" r="9.5" fill="#f5a23e"/>
-      <circle cx="0" cy="0" r="7" fill="#fff5d9"/>
-    </g>
-    <ellipse cx="120" cy="100" rx="58" ry="26" fill="#5dc9c4" transform="rotate(-6 120 100)"/>
-    <path d="M168 86 L196 78 L188 100 Z" fill="#5dc9c4"/>
-    <path d="M86 92 Q108 60 152 80 Q160 102 142 116 Q108 118 90 104 Z" fill="#3a9b95"/>
-    <path d="M68 96 Q90 78 130 90 Q132 102 118 110 Q92 108 72 102 Z" fill="#2d8580" opacity="0.55"/>
-    <path d="M66 96 L52 92 Q49 96 52 100 L66 100 Z" fill="#f5a23e"/>
-    <circle cx="80" cy="90" r="3" fill="white"/>
-    <circle cx="80" cy="90" r="1.6" fill="#1e293b"/>
+  <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg" width="120" height="87">
+    <!-- オリーブの枝（鳥の右側、くちばしから伸びる） -->
+    <path d="M150 60 Q128 50 108 50" stroke="#9ec394" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="113" cy="46" rx="7" ry="3" fill="#b5d4a8" transform="rotate(-20 113 46)"/>
+    <ellipse cx="124" cy="40" rx="7" ry="3" fill="#b5d4a8" transform="rotate(-30 124 40)"/>
+    <ellipse cx="136" cy="38" rx="7" ry="3" fill="#c2dcb3" transform="rotate(-30 136 38)"/>
+    <ellipse cx="148" cy="42" rx="6" ry="2.5" fill="#b5d4a8" transform="rotate(-30 148 42)"/>
+    <ellipse cx="118" cy="56" rx="6" ry="2.5" fill="#b5d4a8" transform="rotate(20 118 56)"/>
+    <ellipse cx="132" cy="54" rx="6" ry="2.5" fill="#c2dcb3" transform="rotate(20 132 54)"/>
+    <ellipse cx="146" cy="56" rx="5" ry="2.2" fill="#b5d4a8" transform="rotate(20 146 56)"/>
+    <!-- 尾羽（左側） -->
+    <path d="M36 72 L14 62 L18 78 L14 92 L40 85 Z" fill="#aedce5"/>
+    <!-- 体（淡いティール） -->
+    <ellipse cx="78" cy="80" rx="46" ry="22" fill="#aedce5" transform="rotate(4 78 80)"/>
+    <!-- 翼（少し濃いめのティール、上） -->
+    <path d="M60 73 Q84 48 116 64 Q120 86 100 98 Q78 98 62 88 Z" fill="#8fc6d0"/>
+    <path d="M66 76 Q86 54 110 68" stroke="#73b1bd" stroke-width="0.9" fill="none" opacity="0.6"/>
+    <!-- くちばし（オレンジ、右側） -->
+    <path d="M122 79 L136 76 Q139 79 136 82 L122 82 Z" fill="#f0a060"/>
+    <!-- 目 -->
+    <circle cx="110" cy="74" r="2.5" fill="white"/>
+    <circle cx="110" cy="74" r="1.3" fill="#1e293b"/>
   </svg>
 </div>
 
 <style>
   #flying-bird-wrap {
     position: fixed;
-    top: 8%;
-    left: 100%;
+    left: 260px;
+    bottom: 90px;
     z-index: 9999;
     pointer-events: none;
     opacity: 0;
     will-change: transform, opacity;
   }
   #flying-bird-wrap.fly {
-    animation: birdFlight 9s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+    animation: birdFlight 6s cubic-bezier(0.45, 0, 0.55, 1) forwards;
   }
   @keyframes birdFlight {
-    0%   { transform: translate(40px, -40px) rotate(18deg); opacity: 0; }
-    8%   { opacity: 0.95; }
-    25%  { transform: translate(-30vw, 12vh) rotate(20deg); }
-    50%  { transform: translate(-60vw, 30vh) rotate(16deg); }
-    75%  { transform: translate(-85vw, 55vh) rotate(20deg); }
-    92%  { opacity: 0.95; }
-    100% { transform: translate(-115vw, 85vh) rotate(18deg); opacity: 0; }
+    0%   { transform: translate(-40px, 10px) rotate(-8deg); opacity: 0; }
+    10%  { opacity: 0.85; }
+    50%  { transform: translate(30vw, -20px) rotate(-3deg); }
+    85%  { opacity: 0.85; }
+    100% { transform: translate(75vw, 30px) rotate(-5deg); opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     #flying-bird-wrap { display: none; }
