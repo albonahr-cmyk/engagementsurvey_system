@@ -29,7 +29,7 @@ if (typeof pdfjsLib !== 'undefined') {
 </script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; background-color: #f1ebd6; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.28 0 0 0 0 0.15 0 0 0 0.22 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); color: #1e293b; }
+  body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; background-color: #edebe4; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.28 0 0 0 0 0.15 0 0 0 0.22 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); color: #1e293b; }
 
   .screen { display: none; min-height: 100vh; }
   .screen.active { display: flex; }
@@ -317,7 +317,7 @@ if (typeof pdfjsLib !== 'undefined') {
   /* 管理者共通 */
   #screen-admin { flex-direction: column; height: 100vh; overflow: hidden; }
   .admin-mobile-header { display: none; }
-  .admin-nav { background: #f1ebd6; color: #1e293b; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0; border-bottom: 1px solid #e5d9b8; }
+  .admin-nav { background: #fff; color: #1e293b; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0; border-bottom: 1px solid #e5e7eb; }
   .admin-nav .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: #1e293b; }
   .admin-nav .user-info { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 12px; font-weight: 500; }
   .admin-nav .logout-btn { background: #f1f5f9; color: #475569; padding: 7px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600; transition: all 0.15s; }
@@ -342,18 +342,9 @@ if (typeof pdfjsLib !== 'undefined') {
   .tab-btn .tab-icon svg { display: block; }
 
   /* メインコンテンツ */
-  .admin-main { flex: 1; overflow-y: auto; background-color: #f1ebd6; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.28 0 0 0 0 0.15 0 0 0 0.22 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); display: flex; flex-direction: column; }
+  .admin-main { flex: 1; overflow-y: auto; background-color: #edebe4; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.28 0 0 0 0 0.15 0 0 0 0.22 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); display: flex; flex-direction: column; }
   .admin-main .admin-nav { flex-shrink: 0; }
   .admin-body { padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
-
-  /* 月次ダッシュボードの背景イラスト（葉っぱシルエット） */
-  #tab-dashboard { position: relative; }
-  #tab-dashboard > *:not(.dashboard-deco) { position: relative; z-index: 1; }
-  .dashboard-deco { position: absolute; pointer-events: none; opacity: 0.16; z-index: 0; }
-  .dashboard-deco.tr { top: -10px; right: -30px; width: 180px; transform: rotate(15deg); }
-  .dashboard-deco.bl { bottom: 40px; left: -40px; width: 200px; transform: rotate(-25deg); opacity: 0.13; }
-  .dashboard-deco.mr { top: 38%; right: -50px; width: 140px; transform: rotate(-10deg); opacity: 0.12; }
-  @media (max-width: 900px) { .dashboard-deco { display: none; } }
 
   /* 月セレクター */
   /* ダッシュボードヘッダー（オーバービュー＋フィルタチップ） */
@@ -1469,32 +1460,6 @@ if (typeof pdfjsLib !== 'undefined') {
 
   <!-- 月次ダッシュボード -->
   <div id="tab-dashboard" class="admin-body">
-    <svg class="dashboard-deco tr" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M60 8 C75 30 100 55 95 95 C92 130 70 150 60 150 C50 150 28 130 25 95 C20 55 45 30 60 8 Z" fill="#71a85a"/>
-      <path d="M60 18 L60 145" stroke="#5a8d3d" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M60 40 C68 45 78 50 88 55" stroke="#5a8d3d" stroke-width="1" stroke-linecap="round" fill="none"/>
-      <path d="M60 40 C52 45 42 50 32 55" stroke="#5a8d3d" stroke-width="1" stroke-linecap="round" fill="none"/>
-      <path d="M60 70 C70 76 82 82 92 88" stroke="#5a8d3d" stroke-width="1" stroke-linecap="round" fill="none"/>
-      <path d="M60 70 C50 76 38 82 28 88" stroke="#5a8d3d" stroke-width="1" stroke-linecap="round" fill="none"/>
-      <path d="M60 100 C68 108 76 115 84 122" stroke="#5a8d3d" stroke-width="1" stroke-linecap="round" fill="none"/>
-      <path d="M60 100 C52 108 44 115 36 122" stroke="#5a8d3d" stroke-width="1" stroke-linecap="round" fill="none"/>
-    </svg>
-    <svg class="dashboard-deco bl" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M20 100 C40 60 80 30 130 25 C160 22 185 35 190 50 C195 65 175 80 140 88 C100 96 55 110 20 100 Z" fill="#86bc5c"/>
-      <path d="M30 95 C70 80 110 65 180 50" stroke="#5a8d3d" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-      <path d="M60 90 C70 80 82 70 95 62" stroke="#5a8d3d" stroke-width="0.9" stroke-linecap="round" fill="none"/>
-      <path d="M90 85 C100 75 112 65 125 55" stroke="#5a8d3d" stroke-width="0.9" stroke-linecap="round" fill="none"/>
-      <path d="M120 78 C130 70 142 62 155 52" stroke="#5a8d3d" stroke-width="0.9" stroke-linecap="round" fill="none"/>
-    </svg>
-    <svg class="dashboard-deco mr" viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M60 12 L60 188" stroke="#5a8d3d" stroke-width="1.6" stroke-linecap="round"/>
-      <ellipse cx="38" cy="40" rx="22" ry="10" fill="#71a85a" transform="rotate(-30 38 40)"/>
-      <ellipse cx="82" cy="60" rx="22" ry="10" fill="#71a85a" transform="rotate(30 82 60)"/>
-      <ellipse cx="38" cy="85" rx="22" ry="10" fill="#71a85a" transform="rotate(-30 38 85)"/>
-      <ellipse cx="82" cy="105" rx="22" ry="10" fill="#71a85a" transform="rotate(30 82 105)"/>
-      <ellipse cx="38" cy="130" rx="22" ry="10" fill="#71a85a" transform="rotate(-30 38 130)"/>
-      <ellipse cx="82" cy="150" rx="22" ry="10" fill="#71a85a" transform="rotate(30 82 150)"/>
-    </svg>
     <div class="dashboard-header">
       <div class="dashboard-header-left">
         <div class="dashboard-title">オーバービュー</div>
