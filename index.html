@@ -8544,35 +8544,56 @@ function switchMasterTab(name, btn) {
   </div>
 </div>
 
-<!-- 四つ葉のクローバーをくわえた水色の鳥（アクションプラン付近から右下へ飛ぶ） -->
+<!-- 翼を大きく広げた水彩青い鳥（左上→右下に滑空、3秒） -->
 <div id="flying-bird-wrap" aria-hidden="true">
-  <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" width="130" height="91">
+  <svg viewBox="0 0 230 170" xmlns="http://www.w3.org/2000/svg" width="150" height="111">
     <defs>
-      <linearGradient id="birdGrad" x1="0" y1="0" x2="0.4" y2="1">
-        <stop offset="0%" stop-color="#dbeaf5"/>
-        <stop offset="55%" stop-color="#9fcae8"/>
-        <stop offset="100%" stop-color="#6ea9d2"/>
+      <radialGradient id="bodyGrad" cx="0.32" cy="0.55" r="0.7">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="42%" stop-color="#e4eff9"/>
+        <stop offset="100%" stop-color="#a3c7e3"/>
+      </radialGradient>
+      <linearGradient id="wingGrad" x1="0.1" y1="0.95" x2="0.85" y2="0.05">
+        <stop offset="0%" stop-color="#3d6b9e"/>
+        <stop offset="55%" stop-color="#90b7d8"/>
+        <stop offset="100%" stop-color="#d4e3f1"/>
       </linearGradient>
-      <linearGradient id="wingShadeGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#8cbdde" stop-opacity="0.55"/>
-        <stop offset="100%" stop-color="#6ea9d2" stop-opacity="0.25"/>
+      <linearGradient id="tailGrad" x1="1" y1="0.5" x2="0" y2="0.5">
+        <stop offset="0%" stop-color="#a3c7e3"/>
+        <stop offset="100%" stop-color="#3d6b9e"/>
       </linearGradient>
     </defs>
-    <!-- 鳥のシルエット（飛翔ポーズ） -->
-    <path d="M22 108 C40 120, 80 122, 115 110 C140 102, 158 92, 168 84 Q176 80, 170 75 L160 78 C155 60, 135 35, 95 38 C72 40, 56 58, 52 75 C48 90, 28 92, 22 108 Z" fill="url(#birdGrad)"/>
-    <!-- 翼の陰影 -->
-    <path d="M62 75 Q88 50 130 62 Q124 80 96 82 Q74 78 62 75 Z" fill="url(#wingShadeGrad)"/>
-    <path d="M70 100 Q92 95 116 96" stroke="#7fb6d2" stroke-width="0.7" fill="none" opacity="0.45"/>
-    <path d="M52 96 Q70 88 92 90" stroke="#7fb6d2" stroke-width="0.7" fill="none" opacity="0.35"/>
-    <!-- くちばし -->
-    <path d="M158 78 L172 76 L172 81 L158 82 Z" fill="#f0a060"/>
+    <!-- 尾羽（左側に長く） -->
+    <g>
+      <path d="M58 95 L10 80 L20 95 L10 110 L58 105 Z" fill="url(#tailGrad)"/>
+      <path d="M40 88 L14 82" stroke="#2f5786" stroke-width="0.9" opacity="0.5"/>
+      <path d="M40 96 L12 96" stroke="#2f5786" stroke-width="0.9" opacity="0.5"/>
+      <path d="M40 104 L14 108" stroke="#2f5786" stroke-width="0.9" opacity="0.5"/>
+    </g>
+    <!-- 体 -->
+    <ellipse cx="118" cy="102" rx="52" ry="40" fill="url(#bodyGrad)"/>
+    <!-- 頭 -->
+    <circle cx="168" cy="78" r="22" fill="url(#bodyGrad)"/>
+    <!-- 翼（しっかり生えた羽根、上向き後方へ） -->
+    <path d="M95 70 C 84 38, 70 20, 54 18 C 48 24, 56 40, 70 55 C 56 42, 62 60, 74 70 C 60 58, 68 78, 82 82 C 70 76, 80 92, 92 90 C 102 88, 102 76, 95 70 Z" fill="url(#wingGrad)"/>
+    <!-- 翼の羽根スジ -->
+    <path d="M73 25 Q66 20 56 18" stroke="#2f5786" stroke-width="1.2" fill="none" opacity="0.55"/>
+    <path d="M75 42 Q68 36 60 33" stroke="#2f5786" stroke-width="1.1" fill="none" opacity="0.55"/>
+    <path d="M78 55 Q72 50 64 48" stroke="#2f5786" stroke-width="1" fill="none" opacity="0.5"/>
+    <path d="M84 68 Q78 64 71 64" stroke="#2f5786" stroke-width="0.9" fill="none" opacity="0.45"/>
+    <!-- 翼先端の羽根尖り -->
+    <path d="M52 20 L60 28 L55 32 Z" fill="#3d6b9e"/>
+    <path d="M58 38 L66 45 L60 48 Z" fill="#3d6b9e"/>
+    <path d="M66 52 L72 58 L66 60 Z" fill="#3d6b9e"/>
+    <!-- くちばし（前方右） -->
+    <path d="M186 76 L200 74 L200 82 L186 84 Z" fill="#f5a655"/>
     <!-- 目 -->
-    <circle cx="152" cy="73" r="1.7" fill="white"/>
-    <circle cx="152" cy="73" r="0.9" fill="#1e293b"/>
+    <circle cx="176" cy="70" r="2.4" fill="white"/>
+    <circle cx="176" cy="70" r="1.4" fill="#1e293b"/>
     <!-- クローバーの茎 -->
-    <path d="M172 82 Q180 96 184 116" stroke="#4d8a3d" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M200 82 Q210 96 218 116" stroke="#5a8d3d" stroke-width="1.6" fill="none" stroke-linecap="round"/>
     <!-- 四つ葉のクローバー -->
-    <g transform="translate(184 118)">
+    <g transform="translate(218 122)">
       <path d="M-1 -1 C-7 -2 -10 -8 -6 -11 C-3 -13 -1 -10 -1 -7 Z" fill="#3a8b3a"/>
       <path d="M1 -1 C7 -2 10 -8 6 -11 C3 -13 1 -10 1 -7 Z" fill="#3a8b3a"/>
       <path d="M-1 1 C-7 2 -10 8 -6 11 C-3 13 -1 10 -1 7 Z" fill="#3a8b3a"/>
@@ -8585,22 +8606,21 @@ function switchMasterTab(name, btn) {
 <style>
   #flying-bird-wrap {
     position: fixed;
-    left: 90px;
-    bottom: 22vh;
+    left: -180px;
+    top: 8vh;
     z-index: 9999;
     pointer-events: none;
     opacity: 0;
     will-change: transform, opacity;
   }
   #flying-bird-wrap.fly {
-    animation: birdFlight 6s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+    animation: birdFlight 3s linear forwards;
   }
   @keyframes birdFlight {
-    0%   { transform: translate(-30px, -10px) rotate(-12deg); opacity: 0; }
-    10%  { opacity: 0.92; }
-    50%  { transform: translate(28vw, 4vh) rotate(-6deg); }
-    85%  { opacity: 0.92; }
-    100% { transform: translate(55vw, 18vh) rotate(-2deg); opacity: 0; }
+    0%   { transform: translate(0, 0) rotate(12deg); opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { transform: translate(calc(100vw + 360px), 75vh) rotate(18deg); opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     #flying-bird-wrap { display: none; }
