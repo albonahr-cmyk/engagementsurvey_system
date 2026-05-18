@@ -4021,18 +4021,28 @@ function getCondition(score) {
   return CONDITION_LEVELS.find(c => score >= c.min) || CONDITION_LEVELS[CONDITION_LEVELS.length - 1];
 }
 
-// 色付きバッテリーアイコン（ドロップダウン・テーブル共通）
+// ハート型コンディションアイコン（ドロップダウン・テーブル共通）
+let _condIconCounter = 0;
+const COND_HEART_PATH = "M14 24.5 C13 23.5 3 16 3 9 C3 6 5.5 3.5 8.5 3.5 C10.8 3.5 13 4.8 14 6.8 C15 4.8 17.2 3.5 19.5 3.5 C22.5 3.5 25 6 25 9 C25 16 15 23.5 14 24.5 Z";
 function getConditionIconHtml(key, size) {
   const w = size || 22;
-  const h = Math.round(w * 20 / 28);
-  const icons = {
-    dynamic: `<svg width="${w}" height="${h}" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="#d1fae5" stroke="#059669" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#059669"/><rect x="4" y="4" width="5" height="12" rx="1" fill="#10b981"/><rect x="10" y="4" width="5" height="12" rx="1" fill="#10b981"/><rect x="16" y="4" width="6" height="12" rx="1" fill="#10b981"/><path d="M14.5 4.5 L11 11 L13 11 L11.5 15.5 L16 9 L14 9 Z" fill="#fef08a" stroke="#ca8a04" stroke-width="0.6" stroke-linejoin="round"/></svg>`,
-    good: `<svg width="${w}" height="${h}" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="white" stroke="#0d9488" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#0d9488"/><rect x="4" y="4" width="5" height="12" rx="1" fill="#14b8a6"/><rect x="10" y="4" width="5" height="12" rx="1" fill="#14b8a6"/><rect x="16" y="4" width="6" height="12" rx="1" fill="#a7f3d0"/></svg>`,
-    normal: `<svg width="${w}" height="${h}" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="white" stroke="#a16207" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#a16207"/><rect x="4" y="4" width="5" height="12" rx="1" fill="#eab308"/><rect x="10" y="4" width="5" height="12" rx="1" fill="#eab308"/><rect x="16" y="4" width="6" height="12" rx="1" fill="#fef3c7"/></svg>`,
-    low: `<svg width="${w}" height="${h}" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="white" stroke="#c2410c" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#c2410c"/><rect x="4" y="4" width="5" height="12" rx="1" fill="#f97316"/><rect x="10" y="4" width="5" height="12" rx="1" fill="#fed7aa"/><rect x="16" y="4" width="6" height="12" rx="1" fill="#fed7aa"/></svg>`,
-    recovery: `<svg width="${w}" height="${h}" viewBox="0 0 28 22" fill="none" style="vertical-align:-3px"><path d="M14 1 C15 3 16 4 16 5.5 C16 6.6 15.1 7.5 14 7.5 C12.9 7.5 12 6.6 12 5.5 C12 4 13 3 14 1 Z" fill="#f97316"/><rect x="2" y="6" width="22" height="14" rx="3" fill="white" stroke="#b91c1c" stroke-width="1.6"/><rect x="24" y="10" width="2.4" height="6" rx="0.8" fill="#b91c1c"/><rect x="4" y="8" width="5" height="10" rx="1" fill="#fecaca"/><rect x="10" y="8" width="5" height="10" rx="1" fill="#fecaca"/><rect x="16" y="8" width="6" height="10" rx="1" fill="#fecaca"/><rect x="11" y="11" width="6" height="4" rx="1" fill="#dc2626"/></svg>`,
+  const h = Math.round(w * 26 / 28);
+  const config = {
+    dynamic:  { stroke: '#059669', accent: '#10b981', bg: '#d1fae5', fillRatio: 0.92, sparkle: true },
+    good:     { stroke: '#0d9488', accent: '#14b8a6', bg: '#ccfbf1', fillRatio: 0.72 },
+    normal:   { stroke: '#a16207', accent: '#eab308', bg: '#fef9c3', fillRatio: 0.50 },
+    low:      { stroke: '#c2410c', accent: '#f97316', bg: '#ffedd5', fillRatio: 0.32 },
+    recovery: { stroke: '#b91c1c', accent: '#dc2626', bg: '#fee2e2', fillRatio: 0.18 },
   };
-  return icons[key] || '';
+  const c = config[key];
+  if (!c) return '';
+  const uid = `cic-${key}-${++_condIconCounter}`;
+  const fillTop = 24.5 - 21 * c.fillRatio;
+  const fillH = 24.5 - fillTop;
+  const sparkle = c.sparkle
+    ? `<path d="M14.8 8.5 L11.3 14 L13.3 14 L11.8 18.3 L16.3 12.8 L14.3 12.8 Z" fill="#fef08a" stroke="#ca8a04" stroke-width="0.5" stroke-linejoin="round"/>`
+    : '';
+  return `<svg width="${w}" height="${h}" viewBox="0 0 28 26" fill="none" style="vertical-align:-3px"><defs><clipPath id="${uid}"><path d="${COND_HEART_PATH}"/></clipPath></defs><path d="${COND_HEART_PATH}" fill="${c.bg}"/><rect x="2" y="${fillTop}" width="24" height="${fillH}" fill="${c.accent}" clip-path="url(#${uid})"/><path d="${COND_HEART_PATH}" stroke="${c.stroke}" stroke-width="1.6" fill="none" stroke-linejoin="round"/>${sparkle}</svg>`;
 }
 
 // 後方互換：既存呼び出し向け
@@ -4179,7 +4189,7 @@ function toggleScoreSort() {
 
 // ===== コンディション・カスタムドロップダウン =====
 let _scoreCondFilter = '';
-const COND_DEFAULT_ICON = `<svg width="22" height="16" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="white" stroke="#94a3b8" stroke-width="1.6"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#94a3b8"/></svg>`;
+const COND_DEFAULT_ICON = `<svg width="22" height="20" viewBox="0 0 28 26" fill="none" style="vertical-align:-3px"><path d="${COND_HEART_PATH}" fill="white" stroke="#94a3b8" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 
 function buildScoreCondPanel() {
   const panel = document.getElementById('score-cond-panel');
@@ -4300,7 +4310,7 @@ function renderConditionScoreCard(emp, total, diff, cond, month) {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   })();
-  const emptyIcon = `<svg width="36" height="26" viewBox="0 0 28 20" fill="none" style="vertical-align:-3px"><rect x="2" y="2" width="22" height="16" rx="3" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="3 2"/><rect x="24" y="6" width="2.4" height="8" rx="0.8" fill="#cbd5e1"/></svg>`;
+  const emptyIcon = `<svg width="36" height="33" viewBox="0 0 28 26" fill="none" style="vertical-align:-3px"><path d="${COND_HEART_PATH}" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="3 2" stroke-linejoin="round"/></svg>`;
   const condIcon = cond ? getConditionIconHtml(cond.key, 36) : emptyIcon;
   const condLabel = cond
     ? `<span style="font-size:12px;font-weight:700;color:${cond.color};margin-left:2px">${cond.label}</span>`
