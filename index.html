@@ -5214,7 +5214,7 @@ function showDetail(empId, drawerMode) {
     }
   }
   const allYears = [...yearsSet].sort((a, b) => a - b);
-  const displayYear = window._monthlyTableYear || parseInt((months[months.length - 1] || `${yearNow}-01`).split('-')[0]);
+  const displayYear = window._monthlyTableYear || yearNow;
   const yearMonths = [];
   for (let m = 1; m <= 12; m++) yearMonths.push(`${displayYear}-${String(m).padStart(2, '0')}`);
   // 手動入力を統合
@@ -5247,7 +5247,7 @@ function showDetail(empId, drawerMode) {
     const prev2 = mi > 0 && mergedData[yearMonths[mi - 1]] ? getTotal(mergedData[yearMonths[mi - 1]]) : null;
     const d = prev2 !== null ? v - prev2 : null;
     const cls = v < 60 ? 'cell-alert' : v < 70 ? 'cell-warn' : 'cell-ok';
-    const diff2 = d !== null ? `<br><span class="${d >= 0 ? 'cell-diff-up' : 'cell-diff-down'}">${d > 0 ? '+' : ''}${d}</span>` : '';
+    const diff2 = (d !== null && d !== 0) ? `<br><span class="${d > 0 ? 'cell-diff-up' : 'cell-diff-down'}">${d > 0 ? '+' : ''}${d}</span>` : '';
     return `<td class="${cls}" style="font-weight:700">${v}${diff2}</td>`;
   }).join('');
 
