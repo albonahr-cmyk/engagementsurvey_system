@@ -1503,6 +1503,7 @@ if (typeof pdfjsLib !== 'undefined') {
         <path d="M134 200 L131 295 L149 295 L146 200 Z" fill="#b08862"/>
         <path d="M138 200 Q123 178 112 158" stroke="#9c7549" stroke-width="5.5" fill="none" stroke-linecap="round"/>
         <path d="M142 200 Q157 178 168 158" stroke="#9c7549" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+        <g class="tree-glow"></g>
         <g class="tree-cluster"></g>
       </svg>
     </div>
@@ -8783,6 +8784,7 @@ function switchMasterTab(name, btn) {
     function buildTree() {
       const cluster = document.querySelector('.tree-cluster');
       const extras = document.querySelector('.tree-extras');
+      const glow = document.querySelector('.tree-glow');
       if (!cluster || !extras) return;
       const colors = ['#6ab045', '#7dc05a', '#94cf74', '#a7d88a', '#bce0a0', '#558e36', '#86c45a', '#c9e6a8', '#4a7f30', '#d6ecb8'];
       const leafPath = 'M0 4 C0 3.6 -4 1.2 -4 -1.4 C-4 -2.9 -2.6 -4 -1.3 -4 C-0.5 -4 0 -3.4 0 -2.6 C0 -3.4 0.5 -4 1.3 -4 C2.6 -4 4 -2.9 4 -1.4 C4 1.2 0 3.6 0 4 Z';
@@ -8842,6 +8844,48 @@ function switchMasterTab(name, btn) {
       cluster.innerHTML = items.map(p =>
         `<path d="${leafPath}" fill="${p.col}" class="tree-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/>`
       ).join('');
+      // 葉と葉の間の白い隙間を埋める淡い黄緑の光の粒
+      if (glow) {
+        const glowColors = ['#e6f0a8', '#d4e89a', '#dceea0', '#e8f2b2', '#cfe698', '#f0f4c0'];
+        const glowItems = [];
+        // ハート内部にたっぷり散布
+        let gAttempts = 0;
+        while (glowItems.length < 90 && gAttempts < 4000) {
+          gAttempts++;
+          const px = minX + Math.random() * (maxX - minX);
+          const py = minY + Math.random() * (maxY - minY);
+          if (!inHeart(px, py)) continue;
+          // 葉に近すぎない位置に置く
+          if (tooClose(px, py, items, 6)) continue;
+          if (tooClose(px, py, glowItems, 7)) continue;
+          glowItems.push({
+            x: px,
+            y: py,
+            r: 0.9 + Math.random() * 2.0,
+            col: glowColors[Math.floor(Math.random() * glowColors.length)],
+            op: 0.35 + Math.random() * 0.4
+          });
+        }
+        // ハート外側の周辺にも少しだけ散らして自然に
+        let gAttempts2 = 0;
+        while (glowItems.length < 110 && gAttempts2 < 1500) {
+          gAttempts2++;
+          const px = (cx - scale * 19) + Math.random() * (scale * 38);
+          const py = (cy - scale * 18) + Math.random() * (scale * 32);
+          if (inHeart(px, py)) continue;
+          if (tooClose(px, py, glowItems, 11)) continue;
+          glowItems.push({
+            x: px,
+            y: py,
+            r: 0.7 + Math.random() * 1.4,
+            col: glowColors[Math.floor(Math.random() * glowColors.length)],
+            op: 0.25 + Math.random() * 0.3
+          });
+        }
+        glow.innerHTML = glowItems.map(p =>
+          `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(2)}" fill="${p.col}" opacity="${p.op.toFixed(2)}"/>`
+        ).join('');
+      }
       // 周りの舞う葉っぱ（ふわふわ漂う）— 木の上の方〜横〜下まで広範囲に配置
       const extraItems = [];
       let extraAttempts = 0;
