@@ -336,22 +336,23 @@ if (typeof pdfjsLib !== 'undefined') {
   .sidebar-section { padding: 0 12px; margin-bottom: 8px; }
   .sidebar-section-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px 4px; }
   /* サイドバー下部の3ウィジェット */
-  .sidebar-widgets { margin-top: auto; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
-  .sb-widget { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px 14px; display: block; text-align: left; width: 100%; font: inherit; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .sidebar-widgets { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+  .sb-widget { background: white; border: 1px solid transparent; border-radius: 14px; padding: 12px 16px; display: block; text-align: left; width: 100%; font: inherit; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
   .sb-widget:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-  .sb-widget-countdown { background: #fdf3d8; border-color: #f0e3b0; }
-  .sb-widget-alert { background: #fce4ea; border-color: #f5c2cf; }
-  .sb-widget-summary { background: white; cursor: default; padding: 14px; text-align: center; border-color: #f1f5f9; }
+  .sb-widget-countdown { background: #fcefcf; border-color: #f3e3b1; }
+  .sb-widget-alert { background: #fbe4ea; border-color: #f5cdd7; }
+  .sb-widget-summary { background: white; cursor: default; padding: 18px 14px 16px; text-align: center; border-color: #f1f5f9; }
   .sb-widget-summary:hover { transform: none; box-shadow: none; }
-  .sb-widget-header { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #92450a; margin-bottom: 4px; }
-  .sb-widget-alert .sb-widget-header { color: #9f1239; }
-  .sb-countdown-days { font-size: 18px; font-weight: 800; color: #5a3805; line-height: 1.2; }
-  .sb-countdown-num { font-size: 24px; }
-  .sb-countdown-date { font-size: 11px; color: #92450a; margin-top: 2px; opacity: 0.85; }
-  .sb-alert-badge { margin-left: auto; background: #be123c; color: white; border-radius: 999px; font-size: 10px; font-weight: 800; padding: 1px 7px; min-width: 16px; text-align: center; line-height: 1.4; }
-  .sb-alert-text { font-size: 12px; color: #6b1a32; font-weight: 600; line-height: 1.4; }
-  .sb-summary-char { display: flex; justify-content: center; margin-bottom: 6px; }
-  .sb-summary-text { font-size: 11px; color: #64748b; line-height: 1.6; }
+  .sb-widget-header { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #8a6a30; margin-bottom: 6px; }
+  .sb-widget-alert .sb-widget-header { color: #8a3552; }
+  .sb-countdown-days { font-size: 20px; font-weight: 800; color: #5a3d10; line-height: 1.15; }
+  .sb-countdown-num { font-size: 26px; }
+  .sb-countdown-date { font-size: 12px; color: #a68b4f; margin-top: 2px; font-weight: 600; }
+  .sb-alert-badge { margin-left: auto; background: #b8324c; color: white; border-radius: 999px; font-size: 11px; font-weight: 800; padding: 2px 8px; min-width: 18px; text-align: center; line-height: 1.4; }
+  .sb-alert-text { font-size: 13px; color: #4a2531; font-weight: 700; line-height: 1.4; }
+  .sb-summary-char { display: flex; justify-content: center; margin-bottom: 10px; }
+  .sb-summary-text { font-size: 12px; color: #64748b; line-height: 1.7; }
+  .sb-summary-rank { font-size: 14px; font-weight: 800; }
   .tab-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; background: none; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.15s; letter-spacing: 0.1px; text-align: left; margin: 2px 0; }
 
   /* サイドバー下部のハートの木 */
@@ -6647,24 +6648,15 @@ function renderSidebarWidgets() {
   const alerts = computeSidebarAlerts();
   const alertCount = alerts.length;
   const alertTopMsg = alertCount > 0 ? sanitize(alerts[0].message) : 'アラートなし';
-  // ③ ハートキャラ＋サマリ
+  // ③ ハートキャラ＋サマリ（回答済み分の平均でOK）
   let totalAvg = null, conditionTier = null, grade = null;
   try {
     if (typeof rebuildEmpData === 'function') rebuildEmpData();
     const month = (typeof getSurveyMonth === 'function') ? getSurveyMonth() : null;
-    if (month) {
-      const totals = [];
-      Object.keys(employees || {}).forEach(id => {
-        if (employees[id].role === 'admin') return;
-        const data = (window.empData || {})[id] || {};
-        const cur = data[month];
-        if (cur) {
-          const t = getTotal(cur);
-          if (typeof t === 'number' && !isNaN(t)) totals.push(t);
-        }
-      });
-      if (totals.length > 0) {
-        totalAvg = Math.round(totals.reduce((a,b)=>a+b, 0) / totals.length);
+    if (month && typeof getMonthData === 'function') {
+      const md = getMonthData(month, ALL_MEMBERS);
+      if (md && md.total > 0) {
+        totalAvg = md.total;
         conditionTier = getCondition(totalAvg);
         grade = getScoreGrade(totalAvg);
       }
@@ -6676,8 +6668,9 @@ function renderSidebarWidgets() {
     summaryHtml = `今月の総合スコアは<br><span style="color:#94a3b8">データ未集計</span>`;
   } else {
     const adjective = totalAvg >= 90 ? '絶好調' : totalAvg >= 75 ? '好調' : totalAvg >= 60 ? '安定' : totalAvg >= 40 ? '要注意' : '要対応';
-    const decoration = totalAvg >= 75 ? ' ✨' : '';
-    summaryHtml = `今月の総合スコアは<br><span style="color:${grade.color};font-weight:800;font-size:14px">${grade.letter}</span> で${adjective}です${decoration}`;
+    const decoration = totalAvg >= 60 ? ' ✨' : '';
+    const rankColor = totalAvg >= 60 ? '#2d8a6f' : grade.color;
+    summaryHtml = `今月の総合スコアは<br><span class="sb-summary-rank" style="color:${rankColor}">${grade.letter}</span> <span style="color:${rankColor};font-weight:700">で${adjective}です${decoration}</span>`;
   }
   const iconCal = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
   const iconBell = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
@@ -6781,24 +6774,27 @@ function onSidebarAlertClick() {
 function getSidebarCharacterSvg(key) {
   const cfg = {
     dynamic:  { bg: '#10b981', mood: 'happy' },
-    good:     { bg: '#3da589', mood: 'smile' },
+    good:     { bg: '#2d8a6f', mood: 'smile' },
     normal:   { bg: '#eab308', mood: 'neutral' },
-    low:      { bg: '#f97316', mood: 'sad' },
-    recovery: { bg: '#dc2626', mood: 'cry' },
+    low:      { bg: '#f59e0b', mood: 'sad' },
+    recovery: { bg: '#94a3b8', mood: 'cry' },
   };
   const c = cfg[key] || { bg: '#94a3b8', mood: 'neutral' };
   const heart = `<path d="${COND_HEART_PATH}" fill="${c.bg}"/>`;
-  let face = '';
+  // 目（白の少し大きめドット）＋ほっぺ（柔らかなピンク）＋口
+  const eyeFill = '#ffffff';
+  const cheek = `<ellipse cx="9.5" cy="16" rx="1.3" ry="0.8" fill="#ffc8d8" opacity="0.7"/><ellipse cx="18.5" cy="16" rx="1.3" ry="0.8" fill="#ffc8d8" opacity="0.7"/>`;
+  let face;
   if (c.mood === 'happy' || c.mood === 'smile') {
-    face = `<circle cx="11" cy="13.5" r="0.95" fill="white"/><circle cx="17" cy="13.5" r="0.95" fill="white"/><path d="M10.4 16.4 Q14 19 17.6 16.4" stroke="white" stroke-width="1.1" stroke-linecap="round" fill="none"/>`;
+    face = `<circle cx="11.5" cy="14" r="0.85" fill="${eyeFill}"/><circle cx="16.5" cy="14" r="0.85" fill="${eyeFill}"/>${cheek}<path d="M11.2 16.6 Q14 18.6 16.8 16.6" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round" fill="none"/>`;
   } else if (c.mood === 'neutral') {
-    face = `<circle cx="11" cy="13.5" r="0.95" fill="white"/><circle cx="17" cy="13.5" r="0.95" fill="white"/><line x1="11.2" y1="17" x2="16.8" y2="17" stroke="white" stroke-width="1.1" stroke-linecap="round"/>`;
+    face = `<circle cx="11.5" cy="14" r="0.85" fill="${eyeFill}"/><circle cx="16.5" cy="14" r="0.85" fill="${eyeFill}"/>${cheek}<line x1="11.6" y1="17" x2="16.4" y2="17" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/>`;
   } else if (c.mood === 'sad') {
-    face = `<circle cx="11" cy="13.5" r="0.95" fill="white"/><circle cx="17" cy="13.5" r="0.95" fill="white"/><path d="M10.4 17.6 Q14 15.4 17.6 17.6" stroke="white" stroke-width="1.1" stroke-linecap="round" fill="none"/>`;
+    face = `<circle cx="11.5" cy="14" r="0.85" fill="${eyeFill}"/><circle cx="16.5" cy="14" r="0.85" fill="${eyeFill}"/>${cheek}<path d="M11.2 17.6 Q14 15.6 16.8 17.6" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round" fill="none"/>`;
   } else {
-    face = `<line x1="10" y1="12.8" x2="12" y2="14.4" stroke="white" stroke-width="1.1" stroke-linecap="round"/><line x1="12" y1="12.8" x2="10" y2="14.4" stroke="white" stroke-width="1.1" stroke-linecap="round"/><line x1="16" y1="12.8" x2="18" y2="14.4" stroke="white" stroke-width="1.1" stroke-linecap="round"/><line x1="18" y1="12.8" x2="16" y2="14.4" stroke="white" stroke-width="1.1" stroke-linecap="round"/><path d="M10.6 17.4 Q14 15.6 17.4 17.4" stroke="white" stroke-width="1.1" stroke-linecap="round" fill="none"/>`;
+    face = `<line x1="10.7" y1="13.3" x2="12.3" y2="14.7" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/><line x1="12.3" y1="13.3" x2="10.7" y2="14.7" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/><line x1="15.7" y1="13.3" x2="17.3" y2="14.7" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/><line x1="17.3" y1="13.3" x2="15.7" y2="14.7" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/>${cheek}<path d="M11.4 17.4 Q14 15.8 16.6 17.4" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round" fill="none"/>`;
   }
-  return `<svg width="64" height="60" viewBox="0 0 28 26" fill="none" aria-hidden="true">${heart}${face}</svg>`;
+  return `<svg width="72" height="68" viewBox="0 0 28 26" fill="none" aria-hidden="true">${heart}${face}</svg>`;
 }
 
 function loadMailSchedule() {
@@ -8918,6 +8914,7 @@ function switchMasterTab(name, btn) {
         renderIdList();
         renderEmployeeList();
         renderDeptManager();
+        renderSidebarWidgets();
         // データ取得後にタブ描画処理を実行
         const savedTab = localStorage.getItem('es_active_tab');
         if (savedTab && TAB_NAMES.includes(savedTab)) {
