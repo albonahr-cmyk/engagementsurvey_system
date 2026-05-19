@@ -342,28 +342,6 @@ if (typeof pdfjsLib !== 'undefined') {
   .sidebar-tree svg { width: 100%; height: auto; max-width: 230px; display: block; margin: 0 auto; overflow: visible; }
   /* 木についてる葉は静止 */
   .tree-cluster .tree-leaf { opacity: 0.95; }
-  .tree-pale-leaves .tree-pale-leaf { opacity: 0.6; }
-  /* 周りの舞ってる葉だけふわふわ漂う */
-  .tree-leaf-floater { transform-box: fill-box; transform-origin: center; animation: leafDrift 6s ease-in-out infinite both; }
-  @keyframes leafDrift {
-    0%   { opacity: 0; transform: translate(0, 6px) rotate(-6deg); }
-    20%  { opacity: 0.55; }
-    50%  { opacity: 0.95; transform: translate(-2px, -8px) rotate(8deg); }
-    80%  { opacity: 0.55; }
-    100% { opacity: 0; transform: translate(0, 6px) rotate(-6deg); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .tree-leaf-floater { animation: none; opacity: 0.7; }
-  }
-  /* ふんわり発光する光の粒（淡め） */
-  .glow-dot { transform-box: fill-box; transform-origin: center; animation: glowPulse 3.4s ease-in-out infinite both; }
-  @keyframes glowPulse {
-    0%, 100% { opacity: 0.18; transform: scale(0.75); }
-    50%      { opacity: 0.6;  transform: scale(1.15); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .glow-dot { animation: none; opacity: 0.4; }
-  }
   .tab-btn:hover { background: #f1f5f9; color: #334155; }
   .tab-btn.active { background: #eef6f1; color: #2d8a6f; font-weight: 600; }
   .tab-btn .tab-icon { width: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -1507,34 +1485,28 @@ if (typeof pdfjsLib !== 'undefined') {
       <button class="tab-btn" data-tab="actions" onclick="switchTab('actions', this)"><span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>アクションプラン</button>
     </div>
     <div class="sidebar-tree" aria-hidden="true">
-      <svg viewBox="0 -70 280 450" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <filter id="treeGlowFilter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="1.6" result="blur1"/>
-            <feMerge>
-              <feMergeNode in="blur1"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        <ellipse cx="140" cy="296" rx="108" ry="11" fill="#c4e090" opacity="0.42"/>
-        <ellipse cx="140" cy="295" rx="92" ry="8" fill="#b8db82" opacity="0.55"/>
-        <path d="M134 200 L131 295 L149 295 L146 200 Z" fill="#b08862"/>
-        <!-- メイン枝 -->
-        <path d="M138 200 Q123 178 112 158" stroke="#9c7549" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-        <path d="M142 200 Q157 178 168 158" stroke="#9c7549" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-        <!-- 中央上向きの短枝 -->
-        <path d="M140 200 Q140 188 140 172" stroke="#9c7549" stroke-width="3.8" fill="none" stroke-linecap="round"/>
-        <!-- 左メインから派生する枝分かれ -->
-        <path d="M122 178 Q113 165 105 146" stroke="#9c7549" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-        <path d="M128 173 Q130 158 132 144" stroke="#9c7549" stroke-width="3.0" fill="none" stroke-linecap="round"/>
-        <path d="M116 168 Q104 158 92 154" stroke="#9c7549" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-        <!-- 右メインから派生する枝分かれ -->
-        <path d="M158 178 Q167 165 175 146" stroke="#9c7549" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-        <path d="M152 173 Q150 158 148 144" stroke="#9c7549" stroke-width="3.0" fill="none" stroke-linecap="round"/>
-        <path d="M164 168 Q176 158 188 154" stroke="#9c7549" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-        <g class="tree-glow" filter="url(#treeGlowFilter)"></g>
-        <g class="tree-pale-leaves"></g>
+      <svg viewBox="0 -30 280 420" preserveAspectRatio="xMidYMid meet">
+        <!-- 重なり合う丘 -->
+        <path d="M-20 318 Q 70 296 150 308 Q 230 318 320 304 L 320 400 L -20 400 Z" fill="#bce0a0" opacity="0.7"/>
+        <path d="M-20 332 Q 90 314 170 324 Q 250 334 320 324 L 320 400 L -20 400 Z" fill="#9bd078" opacity="0.85"/>
+        <path d="M-20 346 Q 110 334 190 342 Q 270 350 320 342 L 320 400 L -20 400 Z" fill="#7ec05a"/>
+        <!-- 幹（自然なシルエット） -->
+        <path d="M 134 195 C 130 232 126 272 124 320 L 156 320 C 154 272 150 232 146 195 Z" fill="#a89488"/>
+        <!-- メインの三又 -->
+        <path d="M140 200 Q128 180 118 158" stroke="#a89488" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+        <path d="M140 200 Q152 180 162 158" stroke="#a89488" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+        <path d="M140 200 Q138 180 138 160" stroke="#a89488" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <!-- 二次枝（キャノピー内へ伸びる） -->
+        <path d="M118 158 Q108 142 96 128" stroke="#a89488" stroke-width="3.8" fill="none" stroke-linecap="round"/>
+        <path d="M118 158 Q120 142 122 124" stroke="#a89488" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+        <path d="M162 158 Q172 142 184 128" stroke="#a89488" stroke-width="3.8" fill="none" stroke-linecap="round"/>
+        <path d="M162 158 Q160 142 158 124" stroke="#a89488" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+        <path d="M138 160 Q134 142 130 122" stroke="#a89488" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M138 160 Q142 142 146 122" stroke="#a89488" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- 三次枝（先端） -->
+        <path d="M96 128 Q92 116 88 104" stroke="#a89488" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M184 128 Q188 116 192 104" stroke="#a89488" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <!-- 葉クラスタ -->
         <g class="tree-cluster"></g>
       </svg>
     </div>
@@ -8844,18 +8816,15 @@ function switchMasterTab(name, btn) {
   (function() {
     function buildTree() {
       const cluster = document.querySelector('.tree-cluster');
-      const glow = document.querySelector('.tree-glow');
-      const pale = document.querySelector('.tree-pale-leaves');
       if (!cluster) return;
-      const colors = ['#6ab045', '#7dc05a', '#94cf74', '#a7d88a', '#bce0a0', '#558e36', '#86c45a', '#c9e6a8', '#4a7f30', '#d6ecb8'];
+      const colors = ['#4a8a3d', '#5a9c4d', '#6db05c', '#7ec06b', '#94cd7f', '#b0d99a', '#7fb060', '#a0c890', '#5fa84e', '#86bd70', '#bedfa6', '#3f7a32'];
       const leafPath = 'M0 4 C0 3.6 -4 1.2 -4 -1.4 C-4 -2.9 -2.6 -4 -1.3 -4 C-0.5 -4 0 -3.4 0 -2.6 C0 -3.4 0.5 -4 1.3 -4 C2.6 -4 4 -2.9 4 -1.4 C4 1.2 0 3.6 0 4 Z';
-      // ハート形状の判定関数（内側 true）
-      const cx = 140, cy = 118, scale = 5.6;
-      function inHeart(px, py) {
-        const x = (px - cx) / scale / 16;
-        const y = -(py - cy) / scale / 13;
-        const a = x*x + y*y - 1;
-        return a*a*a - x*x*y*y*y <= 0;
+      // 楕円キャノピー
+      const cx = 140, cy = 115, rx = 80, ry = 72;
+      function inCanopy(px, py) {
+        const dx = (px - cx) / rx;
+        const dy = (py - cy) / ry;
+        return dx*dx + dy*dy <= 1;
       }
       function tooClose(x, y, arr, minDist) {
         const m2 = minDist * minDist;
@@ -8866,112 +8835,43 @@ function switchMasterTab(name, btn) {
         return false;
       }
       const items = [];
-      const minX = cx - scale * 17, maxX = cx + scale * 17;
-      const minY = cy - scale * 16, maxY = cy + scale * 12;
-      // ① ハート輪郭沿いに均等配置（パラメトリックハート）
-      const outlineCount = 22;
+      const minX = cx - rx, maxX = cx + rx;
+      const minY = cy - ry, maxY = cy + ry;
+      // ① 楕円輪郭にハートを並べる
+      const outlineCount = 11;
       for (let i = 0; i < outlineCount; i++) {
-        const t = (i / outlineCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.18;
-        const hx = 16 * Math.pow(Math.sin(t), 3);
-        const hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-        const r = 0.86 + Math.random() * 0.12; // 輪郭付近
-        const px = cx + hx * r * scale;
-        const py = cy + hy * r * scale;
-        if (tooClose(px, py, items, 16)) continue;
+        const t = (i / outlineCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.25;
+        const r2 = 0.88 + Math.random() * 0.1;
+        const px = cx + Math.cos(t) * rx * r2;
+        const py = cy + Math.sin(t) * ry * r2;
+        if (tooClose(px, py, items, 18)) continue;
         items.push({
           x: px,
           y: py,
-          s: 2.1 + Math.random() * 1.4,
-          rot: -25 + Math.random() * 50,
+          s: 2.6 + Math.random() * 1.4,
+          rot: -12 + Math.random() * 24,
           col: colors[Math.floor(Math.random() * colors.length)]
         });
       }
-      // ② 内部に散らして充填（密集させすぎないよう余白多め）
+      // ② キャノピー内部に余白を持って散布
       let attempts = 0;
-      while (items.length < 26 && attempts < 6000) {
+      while (items.length < 28 && attempts < 6000) {
         attempts++;
         const px = minX + Math.random() * (maxX - minX);
         const py = minY + Math.random() * (maxY - minY);
-        if (!inHeart(px, py)) continue;
-        if (tooClose(px, py, items, 24)) continue;
+        if (!inCanopy(px, py)) continue;
+        if (tooClose(px, py, items, 19)) continue;
         items.push({
           x: px,
           y: py,
-          s: 1.9 + Math.random() * 1.6,
-          rot: -25 + Math.random() * 50,
+          s: 2.4 + Math.random() * 1.6,
+          rot: -12 + Math.random() * 24,
           col: colors[Math.floor(Math.random() * colors.length)]
         });
       }
       cluster.innerHTML = items.map(p =>
         `<path d="${leafPath}" fill="${p.col}" class="tree-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/>`
       ).join('');
-      // 薄色のハート葉を散らして葉間のすき間を埋める（メイン葉の背面）
-      if (pale) {
-        const paleColors = ['#dceeb8', '#e6f1c8', '#ecf4d4', '#dae8b0', '#cce0a0', '#d8e9b4', '#e4eebe'];
-        const paleItems = [];
-        // ハート内部に散布（密度控えめ）
-        let pAttempts = 0;
-        while (paleItems.length < 20 && pAttempts < 4000) {
-          pAttempts++;
-          const px = minX + Math.random() * (maxX - minX);
-          const py = minY + Math.random() * (maxY - minY);
-          if (!inHeart(px, py)) continue;
-          if (tooClose(px, py, paleItems, 16)) continue;
-          paleItems.push({
-            x: px,
-            y: py,
-            s: 2.0 + Math.random() * 1.7,
-            rot: -25 + Math.random() * 50,
-            col: paleColors[Math.floor(Math.random() * paleColors.length)]
-          });
-        }
-        pale.innerHTML = paleItems.map(p =>
-          `<path d="${leafPath}" fill="${p.col}" class="tree-pale-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/>`
-        ).join('');
-      }
-      // 葉と葉の間の白い隙間を埋めるふんわり光の粒（黄色×黄緑の中間／淡色）
-      if (glow) {
-        const glowColors = ['#e8ee9c', '#dde889', '#eaf0a4', '#d8e88b', '#e2ec95', '#f0f3b5', '#d4e286'];
-        const glowItems = [];
-        // ハート内部に散布（小さめ）
-        let gAttempts = 0;
-        while (glowItems.length < 70 && gAttempts < 4000) {
-          gAttempts++;
-          const px = minX + Math.random() * (maxX - minX);
-          const py = minY + Math.random() * (maxY - minY);
-          if (!inHeart(px, py)) continue;
-          if (tooClose(px, py, items, 4)) continue;
-          if (tooClose(px, py, glowItems, 9)) continue;
-          glowItems.push({
-            x: px,
-            y: py,
-            r: 0.9 + Math.random() * 1.4,
-            col: glowColors[Math.floor(Math.random() * glowColors.length)],
-            delay: (Math.random() * 3.4).toFixed(2),
-            dur: (2.6 + Math.random() * 2.4).toFixed(2)
-          });
-        }
-        // ハート外周にも少しだけ散らして自然に
-        let gAttempts2 = 0;
-        while (glowItems.length < 85 && gAttempts2 < 1500) {
-          gAttempts2++;
-          const px = (cx - scale * 19) + Math.random() * (scale * 38);
-          const py = (cy - scale * 18) + Math.random() * (scale * 32);
-          if (inHeart(px, py)) continue;
-          if (tooClose(px, py, glowItems, 13)) continue;
-          glowItems.push({
-            x: px,
-            y: py,
-            r: 0.6 + Math.random() * 1.0,
-            col: glowColors[Math.floor(Math.random() * glowColors.length)],
-            delay: (Math.random() * 3.4).toFixed(2),
-            dur: (2.8 + Math.random() * 2.6).toFixed(2)
-          });
-        }
-        glow.innerHTML = glowItems.map(p =>
-          `<circle class="glow-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(2)}" fill="${p.col}" style="animation-delay:${p.delay}s;animation-duration:${p.dur}s"/>`
-        ).join('');
-      }
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildTree);
     else buildTree();
