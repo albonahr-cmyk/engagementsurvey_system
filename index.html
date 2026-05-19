@@ -1627,7 +1627,12 @@ if (typeof pdfjsLib !== 'undefined') {
       <div class="form-row" style="margin-bottom:14px">
         <div class="form-group" style="max-width:200px">
           <label>役職</label>
-          <input type="text" id="new-emp-position" placeholder="例：マネージャー">
+          <select id="new-emp-position">
+            <option value="">未選択</option>
+            <option value="マネージャー">マネージャー</option>
+            <option value="シニアリーダー">シニアリーダー</option>
+            <option value="リーダー">リーダー</option>
+          </select>
         </div>
         <div class="form-group" style="max-width:200px">
           <label>雇用形態</label>
@@ -6169,7 +6174,10 @@ function _renderAccountEdit(empId) {
         <option value=""${!emp.dept ? ' selected' : ''}>部署を選択</option>
         ${getDeptsFromEmployees().map(d => `<option value="${sanitize(d)}"${emp.dept === d ? ' selected' : ''}>${sanitize(d)}</option>`).join('')}
       </select></div>
-      <div class="account-info-row" style="margin-top:10px"><div class="label">役職</div><input id="ai-edit-position" value="${sanitize(emp.position || '')}" placeholder="例：一般社員、マネージャー" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">役職</div><select id="ai-edit-position" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
+        <option value=""${!emp.position ? ' selected' : ''}>未選択</option>
+        ${['マネージャー','シニアリーダー','リーダー'].map(p => `<option value="${p}"${emp.position === p ? ' selected' : ''}>${p}</option>`).join('')}
+      </select></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">雇用形態</div><select id="ai-edit-jobtype" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
         <option value=""${!emp.jobType ? ' selected' : ''}>未選択</option>
         ${['正社員','契約社員','アルバイト','インターン','業務委託','派遣社員'].map(t => `<option value="${t}"${emp.jobType === t ? ' selected' : ''}>${t}</option>`).join('')}
