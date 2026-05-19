@@ -4594,27 +4594,27 @@ function getConditionCharacterSvg(key) {
 
 function renderConditionSummarySection(cond, diff) {
   const text = getConditionLongSummary(cond, diff);
-  return `<div style="margin-bottom:24px">
+  return `<div style="margin:0 auto 24px;max-width:680px;padding:0 24px">
     <h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:8px 0 14px">まとめ</h2>
-    <p style="font-size:13.5px;color:#334155;line-height:1.85;margin:0;white-space:pre-line">${sanitize(text)}</p>
+    <p style="font-size:14px;color:#334155;line-height:1.95;margin:0;white-space:pre-line;letter-spacing:0.2px">${sanitize(text)}</p>
   </div>`;
 }
 
 function renderConditionAnalysisSection(scores, cond, diff) {
   const bullets = getConditionAnalysisBullets(scores, cond, diff);
   if (!bullets.length) return '';
-  return `<div style="margin-bottom:24px">
+  return `<div style="margin:0 auto 24px;max-width:680px;padding:0 24px">
     <h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:8px 0 14px">直近のコンディション分析</h2>
-    <ul style="font-size:13.5px;color:#334155;line-height:1.85;padding-left:20px;margin:0">${bullets.map(b => `<li style="margin-bottom:10px">${sanitize(b)}</li>`).join('')}</ul>
+    <ul style="font-size:14px;color:#334155;line-height:1.95;padding-left:22px;margin:0;letter-spacing:0.2px">${bullets.map(b => `<li style="margin-bottom:12px">${sanitize(b)}</li>`).join('')}</ul>
   </div>`;
 }
 
 function renderConditionForwardSection(cond, diff) {
   const bullets = getConditionForwardBullets(cond, diff);
   if (!bullets.length) return '';
-  return `<div style="margin-bottom:24px">
+  return `<div style="margin:0 auto 24px;max-width:680px;padding:0 24px">
     <h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:8px 0 14px">今後の見立て・提案</h2>
-    <ul style="font-size:13.5px;color:#334155;line-height:1.85;padding-left:20px;margin:0">${bullets.map(b => `<li style="margin-bottom:10px">${sanitize(b)}</li>`).join('')}</ul>
+    <ul style="font-size:14px;color:#334155;line-height:1.95;padding-left:22px;margin:0;letter-spacing:0.2px">${bullets.map(b => `<li style="margin-bottom:12px">${sanitize(b)}</li>`).join('')}</ul>
   </div>`;
 }
 
@@ -5062,6 +5062,36 @@ async function exportToSpreadsheet() {
 // ===== 社員詳細 =====
 let lastTab = 'employees';
 
+// 月別スコアの手動入力（localStorage 経由で永続化）
+function _manualKey(empId, m, k) { return `ms2_${empId}_${m}_${k}`; }
+function getManualScore(empId, m, k) {
+  const v = localStorage.getItem(_manualKey(empId, m, k));
+  return v !== null && v !== '' ? parseInt(v) : null;
+}
+function setManualScore(empId, m, k, v) {
+  const key = _manualKey(empId, m, k);
+  if (v === '' || v === null || v === undefined || isNaN(v)) localStorage.removeItem(key);
+  else localStorage.setItem(key, String(v));
+}
+function updateMonthlyCell(empId, m, k, value) {
+  const v = value === '' ? '' : Math.max(0, Math.min(100, parseInt(value)));
+  setManualScore(empId, m, k, v);
+  if (typeof openConditionDrawer === 'function' && document.getElementById('condition-drawer')?.style.display === 'block') {
+    openConditionDrawer(empId);
+  } else {
+    const node = document.getElementById('detail-content');
+    if (node) showDetail(empId, false);
+  }
+}
+function changeMonthlyYear(empId, year) {
+  window._monthlyTableYear = parseInt(year);
+  if (typeof openConditionDrawer === 'function' && document.getElementById('condition-drawer')?.style.display === 'block') {
+    openConditionDrawer(empId);
+  } else {
+    showDetail(empId, false);
+  }
+}
+
 function showDetail(empId, drawerMode) {
   rebuildEmpData();
   if (!drawerMode) {
@@ -5168,24 +5198,52 @@ function showDetail(empId, drawerMode) {
       <div class="legend-item"><div class="legend-dot" style="background:${l.color}"></div>${catNames[l.key]}</div>`).join('')}
     </div>`;
 
-  // 月別カテゴリ表
+  // 月別カテゴリ表（年選択＋手入力対応）
+  const yearNow = new Date().getFullYear();
+  const yearsSet = new Set([yearNow - 2, yearNow - 1, yearNow, yearNow + 1]);
+  months.forEach(m => yearsSet.add(parseInt(m.split('-')[0])));
+  for (let i = 0; i < localStorage.length; i++) {
+    const lk = localStorage.key(i);
+    if (lk && lk.startsWith(`ms2_${empId}_`)) {
+      const parts = lk.split('_');
+      if (parts.length >= 4) {
+        const ym = parts[2];
+        if (ym && ym.includes('-')) yearsSet.add(parseInt(ym.split('-')[0]));
+      }
+    }
+  }
+  const allYears = [...yearsSet].sort((a, b) => a - b);
+  const displayYear = window._monthlyTableYear || parseInt((months[months.length - 1] || `${yearNow}-01`).split('-')[0]);
+  const yearMonths = [];
+  for (let m = 1; m <= 12; m++) yearMonths.push(`${displayYear}-${String(m).padStart(2, '0')}`);
+  // 手動入力を統合
+  const mergedData = {};
+  yearMonths.forEach(m => {
+    const orig = empData[empId]?.[m] || {};
+    const merged = { ...orig };
+    catKeys.forEach(k => {
+      const manual = getManualScore(empId, m, k);
+      if (manual !== null) merged[k] = manual;
+    });
+    if (Object.keys(merged).some(k => catKeys.includes(k) && merged[k])) mergedData[m] = merged;
+  });
   const tableRows = catKeys.map((k, ci) => {
-    const cells = months.map((m, mi) => {
-      const v = data[m]?.[k];
-      if (!v) return '<td>―</td>';
-      const prev2 = mi > 0 ? data[months[mi-1]]?.[k] : null;
-      const d = prev2 ? v - prev2 : null;
-      const cls = v < 60 ? 'cell-alert' : v < 70 ? 'cell-warn' : 'cell-ok';
+    const cells = yearMonths.map((m, mi) => {
+      const v = mergedData[m]?.[k] || null;
+      const prev2 = mi > 0 ? (mergedData[yearMonths[mi - 1]]?.[k] || null) : null;
+      const d = (v !== null && prev2 !== null) ? v - prev2 : null;
+      const cls = v ? (v < 60 ? 'cell-alert' : v < 70 ? 'cell-warn' : 'cell-ok') : '';
       const diff2 = (d !== null && d !== 0) ? `<br><span class="${d > 0 ? 'cell-diff-up' : 'cell-diff-down'}">${d > 0 ? '+' : ''}${d}</span>` : '';
-      return `<td class="${cls}">${v}${diff2}</td>`;
+      const inputVal = v !== null && v !== undefined ? v : '';
+      return `<td class="${cls}" style="padding:6px 4px"><input type="number" min="0" max="100" value="${inputVal}" onchange="updateMonthlyCell('${empId}','${m}','${k}',this.value)" style="width:44px;text-align:center;border:1px solid transparent;border-radius:4px;background:transparent;font-size:13px;font-weight:600;color:inherit;padding:4px 0" onfocus="this.style.borderColor='#cbd5e1';this.style.background='#fff'" onblur="this.style.borderColor='transparent';this.style.background='transparent'" placeholder="―">${diff2}</td>`;
     }).join('');
     return `<tr><td>${catNames[k]}</td>${cells}</tr>`;
   });
 
-  const totalRow = months.map((m, mi) => {
-    const v = data[m] ? getTotal(data[m]) : null;
+  const totalRow = yearMonths.map((m, mi) => {
+    const v = mergedData[m] ? getTotal(mergedData[m]) : null;
     if (!v) return '<td>―</td>';
-    const prev2 = mi > 0 && data[months[mi-1]] ? getTotal(data[months[mi-1]]) : null;
+    const prev2 = mi > 0 && mergedData[yearMonths[mi - 1]] ? getTotal(mergedData[yearMonths[mi - 1]]) : null;
     const d = prev2 !== null ? v - prev2 : null;
     const cls = v < 60 ? 'cell-alert' : v < 70 ? 'cell-warn' : 'cell-ok';
     const diff2 = d !== null ? `<br><span class="${d >= 0 ? 'cell-diff-up' : 'cell-diff-down'}">${d > 0 ? '+' : ''}${d}</span>` : '';
@@ -5303,9 +5361,17 @@ function showDetail(empId, drawerMode) {
       ${svgContent}
     </div>
     <div class="monthly-table-card">
-      <h3>月別スコア詳細</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;flex-wrap:wrap;gap:12px">
+        <h3 style="padding:0;margin:0">月別スコア詳細</h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:12px;font-weight:600;color:#64748b">年度</label>
+          <select onchange="changeMonthlyYear('${empId}',this.value)" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;font-weight:600;color:#334155;background:white;cursor:pointer">
+            ${allYears.map(y => `<option value="${y}"${y === displayYear ? ' selected' : ''}>${y}年</option>`).join('')}
+          </select>
+        </div>
+      </div>
       <table>
-        <thead><tr><th>カテゴリ</th>${months.map(m => `<th>${monthLabels[m]}</th>`).join('')}</tr></thead>
+        <thead><tr><th>カテゴリ</th>${yearMonths.map(m => `<th>${parseInt(m.split('-')[1])}月</th>`).join('')}</tr></thead>
         <tbody>
           <tr style="background:#eef6f1"><td style="font-weight:700;color:#1f604c">平均</td>${totalRow}</tr>
           ${tableRows.join('')}
