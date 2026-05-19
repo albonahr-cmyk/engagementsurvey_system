@@ -335,6 +335,23 @@ if (typeof pdfjsLib !== 'undefined') {
   .sidebar-logo-sub { font-size: 13px; font-weight: 700; color: #2d8a6f; margin-top: 3px; }
   .sidebar-section { padding: 0 12px; margin-bottom: 8px; }
   .sidebar-section-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px 4px; }
+  /* サイドバー下部の3ウィジェット */
+  .sidebar-widgets { margin-top: auto; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+  .sb-widget { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px 14px; display: block; text-align: left; width: 100%; font: inherit; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .sb-widget:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .sb-widget-countdown { background: #fdf3d8; border-color: #f0e3b0; }
+  .sb-widget-alert { background: #fce4ea; border-color: #f5c2cf; }
+  .sb-widget-summary { background: white; cursor: default; padding: 14px; text-align: center; border-color: #f1f5f9; }
+  .sb-widget-summary:hover { transform: none; box-shadow: none; }
+  .sb-widget-header { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #92450a; margin-bottom: 4px; }
+  .sb-widget-alert .sb-widget-header { color: #9f1239; }
+  .sb-countdown-days { font-size: 18px; font-weight: 800; color: #5a3805; line-height: 1.2; }
+  .sb-countdown-num { font-size: 24px; }
+  .sb-countdown-date { font-size: 11px; color: #92450a; margin-top: 2px; opacity: 0.85; }
+  .sb-alert-badge { margin-left: auto; background: #be123c; color: white; border-radius: 999px; font-size: 10px; font-weight: 800; padding: 1px 7px; min-width: 16px; text-align: center; line-height: 1.4; }
+  .sb-alert-text { font-size: 12px; color: #6b1a32; font-weight: 600; line-height: 1.4; }
+  .sb-summary-char { display: flex; justify-content: center; margin-bottom: 6px; }
+  .sb-summary-text { font-size: 11px; color: #64748b; line-height: 1.6; }
   .tab-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; background: none; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.15s; letter-spacing: 0.1px; text-align: left; margin: 2px 0; }
 
   /* サイドバー下部のハートの木 */
@@ -1484,6 +1501,7 @@ if (typeof pdfjsLib !== 'undefined') {
       <button class="tab-btn" data-tab="logic" onclick="switchTab('logic', this)"><span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>ロジック一覧</button>
       <button class="tab-btn" data-tab="actions" onclick="switchTab('actions', this)"><span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>アクションプラン</button>
     </div>
+    <div class="sidebar-widgets" id="sidebar-widgets" aria-live="polite"></div>
   </aside>
   <div class="admin-main">
   <nav class="admin-nav">
@@ -5500,6 +5518,7 @@ function switchTab(name, btn) {
   if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); initMonthSelects(); renderUnsubmittedList(); }
   if (name === 'settings') { renderSettingsTab(); initBizIQMasterUI(); }
   if (name === 'actions') { initMonthSelects(); renderActionPlan(); }
+  renderSidebarWidgets();
 }
 
 function switchTabById(name) {
@@ -6556,6 +6575,7 @@ function saveMailSchedule() {
     const msg = document.getElementById('mail-schedule-msg');
     if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
     renderMailScheduleStatus(config);
+    renderSidebarWidgets();
     if (date) {
       showToast('✅ 設定を保存しました');
       // GASに配信予約リクエストを送信（送信日が設定されている場合のみ）
@@ -6589,6 +6609,196 @@ async function scheduleSendToGas(date, hour, minute, subject, body) {
   } catch(e) {
     showToast('⚠ 配信予約失敗: ' + (e.message || 'ネットワークエラー'));
   }
+}
+
+// ===== サイドバー下部のウィジェット（次回配信／要対応／総合スコア） =====
+function renderSidebarWidgets() {
+  const wrap = document.getElementById('sidebar-widgets');
+  if (!wrap) return;
+  const now = new Date();
+  // ① 次回配信カウントダウン
+  let countdownInner;
+  try {
+    const raw = localStorage.getItem('es_mail_schedule');
+    const cfg = raw ? JSON.parse(raw) : null;
+    if (cfg && cfg.date) {
+      const [yy, mm, dd] = cfg.date.split('-').map(Number);
+      const hh = cfg.hour != null ? cfg.hour : 9;
+      const mi = cfg.minute != null ? cfg.minute : 0;
+      const target = new Date(yy, mm - 1, dd, hh, mi, 0);
+      const diffMs = target - now;
+      const days = Math.ceil(diffMs / 86400000);
+      const wd = ['日','月','火','水','木','金','土'][target.getDay()];
+      const dateLabel = `${mm}月${dd}日(${wd}) ${String(hh).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+      if (diffMs > 0 && days > 0) {
+        countdownInner = `<div class="sb-countdown-days">あと <span class="sb-countdown-num">${days}</span> 日</div><div class="sb-countdown-date">${dateLabel}</div>`;
+      } else if (diffMs > 0) {
+        countdownInner = `<div class="sb-countdown-days">本日配信</div><div class="sb-countdown-date">${dateLabel}</div>`;
+      } else {
+        countdownInner = `<div class="sb-countdown-days" style="color:#94a3b8">配信済み</div><div class="sb-countdown-date">${dateLabel}</div>`;
+      }
+    } else {
+      countdownInner = `<div class="sb-countdown-days" style="color:#94a3b8;font-size:14px">未設定</div><div class="sb-countdown-date">配信タブで設定</div>`;
+    }
+  } catch(e) {
+    countdownInner = `<div class="sb-countdown-days" style="color:#94a3b8;font-size:14px">設定エラー</div>`;
+  }
+  // ② 要対応アラート
+  const alerts = computeSidebarAlerts();
+  const alertCount = alerts.length;
+  const alertTopMsg = alertCount > 0 ? sanitize(alerts[0].message) : 'アラートなし';
+  // ③ ハートキャラ＋サマリ
+  let totalAvg = null, conditionTier = null, grade = null;
+  try {
+    if (typeof rebuildEmpData === 'function') rebuildEmpData();
+    const month = (typeof getSurveyMonth === 'function') ? getSurveyMonth() : null;
+    if (month) {
+      const totals = [];
+      Object.keys(employees || {}).forEach(id => {
+        if (employees[id].role === 'admin') return;
+        const data = (window.empData || {})[id] || {};
+        const cur = data[month];
+        if (cur) {
+          const t = getTotal(cur);
+          if (typeof t === 'number' && !isNaN(t)) totals.push(t);
+        }
+      });
+      if (totals.length > 0) {
+        totalAvg = Math.round(totals.reduce((a,b)=>a+b, 0) / totals.length);
+        conditionTier = getCondition(totalAvg);
+        grade = getScoreGrade(totalAvg);
+      }
+    }
+  } catch(e) {}
+  const charSvg = getSidebarCharacterSvg(conditionTier ? conditionTier.key : null);
+  let summaryHtml;
+  if (totalAvg == null) {
+    summaryHtml = `今月の総合スコアは<br><span style="color:#94a3b8">データ未集計</span>`;
+  } else {
+    const adjective = totalAvg >= 90 ? '絶好調' : totalAvg >= 75 ? '好調' : totalAvg >= 60 ? '安定' : totalAvg >= 40 ? '要注意' : '要対応';
+    const decoration = totalAvg >= 75 ? ' ✨' : '';
+    summaryHtml = `今月の総合スコアは<br><span style="color:${grade.color};font-weight:800;font-size:14px">${grade.letter}</span> で${adjective}です${decoration}`;
+  }
+  const iconCal = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+  const iconBell = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
+  wrap.innerHTML = `
+    <button type="button" class="sb-widget sb-widget-countdown" onclick="switchTab('mail', null)" title="クリックで配信タブへ">
+      <div class="sb-widget-header">${iconCal}<span>次回配信まで</span></div>
+      ${countdownInner}
+    </button>
+    <button type="button" class="sb-widget sb-widget-alert" onclick="onSidebarAlertClick()" title="${alertCount > 0 ? 'クリックで該当画面へ' : '要対応事項はありません'}">
+      <div class="sb-widget-header">${iconBell}<span>要対応</span>${alertCount > 0 ? `<span class="sb-alert-badge">${alertCount}</span>` : ''}</div>
+      <div class="sb-alert-text">${alertTopMsg}</div>
+    </button>
+    <div class="sb-widget sb-widget-summary">
+      <div class="sb-summary-char">${charSvg}</div>
+      <div class="sb-summary-text">${summaryHtml}</div>
+    </div>
+  `;
+}
+
+function computeSidebarAlerts() {
+  const out = [];
+  try {
+    if (typeof rebuildEmpData === 'function') rebuildEmpData();
+    const month = (typeof getSurveyMonth === 'function') ? getSurveyMonth() : null;
+    if (!month) return out;
+    const monthsArr = window.months || [];
+    const idx = monthsArr.indexOf(month);
+    const prevMonth = idx > 0 ? monthsArr[idx - 1] : null;
+    const nonAdmins = Object.keys(employees || {}).filter(id => employees[id].role !== 'admin');
+    const total = nonAdmins.length;
+    // 全体回答率
+    if (total > 0 && typeof getSubmittedIds === 'function') {
+      const submitted = getSubmittedIds(month).filter(id => nonAdmins.includes(id));
+      const rate = Math.round(submitted.length / total * 100);
+      if (rate < 70) {
+        out.push({ type: 'response-low', message: `全社回答率 ${rate}% に低下`, target: 'dashboard' });
+      } else if (prevMonth) {
+        const prev = getSubmittedIds(prevMonth).filter(id => nonAdmins.includes(id));
+        const prevRate = Math.round(prev.length / total * 100);
+        if (rate < prevRate - 10) {
+          out.push({ type: 'response-drop', message: `回答率が前月比${rate - prevRate}pt 低下`, target: 'dashboard' });
+        }
+      }
+    }
+    // 部署別回答率（最低部署が50%未満なら）
+    if (total > 0 && typeof getSubmittedIds === 'function') {
+      const deptMap = {};
+      nonAdmins.forEach(id => {
+        const d = (employees[id].dept || '').trim() || '未所属';
+        deptMap[d] = deptMap[d] || { tot: 0, sub: 0 };
+        deptMap[d].tot++;
+      });
+      const sub = getSubmittedIds(month);
+      sub.forEach(id => {
+        if (!employees[id] || employees[id].role === 'admin') return;
+        const d = (employees[id].dept || '').trim() || '未所属';
+        if (deptMap[d]) deptMap[d].sub++;
+      });
+      let worst = null;
+      Object.entries(deptMap).forEach(([d, v]) => {
+        if (v.tot < 3) return; // 3名未満の部署は対象外
+        const r = Math.round(v.sub / v.tot * 100);
+        if (r < 50 && (!worst || r < worst.rate)) worst = { dept: d, rate: r };
+      });
+      if (worst) {
+        out.push({ type: 'dept-low', message: `${worst.dept}の回答率低下 (${worst.rate}%)`, target: 'dashboard' });
+      }
+    }
+    // スコア急落者
+    if (prevMonth) {
+      let dropCount = 0;
+      let firstName = null;
+      nonAdmins.forEach(id => {
+        const d = (window.empData || {})[id];
+        if (!d || !d[month] || !d[prevMonth]) return;
+        const cur = getTotal(d[month]);
+        const pre = getTotal(d[prevMonth]);
+        if (typeof cur === 'number' && typeof pre === 'number' && (cur - pre) <= -10) {
+          dropCount++;
+          if (!firstName) firstName = (employees[id].name || id);
+        }
+      });
+      if (dropCount > 0) {
+        out.push({
+          type: 'score-drop',
+          message: dropCount === 1 ? `${firstName}さんのスコア急落` : `${dropCount}名のスコアが急落`,
+          target: 'score'
+        });
+      }
+    }
+  } catch(e) {}
+  return out;
+}
+
+function onSidebarAlertClick() {
+  const alerts = computeSidebarAlerts();
+  const target = alerts.length > 0 ? alerts[0].target : 'dashboard';
+  if (typeof switchTab === 'function') switchTab(target, null);
+}
+
+function getSidebarCharacterSvg(key) {
+  const cfg = {
+    dynamic:  { bg: '#10b981', mood: 'happy' },
+    good:     { bg: '#3da589', mood: 'smile' },
+    normal:   { bg: '#eab308', mood: 'neutral' },
+    low:      { bg: '#f97316', mood: 'sad' },
+    recovery: { bg: '#dc2626', mood: 'cry' },
+  };
+  const c = cfg[key] || { bg: '#94a3b8', mood: 'neutral' };
+  const heart = `<path d="${COND_HEART_PATH}" fill="${c.bg}"/>`;
+  let face = '';
+  if (c.mood === 'happy' || c.mood === 'smile') {
+    face = `<circle cx="11" cy="13.5" r="0.95" fill="white"/><circle cx="17" cy="13.5" r="0.95" fill="white"/><path d="M10.4 16.4 Q14 19 17.6 16.4" stroke="white" stroke-width="1.1" stroke-linecap="round" fill="none"/>`;
+  } else if (c.mood === 'neutral') {
+    face = `<circle cx="11" cy="13.5" r="0.95" fill="white"/><circle cx="17" cy="13.5" r="0.95" fill="white"/><line x1="11.2" y1="17" x2="16.8" y2="17" stroke="white" stroke-width="1.1" stroke-linecap="round"/>`;
+  } else if (c.mood === 'sad') {
+    face = `<circle cx="11" cy="13.5" r="0.95" fill="white"/><circle cx="17" cy="13.5" r="0.95" fill="white"/><path d="M10.4 17.6 Q14 15.4 17.6 17.6" stroke="white" stroke-width="1.1" stroke-linecap="round" fill="none"/>`;
+  } else {
+    face = `<line x1="10" y1="12.8" x2="12" y2="14.4" stroke="white" stroke-width="1.1" stroke-linecap="round"/><line x1="12" y1="12.8" x2="10" y2="14.4" stroke="white" stroke-width="1.1" stroke-linecap="round"/><line x1="16" y1="12.8" x2="18" y2="14.4" stroke="white" stroke-width="1.1" stroke-linecap="round"/><line x1="18" y1="12.8" x2="16" y2="14.4" stroke="white" stroke-width="1.1" stroke-linecap="round"/><path d="M10.6 17.4 Q14 15.6 17.4 17.4" stroke="white" stroke-width="1.1" stroke-linecap="round" fill="none"/>`;
+  }
+  return `<svg width="64" height="60" viewBox="0 0 28 26" fill="none" aria-hidden="true">${heart}${face}</svg>`;
 }
 
 function loadMailSchedule() {
@@ -6957,6 +7167,7 @@ function reloadAllSettings() {
     if (saved) Object.assign(questionCatMap, JSON.parse(saved));
   } catch(e) {}
   loadMailSchedule();
+  renderSidebarWidgets();
 }
 
 // デフォルト部署（必ずプルダウンに表示される）
