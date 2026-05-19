@@ -338,19 +338,8 @@ if (typeof pdfjsLib !== 'undefined') {
   .tab-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; background: none; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.15s; letter-spacing: 0.1px; text-align: left; margin: 2px 0; }
 
   /* サイドバー下部のハートの木 */
-  .sidebar-tree { margin-top: auto; padding: 8px 16px 4px; pointer-events: none; flex-shrink: 0; position: relative; }
-  .sidebar-tree > svg { width: 100%; height: auto; max-width: 230px; display: block; margin: 0 auto; overflow: visible; }
-  .sidebar-tree-bird { position: absolute; top: 8px; left: 10%; width: 40px; opacity: 0; pointer-events: none; z-index: 1; }
-  .sidebar-tree-bird svg { width: 100%; height: auto; display: block; }
-  .sidebar-tree-bird.fly { animation: treeBirdFly 2s ease-out forwards; }
-  @keyframes treeBirdFly {
-    0%   { transform: translate(0, 0) rotate(-4deg); opacity: 0; }
-    20%  { opacity: 0.95; }
-    50%  { transform: translate(60px, -10px) rotate(6deg); }
-    80%  { opacity: 0.95; }
-    100% { transform: translate(140px, 4px) rotate(-2deg); opacity: 0; }
-  }
-  @media (prefers-reduced-motion: reduce) { .sidebar-tree-bird { display: none; } }
+  .sidebar-tree { margin-top: auto; padding: 8px 16px 4px; pointer-events: none; flex-shrink: 0; }
+  .sidebar-tree svg { width: 100%; height: auto; max-width: 230px; display: block; margin: 0 auto; overflow: visible; }
   /* 木についてる葉は静止 */
   .tree-cluster .tree-leaf { opacity: 0.95; }
   /* 周りの舞ってる葉だけふわふわ漂う */
@@ -1508,16 +1497,6 @@ if (typeof pdfjsLib !== 'undefined') {
       <button class="tab-btn" data-tab="actions" onclick="switchTab('actions', this)"><span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>アクションプラン</button>
     </div>
     <div class="sidebar-tree" aria-hidden="true">
-      <div class="sidebar-tree-bird">
-        <svg viewBox="0 0 60 36" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="22" cy="20" rx="14" ry="9" fill="#7eb6e0"/>
-          <path d="M8 22 L0 18 L4 25 Z" fill="#7eb6e0"/>
-          <path d="M14 14 Q22 4 32 12 Q26 18 18 18 Z" fill="#5b9bcc"/>
-          <path d="M36 20 L46 18 L46 22 L36 22 Z" fill="#f59e0b"/>
-          <circle cx="32" cy="17" r="1.4" fill="white"/>
-          <circle cx="32" cy="17" r="0.8" fill="#1e293b"/>
-        </svg>
-      </div>
       <svg viewBox="0 -70 280 390" preserveAspectRatio="xMidYMid meet">
         <g class="tree-extras"></g>
         <ellipse cx="140" cy="295" rx="78" ry="6" fill="#c4e090" opacity="0.55"/>
@@ -4545,7 +4524,16 @@ function getConditionCharacterSvg(key) {
     <rect x="46" y="156" width="22" height="8" rx="3" fill="${HAND}" stroke="${STROKE}" stroke-width="1.5"/>
     <rect x="72" y="156" width="22" height="8" rx="3" fill="${HAND}" stroke="${STROKE}" stroke-width="1.5"/>`;
 
-  const wrap = (bg, inner, big) => `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="70" cy="100" rx="${big ? 75 : 62}" ry="${big ? 82 : 68}" fill="${bg}" opacity="0.75"/>${inner}</svg>`;
+  const wrap = (bg, inner, big) => {
+    // big=true は波々ブロブ＋拡張ViewBox（躍動用）、それ以外は通常のelipse
+    if (big) {
+      return `<svg viewBox="-15 -20 170 220" width="135" height="175" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="overflow:visible">
+        <path d="M70 -12 C108 -10 140 8 138 40 C156 52 152 92 140 110 C152 134 132 170 100 174 C76 190 44 186 30 174 C0 168 -12 134 4 110 C-10 92 -10 56 8 44 C20 10 46 -12 70 -12 Z" fill="${bg}" opacity="0.75"/>
+        ${inner}
+      </svg>`;
+    }
+    return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M70 24 C100 22 128 32 132 56 C146 66 142 96 134 112 C144 134 124 162 98 164 C76 174 48 170 36 162 C14 158 4 132 12 110 C0 92 4 62 18 50 C28 24 50 24 70 24 Z" fill="${bg}" opacity="0.75"/>${inner}</svg>`;
+  };
 
   if (key === 'dynamic') {
     // 躍動：バンザイ＋キラキラ7つ（少し離れた位置）＋閉じ目笑顔
@@ -8723,26 +8711,6 @@ function switchMasterTab(name, btn) {
 </div>
 
 <script>
-  // サイドバーの木の上を時折青い鳥が飛ぶ
-  (function() {
-    const bird = document.querySelector('.sidebar-tree-bird');
-    if (!bird) return;
-    function flyTreeBird() {
-      // 開始位置をランダム化（毎回少し違う動き）
-      bird.style.top = (4 + Math.random() * 30) + 'px';
-      bird.style.left = (5 + Math.random() * 15) + '%';
-      bird.classList.remove('fly');
-      void bird.offsetWidth;
-      bird.classList.add('fly');
-    }
-    function scheduleNext() {
-      const wait = 12000 + Math.random() * 18000;
-      setTimeout(() => { flyTreeBird(); scheduleNext(); }, wait);
-    }
-    setTimeout(flyTreeBird, 6000);
-    scheduleNext();
-  })();
-
   // サイドバーの木：ハート型の葉っぱクラスタを生成
   (function() {
     function buildTree() {
