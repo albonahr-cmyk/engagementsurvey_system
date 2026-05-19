@@ -1517,7 +1517,6 @@ if (typeof pdfjsLib !== 'undefined') {
             </feMerge>
           </filter>
         </defs>
-        <g class="tree-extras"></g>
         <ellipse cx="140" cy="296" rx="108" ry="11" fill="#c4e090" opacity="0.42"/>
         <ellipse cx="140" cy="295" rx="92" ry="8" fill="#b8db82" opacity="0.55"/>
         <path d="M134 200 L131 295 L149 295 L146 200 Z" fill="#b08862"/>
@@ -8845,10 +8844,9 @@ function switchMasterTab(name, btn) {
   (function() {
     function buildTree() {
       const cluster = document.querySelector('.tree-cluster');
-      const extras = document.querySelector('.tree-extras');
       const glow = document.querySelector('.tree-glow');
       const pale = document.querySelector('.tree-pale-leaves');
-      if (!cluster || !extras) return;
+      if (!cluster) return;
       const colors = ['#6ab045', '#7dc05a', '#94cf74', '#a7d88a', '#bce0a0', '#558e36', '#86c45a', '#c9e6a8', '#4a7f30', '#d6ecb8'];
       const leafPath = 'M0 4 C0 3.6 -4 1.2 -4 -1.4 C-4 -2.9 -2.6 -4 -1.3 -4 C-0.5 -4 0 -3.4 0 -2.6 C0 -3.4 0.5 -4 1.3 -4 C2.6 -4 4 -2.9 4 -1.4 C4 1.2 0 3.6 0 4 Z';
       // ハート形状の判定関数（内側 true）
@@ -8879,27 +8877,27 @@ function switchMasterTab(name, btn) {
         const r = 0.86 + Math.random() * 0.12; // 輪郭付近
         const px = cx + hx * r * scale;
         const py = cy + hy * r * scale;
-        if (tooClose(px, py, items, 14)) continue;
+        if (tooClose(px, py, items, 16)) continue;
         items.push({
           x: px,
           y: py,
-          s: 2.0 + Math.random() * 1.4,
+          s: 2.1 + Math.random() * 1.4,
           rot: -25 + Math.random() * 50,
           col: colors[Math.floor(Math.random() * colors.length)]
         });
       }
-      // ② 内部に散らして充填
+      // ② 内部に散らして充填（密集させすぎないよう余白多め）
       let attempts = 0;
-      while (items.length < 38 && attempts < 6000) {
+      while (items.length < 26 && attempts < 6000) {
         attempts++;
         const px = minX + Math.random() * (maxX - minX);
         const py = minY + Math.random() * (maxY - minY);
         if (!inHeart(px, py)) continue;
-        if (tooClose(px, py, items, 18)) continue;
+        if (tooClose(px, py, items, 24)) continue;
         items.push({
           x: px,
           y: py,
-          s: 1.7 + Math.random() * 1.5,
+          s: 1.9 + Math.random() * 1.6,
           rot: -25 + Math.random() * 50,
           col: colors[Math.floor(Math.random() * colors.length)]
         });
@@ -8911,40 +8909,19 @@ function switchMasterTab(name, btn) {
       if (pale) {
         const paleColors = ['#dceeb8', '#e6f1c8', '#ecf4d4', '#dae8b0', '#cce0a0', '#d8e9b4', '#e4eebe'];
         const paleItems = [];
-        // ハート内部に散布
+        // ハート内部に散布（密度控えめ）
         let pAttempts = 0;
-        while (paleItems.length < 32 && pAttempts < 4000) {
+        while (paleItems.length < 20 && pAttempts < 4000) {
           pAttempts++;
           const px = minX + Math.random() * (maxX - minX);
           const py = minY + Math.random() * (maxY - minY);
           if (!inHeart(px, py)) continue;
-          if (tooClose(px, py, paleItems, 13)) continue;
+          if (tooClose(px, py, paleItems, 16)) continue;
           paleItems.push({
             x: px,
             y: py,
             s: 2.0 + Math.random() * 1.7,
             rot: -25 + Math.random() * 50,
-            col: paleColors[Math.floor(Math.random() * paleColors.length)]
-          });
-        }
-        // ハート輪郭の外側ぎりぎりに薄い葉を散らす
-        let pAttempts2 = 0;
-        while (paleItems.length < 50 && pAttempts2 < 2000) {
-          pAttempts2++;
-          const px = (cx - scale * 19) + Math.random() * (scale * 38);
-          const py = (cy - scale * 18) + Math.random() * (scale * 30);
-          if (inHeart(px, py)) continue;
-          const dx = (px - cx) / scale / 16;
-          const dy = -(py - cy) / scale / 13;
-          const a = dx*dx + dy*dy - 1;
-          const outside = a*a*a - dx*dx*dy*dy*dy;
-          if (outside > 0.8) continue; // 輪郭近傍だけ
-          if (tooClose(px, py, paleItems, 12)) continue;
-          paleItems.push({
-            x: px,
-            y: py,
-            s: 1.8 + Math.random() * 1.4,
-            rot: -30 + Math.random() * 60,
             col: paleColors[Math.floor(Math.random() * paleColors.length)]
           });
         }
@@ -8995,29 +8972,6 @@ function switchMasterTab(name, btn) {
           `<circle class="glow-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(2)}" fill="${p.col}" style="animation-delay:${p.delay}s;animation-duration:${p.dur}s"/>`
         ).join('');
       }
-      // 周りの舞う葉っぱ（ふわふわ漂う）— 木の上の方〜横〜下まで広範囲に配置
-      const extraItems = [];
-      let extraAttempts = 0;
-      while (extraItems.length < 16 && extraAttempts < 1000) {
-        extraAttempts++;
-        const px = 6 + Math.random() * 268;
-        const py = -60 + Math.random() * 330; // 上方60まで広げる
-        if (inHeart(px, py)) continue;
-        if (tooClose(px, py, extraItems, 36)) continue;
-        extraItems.push({
-          x: px,
-          y: py,
-          s: 1.4 + Math.random() * 1.5,
-          rot: -45 + Math.random() * 90,
-          col: colors[Math.floor(Math.random() * colors.length)],
-          delay: (Math.random() * 5).toFixed(2),
-          dur: (4 + Math.random() * 4).toFixed(2)
-        });
-      }
-      // 親<g>で位置、内側のpathでrotate/scale、CSSアニメは間に挟んだ<g>で
-      extras.innerHTML = extraItems.map(p =>
-        `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})"><g class="tree-leaf-floater" style="animation-delay:${p.delay}s;animation-duration:${p.dur}s"><path d="${leafPath}" fill="${p.col}" transform="rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/></g></g>`
-      ).join('');
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildTree);
     else buildTree();
