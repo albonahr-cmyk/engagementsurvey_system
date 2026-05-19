@@ -354,14 +354,14 @@ if (typeof pdfjsLib !== 'undefined') {
   @media (prefers-reduced-motion: reduce) {
     .tree-leaf-floater { animation: none; opacity: 0.7; }
   }
-  /* ネオン風ふわふわ発光する光の粒 */
+  /* ふんわり発光する光の粒（淡め） */
   .glow-dot { transform-box: fill-box; transform-origin: center; animation: glowPulse 3.4s ease-in-out infinite both; }
   @keyframes glowPulse {
-    0%, 100% { opacity: 0.25; transform: scale(0.7); }
-    50%      { opacity: 1;    transform: scale(1.25); }
+    0%, 100% { opacity: 0.18; transform: scale(0.75); }
+    50%      { opacity: 0.6;  transform: scale(1.15); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .glow-dot { animation: none; opacity: 0.65; }
+    .glow-dot { animation: none; opacity: 0.4; }
   }
   .tab-btn:hover { background: #f1f5f9; color: #334155; }
   .tab-btn.active { background: #eef6f1; color: #2d8a6f; font-weight: 600; }
@@ -1509,9 +1509,8 @@ if (typeof pdfjsLib !== 'undefined') {
       <svg viewBox="0 -70 280 450" preserveAspectRatio="xMidYMid meet">
         <defs>
           <filter id="treeGlowFilter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2.4" result="blur1"/>
+            <feGaussianBlur stdDeviation="1.6" result="blur1"/>
             <feMerge>
-              <feMergeNode in="blur1"/>
               <feMergeNode in="blur1"/>
               <feMergeNode in="SourceGraphic"/>
             </feMerge>
@@ -8893,23 +8892,23 @@ function switchMasterTab(name, btn) {
       cluster.innerHTML = items.map(p =>
         `<path d="${leafPath}" fill="${p.col}" class="tree-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/>`
       ).join('');
-      // 葉と葉の間の白い隙間を埋めるネオン風ふわふわ光の粒（黄色）
+      // 葉と葉の間の白い隙間を埋めるふんわり光の粒（黄色×黄緑の中間／淡色）
       if (glow) {
-        const glowColors = ['#fde047', '#facc15', '#fef08a', '#fef3c7', '#fcd34d', '#fff8b0'];
+        const glowColors = ['#e8ee9c', '#dde889', '#eaf0a4', '#d8e88b', '#e2ec95', '#f0f3b5', '#d4e286'];
         const glowItems = [];
-        // ハート内部にたっぷり散布（大きめ）
+        // ハート内部に散布（小さめ）
         let gAttempts = 0;
         while (glowItems.length < 70 && gAttempts < 4000) {
           gAttempts++;
           const px = minX + Math.random() * (maxX - minX);
           const py = minY + Math.random() * (maxY - minY);
           if (!inHeart(px, py)) continue;
-          if (tooClose(px, py, items, 5)) continue;
-          if (tooClose(px, py, glowItems, 11)) continue;
+          if (tooClose(px, py, items, 4)) continue;
+          if (tooClose(px, py, glowItems, 9)) continue;
           glowItems.push({
             x: px,
             y: py,
-            r: 1.8 + Math.random() * 2.8,
+            r: 0.9 + Math.random() * 1.4,
             col: glowColors[Math.floor(Math.random() * glowColors.length)],
             delay: (Math.random() * 3.4).toFixed(2),
             dur: (2.6 + Math.random() * 2.4).toFixed(2)
@@ -8922,11 +8921,11 @@ function switchMasterTab(name, btn) {
           const px = (cx - scale * 19) + Math.random() * (scale * 38);
           const py = (cy - scale * 18) + Math.random() * (scale * 32);
           if (inHeart(px, py)) continue;
-          if (tooClose(px, py, glowItems, 15)) continue;
+          if (tooClose(px, py, glowItems, 13)) continue;
           glowItems.push({
             x: px,
             y: py,
-            r: 1.2 + Math.random() * 1.8,
+            r: 0.6 + Math.random() * 1.0,
             col: glowColors[Math.floor(Math.random() * glowColors.length)],
             delay: (Math.random() * 3.4).toFixed(2),
             dur: (2.8 + Math.random() * 2.6).toFixed(2)
