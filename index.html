@@ -4193,37 +4193,67 @@ function renderStatusBadge(status) {
   return `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:${m.color}">${m.label}</span>`;
 }
 
-function getConditionSummary(cond, diff) {
+function getConditionSummary(cond, diff, scores, prevScores) {
   if (!cond) return 'まだサーベイ未回答です。回答を促しましょう。';
   const dir = diff === null || diff === undefined ? 'flat' : diff > 5 ? 'up' : diff < -5 ? 'down' : 'flat';
-  const T = {
-    dynamic: {
-      up: '絶好調の状態です。前向きなエネルギーを周囲にも伝染させましょう。',
-      down: 'ハイレベルでの揺れが見られます。早めに状況を確認しましょう。',
-      flat: 'ハイレベルな状態を維持。次の挑戦を後押しできます。',
-    },
-    good: {
-      up: '順調にエンゲージメントが高まっています。次の目標設定を。',
-      down: '高い貢献意欲を持ち続けてきたからこそ、今は少しペースを整え、自分自身を労る時期かもしれません。',
-      flat: '安定感のある働きぶり。1on1で次の目標を設定しましょう。',
-    },
-    normal: {
-      up: '上向きの兆し。小さな成功体験を積み重ねていきましょう。',
-      down: '変化のサインが出ています。早めに状況を確認しましょう。',
-      flat: 'フラットな状態。新しい刺激や役割を検討してみましょう。',
-    },
-    low: {
-      up: '回復傾向です。引き続きサポートを継続しましょう。',
-      down: 'ストレスのサインが見られます。1on1で丁寧にヒアリングを。',
-      flat: '停滞気味。話をじっくり聞く機会を作りましょう。',
-    },
-    recovery: {
-      up: '回復が始まっています。引き続き丁寧にケアしましょう。',
-      down: 'ケアが必要なレベルです。早急にコンディションを確認しましょう。',
-      flat: 'コンディション低下が継続。優先度高くフォローを。',
-    },
+
+  // 現在スコアから最弱/最強カテゴリを特定
+  const cats = (scores && typeof scores === 'object')
+    ? Object.entries(scores).filter(([k, v]) => typeof v === 'number' && catKeys.includes(k))
+    : [];
+  const sortedAsc = [...cats].sort((a, b) => a[1] - b[1]);
+  const weakest = sortedAsc.length ? sortedAsc[0][0] : null;
+  const strongest = sortedAsc.length ? sortedAsc[sortedAsc.length - 1][0] : null;
+
+  // 前月との比較で最大下落 / 最大上昇カテゴリ
+  let dropped = null, droppedAmt = 0;
+  let rose = null, roseAmt = 0;
+  if (prevScores && typeof prevScores === 'object') {
+    cats.forEach(([k, v]) => {
+      const p = prevScores[k];
+      if (typeof p !== 'number') return;
+      const d = v - p;
+      if (d < droppedAmt) { droppedAmt = d; dropped = k; }
+      if (d > roseAmt) { roseAmt = d; rose = k; }
+    });
+  }
+
+  const nm = (k) => k ? `「${catNames[k] || k}」` : '';
+  const pts = (diff !== null && diff !== undefined) ? Math.abs(diff) : null;
+  const ptsTag = (sign) => pts !== null ? `（${sign}${pts}点）` : '';
+
+  // フォールバック用の汎用文
+  const fallback = {
+    dynamic: { up: '絶好調を維持。前向きなエネルギーを周囲に広げていきましょう。', down: 'ハイレベル維持中ですが揺らぎが見られます。早めに状況を確認しましょう。', flat: 'ハイレベルな状態を維持。次の挑戦を後押しできます。' },
+    good:    { up: '安定+上昇傾向。次の目標を一緒に設定しましょう。', down: 'スコア低下が見られます。1on1で負担の整理を一緒に。', flat: '安定感のある働きぶり。次の目標を1on1で設定しましょう。' },
+    normal:  { up: '上向きの兆し。前向きな変化を後押ししましょう。', down: '変化のサインが出ています。早めに状況確認を。', flat: 'フラットな状態。新しい刺激や役割を検討してみましょう。' },
+    low:     { up: '回復傾向です。引き続きサポートを継続しましょう。', down: 'ストレスのサインが見られます。早めの介入を。', flat: '停滞気味。話をじっくり聞く機会を作りましょう。' },
+    recovery:{ up: '回復が始まっています。引き続き丁寧にケアしましょう。', down: 'ケアが必要なレベルです。早急にコンディションの確認を。', flat: 'コンディション低下が継続。優先度高くフォローを。' },
   };
-  return (T[cond.key] && T[cond.key][dir]) || '';
+
+  switch (cond.key) {
+    case 'dynamic':
+      if (dir === 'up')   return rose    ? `${nm(rose)}の伸びが好調を後押し${ptsTag('+')}。次の挑戦テーマも視野に。` : fallback.dynamic.up;
+      if (dir === 'down') return dropped ? `ハイレベル維持中ですが${nm(dropped)}に陰り${ptsTag('−')}。早めに状況確認を。` : fallback.dynamic.down;
+      return strongest ? `${nm(strongest)}を強みに高水準を維持。次の挑戦を後押しできます。` : fallback.dynamic.flat;
+    case 'good':
+      if (dir === 'up')   return rose    ? `${nm(rose)}の改善が安定感を底上げ${ptsTag('+')}。次の目標設定の好機です。` : fallback.good.up;
+      if (dir === 'down') return dropped ? `${nm(dropped)}を中心に低下${ptsTag('−')}。1on1で丁寧にヒアリングを。` : fallback.good.down;
+      return weakest ? `安定した働きぶり。${nm(weakest)}の伸びしろを1on1で一緒に探りたいところ。` : fallback.good.flat;
+    case 'normal':
+      if (dir === 'up')   return rose    ? `${nm(rose)}の改善が見える上向き傾向${ptsTag('+')}。小さな成功体験を積み重ねて。` : fallback.normal.up;
+      if (dir === 'down') return dropped ? `${nm(dropped)}の落ち込みが目立ち低下${ptsTag('−')}。早めに対話の機会を。` : fallback.normal.down;
+      return weakest ? `フラットな状態。${nm(weakest)}の領域に新しい刺激を加えてみては。` : fallback.normal.flat;
+    case 'low':
+      if (dir === 'up')   return rose    ? `${nm(rose)}に回復の兆し${ptsTag('+')}。引き続き本人ペースでサポートを。` : fallback.low.up;
+      if (dir === 'down') return dropped ? `${nm(dropped)}の落ち込みが顕著で低下${ptsTag('−')}。優先度高めで1on1の場を。` : fallback.low.down;
+      return weakest ? `停滞気味。${nm(weakest)}の課題から丁寧にヒアリングする場を作りましょう。` : fallback.low.flat;
+    case 'recovery':
+      if (dir === 'up')   return rose    ? `${nm(rose)}に明るい兆し${ptsTag('+')}。慎重にケアを続けて自信回復を支援。` : fallback.recovery.up;
+      if (dir === 'down') return dropped ? `${nm(dropped)}の落ち込みが深刻で低下${ptsTag('−')}。早急に面談・休養含むケアを。` : fallback.recovery.down;
+      return weakest ? `低位が継続。${nm(weakest)}を起点に上長・人事連携で具体策の検討を。` : fallback.recovery.flat;
+  }
+  return '';
 }
 
 function populateScoreFilters() {
@@ -4406,7 +4436,7 @@ function openConditionDrawer(empId) {
 
   document.getElementById('condition-drawer-title').textContent = `${emp.name || empId}のコンディション`;
 
-  const scoreCard = renderConditionScoreCard(emp, total, diff, cond, month);
+  const scoreCard = renderConditionScoreCard(emp, total, diff, cond, month, cur, prevData);
   const keydriverRow = (cur && total !== null) ? renderPersonalKeydriverRow(cur, total) : '';
   const summarySection = renderConditionSummarySection(cond, diff);
   const analysisSection = cur ? renderConditionAnalysisSection(cur, cond, diff) : '';
@@ -4447,7 +4477,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-function renderConditionScoreCard(emp, total, diff, cond, month) {
+function renderConditionScoreCard(emp, total, diff, cond, month, scores, prevScores) {
   const dateStr = (() => {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
@@ -4466,7 +4496,7 @@ function renderConditionScoreCard(emp, total, diff, cond, month) {
     if (diff < 0) return `<span style="color:#dc2626;font-weight:700;font-size:14px">↓ ${diff}</span>`;
     return `<span style="color:#94a3b8;font-weight:700;font-size:14px">→ ±0</span>`;
   })();
-  const summaryShort = getConditionSummary(cond, diff);
+  const summaryShort = getConditionSummary(cond, diff, scores, prevScores);
   const character = getConditionCharacterSvg(cond ? cond.key : null);
   return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin:0 16px 20px;display:flex;gap:140px;align-items:center;justify-content:center">
     <div style="flex:0 1 auto;min-width:0;max-width:520px">
@@ -4857,7 +4887,7 @@ function renderScoreTab() {
       const diff = (total !== null && prevTotal !== null) ? total - prevTotal : null;
       const cond = getCondition(total);
       const status = getScoreStatus(total !== null);
-      return { id, emp, total, diff, cond, status };
+      return { id, emp, total, diff, cond, status, scores: cur || null, prevScores: prev || null };
     })
     .filter(r => {
       if (search) {
@@ -4924,7 +4954,7 @@ function renderScoreTab() {
         if (r.diff < 0) return `<span style="color:#dc2626;font-weight:700">↓ ${r.diff}</span>`;
         return `<span style="color:#94a3b8;font-weight:700">→ ±0</span>`;
       })();
-      const summary = getConditionSummary(r.cond, r.diff);
+      const summary = getConditionSummary(r.cond, r.diff, r.scores, r.prevScores);
       return `<tr class="clickable" onclick="openConditionDrawer('${r.id}')">
         <td>${memberCell}</td>
         <td>${condCell}</td>
