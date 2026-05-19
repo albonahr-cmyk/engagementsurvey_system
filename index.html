@@ -4442,7 +4442,7 @@ function renderConditionScoreCard(emp, total, diff, cond, month) {
   </div>`;
 }
 
-// コンディション別キャラクターSVG（ロボット4段階感情表現）
+// コンディション別キャラクターSVG（ロボット5段階感情表現）
 function getConditionCharacterSvg(key) {
   if (!key) {
     return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -4450,47 +4450,76 @@ function getConditionCharacterSvg(key) {
       <text x="70" y="108" text-anchor="middle" font-size="56" font-weight="800" fill="#94a3b8" font-family="sans-serif">?</text>
     </svg>`;
   }
+  // ハート充電のチェストマーク（色とバー数で各レベルを表現）
+  const heartChest = (color, bars) => `
+    <g transform="translate(56 96)">
+      <path d="M14 23 C13 22 3 15 3 8.5 C3 5.5 5.5 3 8.5 3 C10.8 3 13 4.3 14 6.3 C15 4.3 17.2 3 19.5 3 C22.5 3 25 5.5 25 8.5 C25 15 15 22 14 23 Z" fill="white" stroke="${color}" stroke-width="1.8" stroke-linejoin="round"/>
+      ${bars >= 1 ? `<line x1="9" y1="9" x2="9" y2="16" stroke="${color}" stroke-width="2.4" stroke-linecap="round"/>` : ''}
+      ${bars >= 2 ? `<line x1="14" y1="9" x2="14" y2="16" stroke="${color}" stroke-width="2.4" stroke-linecap="round"/>` : ''}
+      ${bars >= 3 ? `<line x1="19" y1="9" x2="19" y2="16" stroke="${color}" stroke-width="2.4" stroke-linecap="round"/>` : ''}
+    </g>`;
+  // 共通: 大きめ丸い目（image96風）
+  const roundEyes = `
+    <circle cx="56" cy="52" r="5.5" fill="white" stroke="#1e293b" stroke-width="1.5"/>
+    <circle cx="56" cy="52" r="2.8" fill="#1e293b"/>
+    <circle cx="84" cy="52" r="5.5" fill="white" stroke="#1e293b" stroke-width="1.5"/>
+    <circle cx="84" cy="52" r="2.8" fill="#1e293b"/>`;
+  // 共通: ピンク頬のスラッシュ
+  const cheekSlashes = `
+    <line x1="38" y1="60" x2="44" y2="62" stroke="#fb7185" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>
+    <line x1="38" y1="63" x2="44" y2="65" stroke="#fb7185" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>
+    <line x1="38" y1="66" x2="44" y2="68" stroke="#fb7185" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>
+    <line x1="96" y1="60" x2="102" y2="62" stroke="#fb7185" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>
+    <line x1="96" y1="63" x2="102" y2="65" stroke="#fb7185" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>
+    <line x1="96" y1="66" x2="102" y2="68" stroke="#fb7185" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>`;
+  // 共通: 側面パネル（オレンジ・耳のような）
+  const sidePanels = `
+    <ellipse cx="38" cy="52" rx="5" ry="10" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
+    <ellipse cx="102" cy="52" rx="5" ry="10" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>`;
+  // 共通: 腕（脇に下ろす）
+  const armsAtSides = `
+    <rect x="26" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+    <rect x="101" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+    <circle cx="32" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+    <circle cx="108" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>`;
   // 共通: 脚＋足
-  const legs = `
-    <rect x="50" y="130" width="14" height="28" rx="3" fill="#7eb6e0" stroke="#475569" stroke-width="1.5"/>
-    <rect x="76" y="130" width="14" height="28" rx="3" fill="#7eb6e0" stroke="#475569" stroke-width="1.5"/>
-    <rect x="46" y="156" width="22" height="8" rx="3" fill="#475569"/>
-    <rect x="72" y="156" width="22" height="8" rx="3" fill="#475569"/>`;
+  const legs = (legColor, footColor) => `
+    <rect x="50" y="130" width="14" height="28" rx="3" fill="${legColor}" stroke="#475569" stroke-width="1.5"/>
+    <rect x="76" y="130" width="14" height="28" rx="3" fill="${legColor}" stroke="#475569" stroke-width="1.5"/>
+    <rect x="46" y="156" width="22" height="8" rx="3" fill="${footColor}"/>
+    <rect x="72" y="156" width="22" height="8" rx="3" fill="${footColor}"/>`;
 
   if (key === 'dynamic') {
-    // ロボット 躍動（バンザイ・キラキラ）
+    // ロボット 躍動（バンザイ＋キラキラ5つ）
     return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <ellipse cx="70" cy="100" rx="62" ry="68" fill="#d4f3dd" opacity="0.75"/>
-      <g opacity="0.85">
-        <polygon points="18,30 21,38 29,40 21,42 18,50 15,42 7,40 15,38" fill="#fde68a"/>
-        <polygon points="120,48 122,54 128,56 122,58 120,64 118,58 112,56 118,54" fill="#fde68a"/>
-        <polygon points="125,108 127,114 133,116 127,118 125,124 123,118 117,116 123,114" fill="#fde68a"/>
+      <!-- キラキラ5つ -->
+      <g opacity="0.9">
+        <polygon points="18,30 21,38 29,40 21,42 18,50 15,42 7,40 15,38" fill="#fbbf24"/>
+        <polygon points="122,30 125,38 133,40 125,42 122,50 119,42 111,40 119,38" fill="#fbbf24"/>
+        <polygon points="10,110 13,116 19,118 13,120 10,126 7,120 1,118 7,116" fill="#fbbf24"/>
+        <polygon points="130,108 132,114 138,116 132,118 130,124 128,118 122,116 128,114" fill="#fbbf24"/>
+        <polygon points="70,2 72,8 78,10 72,12 70,18 68,12 62,10 68,8" fill="#fbbf24"/>
       </g>
-      <!-- バンザイの腕 -->
+      <!-- バンザイ腕 -->
       <path d="M44 86 Q24 60 18 36" stroke="#cbd5e1" stroke-width="13" fill="none" stroke-linecap="round"/>
       <path d="M44 86 Q24 60 18 36" stroke="#475569" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       <path d="M96 86 Q116 60 122 36" stroke="#cbd5e1" stroke-width="13" fill="none" stroke-linecap="round"/>
       <path d="M96 86 Q116 60 122 36" stroke="#475569" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       <circle cx="18" cy="32" r="8" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
       <circle cx="122" cy="32" r="8" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <!-- アンテナ -->
       <line x1="70" y1="28" x2="70" y2="14" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
       <circle cx="70" cy="10" r="5" fill="#10b981" stroke="#059669" stroke-width="1.5"/>
-      <polygon points="80,5 82,10 87,12 82,14 80,19 78,14 73,12 78,10" fill="#fde68a"/>
       <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#10b981" stroke="#475569" stroke-width="1.5"/>
-      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#10b981" stroke="#475569" stroke-width="1.5"/>
+      ${sidePanels}
+      <!-- ニコニコ目 -->
       <path d="M50 56 Q56 46 62 56" stroke="#1e293b" stroke-width="2.8" fill="none" stroke-linecap="round"/>
       <path d="M78 56 Q84 46 90 56" stroke="#1e293b" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-      <ellipse cx="46" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.7"/>
-      <ellipse cx="94" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.7"/>
+      ${cheekSlashes}
       <path d="M52 66 Q70 80 88 66 Q82 74 70 75 Q58 74 52 66 Z" fill="white" stroke="#1e293b" stroke-width="2"/>
       <rect x="44" y="80" width="52" height="48" rx="6" fill="#10b981" stroke="#475569" stroke-width="2"/>
-      <path d="M70 96 C66 92, 58 92, 58 100 C58 108, 70 117, 70 117 C70 117, 82 108, 82 100 C82 92, 74 92, 70 96 Z" fill="#fbbf24" stroke="#d97706" stroke-width="1.6"/>
-      <rect x="50" y="130" width="14" height="22" rx="3" fill="#10b981" stroke="#475569" stroke-width="1.5"/>
-      <rect x="76" y="130" width="14" height="22" rx="3" fill="#10b981" stroke="#475569" stroke-width="1.5"/>
-      <rect x="46" y="152" width="22" height="10" rx="3" fill="#059669" stroke="#047857" stroke-width="1.5"/>
-      <rect x="72" y="152" width="22" height="10" rx="3" fill="#059669" stroke="#047857" stroke-width="1.5"/>
+      ${heartChest('#dc2626', 3)}
+      ${legs('#10b981', '#059669')}
     </svg>`;
   }
   if (key === 'good') {
@@ -4500,125 +4529,79 @@ function getConditionCharacterSvg(key) {
       <line x1="70" y1="28" x2="70" y2="14" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
       <circle cx="70" cy="10" r="4.5" fill="#14b8a6" stroke="#0f766e" stroke-width="1.5"/>
       <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#14b8a6" stroke="#475569" stroke-width="1.5"/>
-      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#14b8a6" stroke="#475569" stroke-width="1.5"/>
+      ${sidePanels}
       <!-- 笑い目 ^^ -->
       <path d="M50 56 Q56 48 62 56" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
       <path d="M78 56 Q84 48 90 56" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <ellipse cx="46" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.6"/>
-      <ellipse cx="94" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.6"/>
-      <!-- にっこり -->
+      ${cheekSlashes}
       <path d="M56 66 Q70 74 84 66" stroke="#1e293b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
       <rect x="44" y="80" width="52" height="48" rx="6" fill="#14b8a6" stroke="#475569" stroke-width="2"/>
-      <path d="M70 96 C66 92, 58 92, 58 100 C58 108, 70 117, 70 117 C70 117, 82 108, 82 100 C82 92, 74 92, 70 96 Z" fill="#fbbf24" stroke="#d97706" stroke-width="1.6"/>
-      <!-- 腕は脇に下ろす -->
-      <rect x="26" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <rect x="101" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <circle cx="32" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <circle cx="108" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <rect x="50" y="130" width="14" height="28" rx="3" fill="#14b8a6" stroke="#475569" stroke-width="1.5"/>
-      <rect x="76" y="130" width="14" height="28" rx="3" fill="#14b8a6" stroke="#475569" stroke-width="1.5"/>
-      <rect x="46" y="156" width="22" height="8" rx="3" fill="#0f766e"/>
-      <rect x="72" y="156" width="22" height="8" rx="3" fill="#0f766e"/>
+      ${heartChest('#dc2626', 3)}
+      ${armsAtSides}
+      ${legs('#14b8a6', '#0f766e')}
     </svg>`;
   }
   if (key === 'normal') {
-    // ロボット ふつう（穏やか・腕は脇、黄色背景）
+    // ロボット ふつう（普通の表情・腕は脇、黄色背景）
     return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <ellipse cx="70" cy="100" rx="62" ry="68" fill="#fef3c7" opacity="0.85"/>
       <line x1="70" y1="28" x2="70" y2="14" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
       <circle cx="70" cy="10" r="4" fill="#eab308" stroke="#a16207" stroke-width="1.5"/>
       <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#eab308" stroke="#475569" stroke-width="1.5"/>
-      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#eab308" stroke="#475569" stroke-width="1.5"/>
-      <circle cx="56" cy="52" r="4" fill="#1e293b"/>
-      <circle cx="84" cy="52" r="4" fill="#1e293b"/>
-      <circle cx="57.5" cy="50.5" r="1.3" fill="white"/>
-      <circle cx="85.5" cy="50.5" r="1.3" fill="white"/>
-      <ellipse cx="46" cy="62" rx="3.5" ry="2.5" fill="#fb7185" opacity="0.5"/>
-      <ellipse cx="94" cy="62" rx="3.5" ry="2.5" fill="#fb7185" opacity="0.5"/>
+      ${sidePanels}
+      ${roundEyes}
+      ${cheekSlashes}
       <path d="M58 65 Q70 71 82 65" stroke="#1e293b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
       <rect x="44" y="80" width="52" height="48" rx="6" fill="#eab308" stroke="#475569" stroke-width="2"/>
-      <ellipse cx="70" cy="108" rx="13" ry="13" fill="#fef3c7" stroke="#a16207" stroke-width="1.5"/>
-      <rect x="26" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <rect x="101" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <circle cx="32" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <circle cx="108" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <rect x="50" y="130" width="14" height="28" rx="3" fill="#eab308" stroke="#475569" stroke-width="1.5"/>
-      <rect x="76" y="130" width="14" height="28" rx="3" fill="#eab308" stroke="#475569" stroke-width="1.5"/>
-      <rect x="46" y="156" width="22" height="8" rx="3" fill="#a16207"/>
-      <rect x="72" y="156" width="22" height="8" rx="3" fill="#a16207"/>
+      ${heartChest('#dc2626', 2)}
+      ${armsAtSides}
+      ${legs('#eab308', '#a16207')}
     </svg>`;
   }
   if (key === 'low') {
-    // ロボット 低調（しくしく泣く・手を目に当てる）
+    // ロボット 低調（しくしく泣く・手は脇）
     return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <ellipse cx="70" cy="100" rx="62" ry="68" fill="#fde4d2" opacity="0.75"/>
       <path d="M70 28 Q68 22 66 14" stroke="#94a3b8" stroke-width="1.8" fill="none" stroke-linecap="round"/>
       <circle cx="65" cy="12" r="4" fill="#fb923c" stroke="#c2410c" stroke-width="1.5"/>
       <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
-      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
-      <!-- 体（先に描く） -->
+      ${sidePanels}
+      <!-- 泣き目（へ の字、目を閉じて泣いている） -->
+      <path d="M48 53 Q56 49 64 53" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M76 53 Q84 49 92 53" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <!-- 大粒の涙（目から流れる） -->
+      <path d="M52 56 Q50 64 52 70 Q54 64 52 56 Z" fill="#7eb6e0" stroke="#5b9bcc" stroke-width="1"/>
+      <path d="M88 56 Q86 64 88 70 Q90 64 88 56 Z" fill="#7eb6e0" stroke="#5b9bcc" stroke-width="1"/>
+      <ellipse cx="52" cy="76" rx="2.5" ry="3.5" fill="#7eb6e0"/>
+      <ellipse cx="88" cy="76" rx="2.5" ry="3.5" fill="#7eb6e0"/>
+      <!-- 泣き口（小さく開いた口） -->
+      <ellipse cx="70" cy="68" rx="5" ry="3.5" fill="#1e293b"/>
+      <path d="M65 68 Q70 65 75 68" stroke="white" stroke-width="0.9" fill="none"/>
       <rect x="44" y="80" width="52" height="48" rx="6" fill="#fb923c" stroke="#475569" stroke-width="2"/>
-      <ellipse cx="70" cy="108" rx="13" ry="13" fill="#fed7aa" stroke="#c2410c" stroke-width="1.5"/>
-      <!-- 涙の流れ（手の下から） -->
-      <path d="M48 64 Q47 78 50 88 Q47 92 50 96" stroke="#7eb6e0" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M92 64 Q93 78 90 88 Q93 92 90 96" stroke="#7eb6e0" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <ellipse cx="50" cy="98" rx="2.5" ry="3.5" fill="#7eb6e0"/>
-      <ellipse cx="90" cy="98" rx="2.5" ry="3.5" fill="#7eb6e0"/>
-      <!-- 涙目（><） -->
-      <path d="M48 50 L62 56 M48 56 L62 50" stroke="#1e293b" stroke-width="2.4" stroke-linecap="round"/>
-      <path d="M78 50 L92 56 M78 56 L92 50" stroke="#1e293b" stroke-width="2.4" stroke-linecap="round"/>
-      <!-- 泣き口 -->
-      <ellipse cx="70" cy="68" rx="4" ry="3" fill="#1e293b"/>
-      <path d="M66 68 Q70 65 74 68" stroke="white" stroke-width="1" fill="none"/>
-      <!-- 手を目に当てる（両腕が上がって顔に） -->
-      <path d="M28 90 Q22 70 42 58" stroke="#cbd5e1" stroke-width="13" stroke-linecap="round" fill="none"/>
-      <path d="M28 90 Q22 70 42 58" stroke="#475569" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-      <path d="M112 90 Q118 70 98 58" stroke="#cbd5e1" stroke-width="13" stroke-linecap="round" fill="none"/>
-      <path d="M112 90 Q118 70 98 58" stroke="#475569" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-      <circle cx="44" cy="56" r="8" fill="#cbd5e1" stroke="#475569" stroke-width="1.6"/>
-      <circle cx="96" cy="56" r="8" fill="#cbd5e1" stroke="#475569" stroke-width="1.6"/>
-      <rect x="50" y="130" width="14" height="28" rx="3" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
-      <rect x="76" y="130" width="14" height="28" rx="3" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
-      <rect x="46" y="156" width="22" height="8" rx="3" fill="#c2410c"/>
-      <rect x="72" y="156" width="22" height="8" rx="3" fill="#c2410c"/>
+      ${heartChest('#dc2626', 1)}
+      ${armsAtSides}
+      ${legs('#fb923c', '#c2410c')}
     </svg>`;
   }
-  // recovery: ロボット 元気がない（しょんぼり・アンテナ折れ・腕だらん）
+  // recovery: ロボット 要回復（しょんぼり・アンテナ折れ・腕だらん）
   return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <ellipse cx="70" cy="100" rx="62" ry="68" fill="#dbe2eb" opacity="0.7"/>
-    <!-- 折れたアンテナ -->
     <path d="M70 28 Q66 22 62 16 Q58 12 48 10" stroke="#94a3b8" stroke-width="1.8" fill="none" stroke-linecap="round"/>
     <circle cx="46" cy="10" r="4" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
-    <!-- 頭 -->
     <rect x="40" y="28" width="60" height="48" rx="10" fill="#b8c3d0" stroke="#475569" stroke-width="2"/>
-    <!-- 側面（くすんだ色） -->
     <ellipse cx="38" cy="52" rx="4" ry="9" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
     <ellipse cx="102" cy="52" rx="4" ry="9" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
-    <!-- ぐったり目（とても疲れた） -->
     <path d="M48 53 Q56 60 64 53" stroke="#1e293b" stroke-width="2.8" fill="none" stroke-linecap="round"/>
     <path d="M76 53 Q84 60 92 53" stroke="#1e293b" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-    <!-- しょんぼり口（下に曲がる） -->
     <path d="M56 70 Q70 64 84 70" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-    <!-- 涙 -->
     <path d="M88 60 Q92 70 90 76" fill="#aee0f5" stroke="#7eb6e0" stroke-width="1"/>
-    <!-- 体（くすんだブルーグレー） -->
     <rect x="44" y="80" width="52" height="48" rx="6" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
-    <!-- 胸パネル（消えかけ） -->
-    <ellipse cx="70" cy="108" rx="13" ry="13" fill="#a8b5c4" stroke="#64748b" stroke-width="1.5"/>
-    <path d="M64 108 L70 102 L76 108 M64 108 L76 108" stroke="#dc2626" stroke-width="1.5" fill="none"/>
-    <!-- 腕（だらん） -->
+    ${heartChest('#dc2626', 0)}
     <rect x="26" y="84" width="13" height="42" rx="5" fill="#b8c3d0" stroke="#475569" stroke-width="1.5"/>
     <rect x="101" y="84" width="13" height="42" rx="5" fill="#b8c3d0" stroke="#475569" stroke-width="1.5"/>
     <circle cx="32" cy="128" r="7" fill="#b8c3d0" stroke="#475569" stroke-width="1.5"/>
     <circle cx="108" cy="128" r="7" fill="#b8c3d0" stroke="#475569" stroke-width="1.5"/>
-    <!-- 脚（くすんだ色） -->
-    <rect x="50" y="130" width="14" height="28" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
-    <rect x="76" y="130" width="14" height="28" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
-    <rect x="46" y="156" width="22" height="8" rx="3" fill="#475569"/>
-    <rect x="72" y="156" width="22" height="8" rx="3" fill="#475569"/>
+    ${legs('#94a3b8', '#475569')}
   </svg>`;
 }
 
