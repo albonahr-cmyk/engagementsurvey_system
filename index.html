@@ -336,7 +336,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .sidebar-section { padding: 0 12px; margin-bottom: 8px; }
   .sidebar-section-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px 4px; }
   /* サイドバー下部の3ウィジェット */
-  .sidebar-widgets { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+  .sidebar-widgets { margin-top: 40px; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
   .sb-widget { background: white; border: 1px solid transparent; border-radius: 14px; padding: 12px 16px; display: block; text-align: left; width: 100%; font: inherit; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
   .sb-widget:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
   .sb-widget-countdown { background: #fcefcf; border-color: #f3e3b1; }
@@ -6636,13 +6636,13 @@ function renderSidebarWidgets() {
       } else if (diffMs > 0) {
         countdownInner = `<div class="sb-countdown-days">本日配信</div><div class="sb-countdown-date">${dateLabel}</div>`;
       } else {
-        countdownInner = `<div class="sb-countdown-days" style="color:#94a3b8">配信済み</div><div class="sb-countdown-date">${dateLabel}</div>`;
+        countdownInner = `<div class="sb-countdown-days">配信済み</div><div class="sb-countdown-date">${dateLabel}</div>`;
       }
     } else {
-      countdownInner = `<div class="sb-countdown-days" style="color:#94a3b8;font-size:14px">未設定</div><div class="sb-countdown-date">配信タブで設定</div>`;
+      countdownInner = `<div class="sb-countdown-days" style="font-size:14px;opacity:0.7">未設定</div><div class="sb-countdown-date">配信タブで設定</div>`;
     }
   } catch(e) {
-    countdownInner = `<div class="sb-countdown-days" style="color:#94a3b8;font-size:14px">設定エラー</div>`;
+    countdownInner = `<div class="sb-countdown-days" style="font-size:14px;opacity:0.7">設定エラー</div>`;
   }
   // ② 要対応アラート
   const alerts = computeSidebarAlerts();
@@ -6781,18 +6781,18 @@ function getSidebarCharacterSvg(key) {
   };
   const c = cfg[key] || { bg: '#94a3b8', mood: 'neutral' };
   const heart = `<path d="${COND_HEART_PATH}" fill="${c.bg}"/>`;
-  // 目（白の少し大きめドット）＋ほっぺ（柔らかなピンク）＋口
+  // 目（白の少し大きめドット）＋ほっぺ（柔らかなピンク）＋口 — ハート視覚中心に配置
   const eyeFill = '#ffffff';
-  const cheek = `<ellipse cx="9.5" cy="16" rx="1.3" ry="0.8" fill="#ffc8d8" opacity="0.7"/><ellipse cx="18.5" cy="16" rx="1.3" ry="0.8" fill="#ffc8d8" opacity="0.7"/>`;
+  const cheek = `<ellipse cx="9.6" cy="17.6" rx="1.3" ry="0.85" fill="#ffc8d8" opacity="0.75"/><ellipse cx="18.4" cy="17.6" rx="1.3" ry="0.85" fill="#ffc8d8" opacity="0.75"/>`;
   let face;
   if (c.mood === 'happy' || c.mood === 'smile') {
-    face = `<circle cx="11.5" cy="14" r="0.85" fill="${eyeFill}"/><circle cx="16.5" cy="14" r="0.85" fill="${eyeFill}"/>${cheek}<path d="M11.2 16.6 Q14 18.6 16.8 16.6" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round" fill="none"/>`;
+    face = `<circle cx="11.6" cy="15.6" r="0.9" fill="${eyeFill}"/><circle cx="16.4" cy="15.6" r="0.9" fill="${eyeFill}"/>${cheek}<path d="M11.2 18.2 Q14 20.4 16.8 18.2" stroke="${eyeFill}" stroke-width="1.05" stroke-linecap="round" fill="none"/>`;
   } else if (c.mood === 'neutral') {
-    face = `<circle cx="11.5" cy="14" r="0.85" fill="${eyeFill}"/><circle cx="16.5" cy="14" r="0.85" fill="${eyeFill}"/>${cheek}<line x1="11.6" y1="17" x2="16.4" y2="17" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/>`;
+    face = `<circle cx="11.6" cy="15.6" r="0.9" fill="${eyeFill}"/><circle cx="16.4" cy="15.6" r="0.9" fill="${eyeFill}"/>${cheek}<line x1="11.7" y1="18.6" x2="16.3" y2="18.6" stroke="${eyeFill}" stroke-width="1.05" stroke-linecap="round"/>`;
   } else if (c.mood === 'sad') {
-    face = `<circle cx="11.5" cy="14" r="0.85" fill="${eyeFill}"/><circle cx="16.5" cy="14" r="0.85" fill="${eyeFill}"/>${cheek}<path d="M11.2 17.6 Q14 15.6 16.8 17.6" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round" fill="none"/>`;
+    face = `<circle cx="11.6" cy="15.6" r="0.9" fill="${eyeFill}"/><circle cx="16.4" cy="15.6" r="0.9" fill="${eyeFill}"/>${cheek}<path d="M11.2 19.2 Q14 17.2 16.8 19.2" stroke="${eyeFill}" stroke-width="1.05" stroke-linecap="round" fill="none"/>`;
   } else {
-    face = `<line x1="10.7" y1="13.3" x2="12.3" y2="14.7" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/><line x1="12.3" y1="13.3" x2="10.7" y2="14.7" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/><line x1="15.7" y1="13.3" x2="17.3" y2="14.7" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/><line x1="17.3" y1="13.3" x2="15.7" y2="14.7" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round"/>${cheek}<path d="M11.4 17.4 Q14 15.8 16.6 17.4" stroke="${eyeFill}" stroke-width="1" stroke-linecap="round" fill="none"/>`;
+    face = `<line x1="10.8" y1="14.9" x2="12.4" y2="16.3" stroke="${eyeFill}" stroke-width="1.05" stroke-linecap="round"/><line x1="12.4" y1="14.9" x2="10.8" y2="16.3" stroke="${eyeFill}" stroke-width="1.05" stroke-linecap="round"/><line x1="15.6" y1="14.9" x2="17.2" y2="16.3" stroke="${eyeFill}" stroke-width="1.05" stroke-linecap="round"/><line x1="17.2" y1="14.9" x2="15.6" y2="16.3" stroke="${eyeFill}" stroke-width="1.05" stroke-linecap="round"/>${cheek}<path d="M11.4 19 Q14 17.3 16.6 19" stroke="${eyeFill}" stroke-width="1.05" stroke-linecap="round" fill="none"/>`;
   }
   return `<svg width="72" height="68" viewBox="0 0 28 26" fill="none" aria-hidden="true">${heart}${face}</svg>`;
 }
