@@ -354,6 +354,15 @@ if (typeof pdfjsLib !== 'undefined') {
   @media (prefers-reduced-motion: reduce) {
     .tree-leaf-floater { animation: none; opacity: 0.7; }
   }
+  /* ネオン風ふわふわ発光する光の粒 */
+  .glow-dot { transform-box: fill-box; transform-origin: center; animation: glowPulse 3.4s ease-in-out infinite both; }
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.7); }
+    50%      { opacity: 1;    transform: scale(1.25); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glow-dot { animation: none; opacity: 0.65; }
+  }
   .tab-btn:hover { background: #f1f5f9; color: #334155; }
   .tab-btn.active { background: #eef6f1; color: #2d8a6f; font-weight: 600; }
   .tab-btn .tab-icon { width: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -1497,13 +1506,23 @@ if (typeof pdfjsLib !== 'undefined') {
       <button class="tab-btn" data-tab="actions" onclick="switchTab('actions', this)"><span class="tab-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>アクションプラン</button>
     </div>
     <div class="sidebar-tree" aria-hidden="true">
-      <svg viewBox="0 -70 280 390" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox="0 -70 280 450" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <filter id="treeGlowFilter" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2.4" result="blur1"/>
+            <feMerge>
+              <feMergeNode in="blur1"/>
+              <feMergeNode in="blur1"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
         <g class="tree-extras"></g>
         <ellipse cx="140" cy="295" rx="78" ry="6" fill="#c4e090" opacity="0.55"/>
         <path d="M134 200 L131 295 L149 295 L146 200 Z" fill="#b08862"/>
         <path d="M138 200 Q123 178 112 158" stroke="#9c7549" stroke-width="5.5" fill="none" stroke-linecap="round"/>
         <path d="M142 200 Q157 178 168 158" stroke="#9c7549" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-        <g class="tree-glow"></g>
+        <g class="tree-glow" filter="url(#treeGlowFilter)"></g>
         <g class="tree-cluster"></g>
       </svg>
     </div>
@@ -8844,46 +8863,47 @@ function switchMasterTab(name, btn) {
       cluster.innerHTML = items.map(p =>
         `<path d="${leafPath}" fill="${p.col}" class="tree-leaf" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(0)}) scale(${p.s.toFixed(2)})"/>`
       ).join('');
-      // 葉と葉の間の白い隙間を埋める淡い黄緑の光の粒
+      // 葉と葉の間の白い隙間を埋めるネオン風ふわふわ光の粒（黄色）
       if (glow) {
-        const glowColors = ['#e6f0a8', '#d4e89a', '#dceea0', '#e8f2b2', '#cfe698', '#f0f4c0'];
+        const glowColors = ['#fde047', '#facc15', '#fef08a', '#fef3c7', '#fcd34d', '#fff8b0'];
         const glowItems = [];
-        // ハート内部にたっぷり散布
+        // ハート内部にたっぷり散布（大きめ）
         let gAttempts = 0;
-        while (glowItems.length < 90 && gAttempts < 4000) {
+        while (glowItems.length < 70 && gAttempts < 4000) {
           gAttempts++;
           const px = minX + Math.random() * (maxX - minX);
           const py = minY + Math.random() * (maxY - minY);
           if (!inHeart(px, py)) continue;
-          // 葉に近すぎない位置に置く
-          if (tooClose(px, py, items, 6)) continue;
-          if (tooClose(px, py, glowItems, 7)) continue;
-          glowItems.push({
-            x: px,
-            y: py,
-            r: 0.9 + Math.random() * 2.0,
-            col: glowColors[Math.floor(Math.random() * glowColors.length)],
-            op: 0.35 + Math.random() * 0.4
-          });
-        }
-        // ハート外側の周辺にも少しだけ散らして自然に
-        let gAttempts2 = 0;
-        while (glowItems.length < 110 && gAttempts2 < 1500) {
-          gAttempts2++;
-          const px = (cx - scale * 19) + Math.random() * (scale * 38);
-          const py = (cy - scale * 18) + Math.random() * (scale * 32);
-          if (inHeart(px, py)) continue;
+          if (tooClose(px, py, items, 5)) continue;
           if (tooClose(px, py, glowItems, 11)) continue;
           glowItems.push({
             x: px,
             y: py,
-            r: 0.7 + Math.random() * 1.4,
+            r: 1.8 + Math.random() * 2.8,
             col: glowColors[Math.floor(Math.random() * glowColors.length)],
-            op: 0.25 + Math.random() * 0.3
+            delay: (Math.random() * 3.4).toFixed(2),
+            dur: (2.6 + Math.random() * 2.4).toFixed(2)
+          });
+        }
+        // ハート外周にも少しだけ散らして自然に
+        let gAttempts2 = 0;
+        while (glowItems.length < 85 && gAttempts2 < 1500) {
+          gAttempts2++;
+          const px = (cx - scale * 19) + Math.random() * (scale * 38);
+          const py = (cy - scale * 18) + Math.random() * (scale * 32);
+          if (inHeart(px, py)) continue;
+          if (tooClose(px, py, glowItems, 15)) continue;
+          glowItems.push({
+            x: px,
+            y: py,
+            r: 1.2 + Math.random() * 1.8,
+            col: glowColors[Math.floor(Math.random() * glowColors.length)],
+            delay: (Math.random() * 3.4).toFixed(2),
+            dur: (2.8 + Math.random() * 2.6).toFixed(2)
           });
         }
         glow.innerHTML = glowItems.map(p =>
-          `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(2)}" fill="${p.col}" opacity="${p.op.toFixed(2)}"/>`
+          `<circle class="glow-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(2)}" fill="${p.col}" style="animation-delay:${p.delay}s;animation-duration:${p.dur}s"/>`
         ).join('');
       }
       // 周りの舞う葉っぱ（ふわふわ漂う）— 木の上の方〜横〜下まで広範囲に配置
