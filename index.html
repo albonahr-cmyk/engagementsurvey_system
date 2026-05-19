@@ -1633,6 +1633,7 @@ if (typeof pdfjsLib !== 'undefined') {
             <option value="マネージャー">マネージャー</option>
             <option value="シニアリーダー">シニアリーダー</option>
             <option value="リーダー">リーダー</option>
+            <option value="メンバー">メンバー</option>
           </select>
         </div>
         <div class="form-group" style="max-width:200px">
@@ -4352,16 +4353,16 @@ document.addEventListener('click', (e) => {
 function renderPersonalKeydriverRow(cur, total) {
   const drivers = [{ key: 'total', label: '総合', score: total }, ...catKeys.map(k => ({ key: k, label: catNames[k], score: cur[k] || 0 }))];
   return `
-    <div class="kd-card" style="margin-bottom:20px">
-      <div class="kd-card-title">キードライバーごとのスコア</div>
-      <div class="kd-row">
+    <div class="kd-card" style="margin:0 16px 20px;padding:14px 16px">
+      <div class="kd-card-title" style="font-size:13px">キードライバーごとのスコア</div>
+      <div class="kd-row" style="gap:5px">
         ${drivers.map((d, i) => `
-          <div class="kd-chip${i === 0 ? ' active' : ''}">
-            <div class="kd-chip-top">
-              <span class="kd-icon">${driverIcons[d.key] || ''}</span>
-              <span class="kd-score">${d.score}</span>
+          <div class="kd-chip${i === 0 ? ' active' : ''}" style="padding:8px 4px;gap:3px">
+            <div class="kd-chip-top" style="gap:4px">
+              <span class="kd-icon" style="width:16px;height:16px">${driverIcons[d.key] || ''}</span>
+              <span class="kd-score" style="font-size:12px;font-weight:600">${d.score}</span>
             </div>
-            <div class="kd-label">${sanitize(d.label)}</div>
+            <div class="kd-label" style="font-size:9.5px">${sanitize(d.label)}</div>
           </div>
         `).join('')}
       </div>
@@ -6396,7 +6397,7 @@ function _renderAccountEdit(empId) {
       </select></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">役職</div><select id="ai-edit-position" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
         <option value=""${!emp.position ? ' selected' : ''}>未選択</option>
-        ${['マネージャー','シニアリーダー','リーダー'].map(p => `<option value="${p}"${emp.position === p ? ' selected' : ''}>${p}</option>`).join('')}
+        ${['マネージャー','シニアリーダー','リーダー','メンバー'].map(p => `<option value="${p}"${emp.position === p ? ' selected' : ''}>${p}</option>`).join('')}
       </select></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">雇用形態</div><select id="ai-edit-jobtype" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
         <option value=""${!emp.jobType ? ' selected' : ''}>未選択</option>
