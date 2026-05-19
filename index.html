@@ -4457,118 +4457,133 @@ function getConditionCharacterSvg(key) {
     <rect x="46" y="156" width="22" height="8" rx="3" fill="#475569"/>
     <rect x="72" y="156" width="22" height="8" rx="3" fill="#475569"/>`;
 
-  if (key === 'dynamic' || key === 'good') {
-    // ロボット かなり元気（バンザイ・キラキラ）
+  if (key === 'dynamic') {
+    // ロボット 躍動（バンザイ・キラキラ）
     return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <ellipse cx="70" cy="100" rx="62" ry="68" fill="#e7f5d8" opacity="0.7"/>
+      <ellipse cx="70" cy="100" rx="62" ry="68" fill="#d4f3dd" opacity="0.75"/>
       <g opacity="0.85">
         <polygon points="18,30 21,38 29,40 21,42 18,50 15,42 7,40 15,38" fill="#fde68a"/>
         <polygon points="120,48 122,54 128,56 122,58 120,64 118,58 112,56 118,54" fill="#fde68a"/>
         <polygon points="125,108 127,114 133,116 127,118 125,124 123,118 117,116 123,114" fill="#fde68a"/>
       </g>
-      <!-- バンザイの腕（上に上げる） -->
+      <!-- バンザイの腕 -->
       <path d="M44 86 Q24 60 18 36" stroke="#cbd5e1" stroke-width="13" fill="none" stroke-linecap="round"/>
       <path d="M44 86 Q24 60 18 36" stroke="#475569" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       <path d="M96 86 Q116 60 122 36" stroke="#cbd5e1" stroke-width="13" fill="none" stroke-linecap="round"/>
       <path d="M96 86 Q116 60 122 36" stroke="#475569" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       <circle cx="18" cy="32" r="8" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
       <circle cx="122" cy="32" r="8" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <!-- アンテナ＋輝く玉＋星 -->
-      <line x1="70" y1="28" x2="70" y2="14" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="70" cy="10" r="5" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/>
-      <polygon points="80,5 82,10 87,12 82,14 80,19 78,14 73,12 78,10" fill="#fde68a"/>
-      <!-- 頭 -->
-      <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-      <!-- 側面 -->
-      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#86c45a" stroke="#475569" stroke-width="1.5"/>
-      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#86c45a" stroke="#475569" stroke-width="1.5"/>
-      <!-- 笑い目（^^） -->
-      <path d="M50 56 Q56 46 62 56" stroke="#1e293b" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-      <path d="M78 56 Q84 46 90 56" stroke="#1e293b" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-      <!-- 頬 -->
-      <ellipse cx="46" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.7"/>
-      <ellipse cx="94" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.7"/>
-      <!-- 大きな笑顔 -->
-      <path d="M52 66 Q70 80 88 66 Q82 74 70 75 Q58 74 52 66 Z" fill="white" stroke="#1e293b" stroke-width="2"/>
-      <!-- 体 -->
-      <rect x="44" y="80" width="52" height="48" rx="6" fill="#86c45a" stroke="#475569" stroke-width="2"/>
-      <!-- ハート胸パネル -->
-      <path d="M70 96 C66 92, 58 92, 58 100 C58 108, 70 117, 70 117 C70 117, 82 108, 82 100 C82 92, 74 92, 70 96 Z" fill="#fbbf24" stroke="#d97706" stroke-width="1.6"/>
-      <!-- 緑のブーツ -->
-      <rect x="50" y="130" width="14" height="22" rx="3" fill="#86c45a" stroke="#475569" stroke-width="1.5"/>
-      <rect x="76" y="130" width="14" height="22" rx="3" fill="#86c45a" stroke="#475569" stroke-width="1.5"/>
-      <rect x="46" y="152" width="22" height="10" rx="3" fill="#16a34a" stroke="#0f766e" stroke-width="1.5"/>
-      <rect x="72" y="152" width="22" height="10" rx="3" fill="#16a34a" stroke="#0f766e" stroke-width="1.5"/>
-    </svg>`;
-  }
-  if (key === 'normal') {
-    // ロボット ふつう（穏やか・腕は脇）
-    return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <ellipse cx="70" cy="100" rx="62" ry="68" fill="#e0eed7" opacity="0.65"/>
       <!-- アンテナ -->
       <line x1="70" y1="28" x2="70" y2="14" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="70" cy="10" r="4" fill="#86c45a" stroke="#558e36" stroke-width="1.5"/>
-      <!-- 頭 -->
+      <circle cx="70" cy="10" r="5" fill="#10b981" stroke="#059669" stroke-width="1.5"/>
+      <polygon points="80,5 82,10 87,12 82,14 80,19 78,14 73,12 78,10" fill="#fde68a"/>
       <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-      <!-- 側面 -->
-      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
-      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
-      <!-- 普通の丸い目 -->
-      <circle cx="56" cy="52" r="4" fill="#1e293b"/>
-      <circle cx="84" cy="52" r="4" fill="#1e293b"/>
-      <circle cx="57.5" cy="50.5" r="1.3" fill="white"/>
-      <circle cx="85.5" cy="50.5" r="1.3" fill="white"/>
-      <!-- 頬 -->
-      <ellipse cx="46" cy="62" rx="3.5" ry="2.5" fill="#fb7185" opacity="0.5"/>
-      <ellipse cx="94" cy="62" rx="3.5" ry="2.5" fill="#fb7185" opacity="0.5"/>
-      <!-- 微笑み -->
-      <path d="M58 65 Q70 71 82 65" stroke="#1e293b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-      <!-- 体 -->
-      <rect x="44" y="80" width="52" height="48" rx="6" fill="#7eb6e0" stroke="#475569" stroke-width="2"/>
-      <!-- 胸パネル -->
-      <ellipse cx="70" cy="108" rx="13" ry="13" fill="#fb923c" stroke="#c2410c" stroke-width="1.5"/>
-      <!-- 腕（脇に下ろす） -->
+      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#10b981" stroke="#475569" stroke-width="1.5"/>
+      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#10b981" stroke="#475569" stroke-width="1.5"/>
+      <path d="M50 56 Q56 46 62 56" stroke="#1e293b" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M78 56 Q84 46 90 56" stroke="#1e293b" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <ellipse cx="46" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.7"/>
+      <ellipse cx="94" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.7"/>
+      <path d="M52 66 Q70 80 88 66 Q82 74 70 75 Q58 74 52 66 Z" fill="white" stroke="#1e293b" stroke-width="2"/>
+      <rect x="44" y="80" width="52" height="48" rx="6" fill="#10b981" stroke="#475569" stroke-width="2"/>
+      <path d="M70 96 C66 92, 58 92, 58 100 C58 108, 70 117, 70 117 C70 117, 82 108, 82 100 C82 92, 74 92, 70 96 Z" fill="#fbbf24" stroke="#d97706" stroke-width="1.6"/>
+      <rect x="50" y="130" width="14" height="22" rx="3" fill="#10b981" stroke="#475569" stroke-width="1.5"/>
+      <rect x="76" y="130" width="14" height="22" rx="3" fill="#10b981" stroke="#475569" stroke-width="1.5"/>
+      <rect x="46" y="152" width="22" height="10" rx="3" fill="#059669" stroke="#047857" stroke-width="1.5"/>
+      <rect x="72" y="152" width="22" height="10" rx="3" fill="#059669" stroke="#047857" stroke-width="1.5"/>
+    </svg>`;
+  }
+  if (key === 'good') {
+    // ロボット 快調（にっこり微笑み・手は下げる）
+    return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="70" cy="100" rx="62" ry="68" fill="#d4f0eb" opacity="0.75"/>
+      <line x1="70" y1="28" x2="70" y2="14" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="70" cy="10" r="4.5" fill="#14b8a6" stroke="#0f766e" stroke-width="1.5"/>
+      <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#14b8a6" stroke="#475569" stroke-width="1.5"/>
+      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#14b8a6" stroke="#475569" stroke-width="1.5"/>
+      <!-- 笑い目 ^^ -->
+      <path d="M50 56 Q56 48 62 56" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M78 56 Q84 48 90 56" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <ellipse cx="46" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.6"/>
+      <ellipse cx="94" cy="64" rx="4" ry="2.5" fill="#fb7185" opacity="0.6"/>
+      <!-- にっこり -->
+      <path d="M56 66 Q70 74 84 66" stroke="#1e293b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <rect x="44" y="80" width="52" height="48" rx="6" fill="#14b8a6" stroke="#475569" stroke-width="2"/>
+      <path d="M70 96 C66 92, 58 92, 58 100 C58 108, 70 117, 70 117 C70 117, 82 108, 82 100 C82 92, 74 92, 70 96 Z" fill="#fbbf24" stroke="#d97706" stroke-width="1.6"/>
+      <!-- 腕は脇に下ろす -->
       <rect x="26" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
       <rect x="101" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
       <circle cx="32" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
       <circle cx="108" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      ${legs}
+      <rect x="50" y="130" width="14" height="28" rx="3" fill="#14b8a6" stroke="#475569" stroke-width="1.5"/>
+      <rect x="76" y="130" width="14" height="28" rx="3" fill="#14b8a6" stroke="#475569" stroke-width="1.5"/>
+      <rect x="46" y="156" width="22" height="8" rx="3" fill="#0f766e"/>
+      <rect x="72" y="156" width="22" height="8" rx="3" fill="#0f766e"/>
+    </svg>`;
+  }
+  if (key === 'normal') {
+    // ロボット ふつう（穏やか・腕は脇、黄色背景）
+    return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="70" cy="100" rx="62" ry="68" fill="#fef3c7" opacity="0.85"/>
+      <line x1="70" y1="28" x2="70" y2="14" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="70" cy="10" r="4" fill="#eab308" stroke="#a16207" stroke-width="1.5"/>
+      <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+      <ellipse cx="38" cy="52" rx="4" ry="9" fill="#eab308" stroke="#475569" stroke-width="1.5"/>
+      <ellipse cx="102" cy="52" rx="4" ry="9" fill="#eab308" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="56" cy="52" r="4" fill="#1e293b"/>
+      <circle cx="84" cy="52" r="4" fill="#1e293b"/>
+      <circle cx="57.5" cy="50.5" r="1.3" fill="white"/>
+      <circle cx="85.5" cy="50.5" r="1.3" fill="white"/>
+      <ellipse cx="46" cy="62" rx="3.5" ry="2.5" fill="#fb7185" opacity="0.5"/>
+      <ellipse cx="94" cy="62" rx="3.5" ry="2.5" fill="#fb7185" opacity="0.5"/>
+      <path d="M58 65 Q70 71 82 65" stroke="#1e293b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <rect x="44" y="80" width="52" height="48" rx="6" fill="#eab308" stroke="#475569" stroke-width="2"/>
+      <ellipse cx="70" cy="108" rx="13" ry="13" fill="#fef3c7" stroke="#a16207" stroke-width="1.5"/>
+      <rect x="26" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+      <rect x="101" y="84" width="13" height="38" rx="5" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="32" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="108" cy="124" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+      <rect x="50" y="130" width="14" height="28" rx="3" fill="#eab308" stroke="#475569" stroke-width="1.5"/>
+      <rect x="76" y="130" width="14" height="28" rx="3" fill="#eab308" stroke="#475569" stroke-width="1.5"/>
+      <rect x="46" y="156" width="22" height="8" rx="3" fill="#a16207"/>
+      <rect x="72" y="156" width="22" height="8" rx="3" fill="#a16207"/>
     </svg>`;
   }
   if (key === 'low') {
-    // ロボット 少し元気がない（疲れ目・手を胸に当てる）
+    // ロボット 低調（しくしく泣く・手を目に当てる）
     return `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <ellipse cx="70" cy="100" rx="62" ry="68" fill="#fde4d2" opacity="0.7"/>
-      <!-- アンテナ -->
-      <line x1="70" y1="28" x2="70" y2="14" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="70" cy="10" r="4" fill="#fb923c" stroke="#c2410c" stroke-width="1.5"/>
-      <!-- 頭 -->
+      <ellipse cx="70" cy="100" rx="62" ry="68" fill="#fde4d2" opacity="0.75"/>
+      <path d="M70 28 Q68 22 66 14" stroke="#94a3b8" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <circle cx="65" cy="12" r="4" fill="#fb923c" stroke="#c2410c" stroke-width="1.5"/>
       <rect x="40" y="28" width="60" height="48" rx="10" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-      <!-- 側面 -->
       <ellipse cx="38" cy="52" rx="4" ry="9" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
       <ellipse cx="102" cy="52" rx="4" ry="9" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
-      <!-- 疲れ目 -->
-      <path d="M50 52 Q56 56 62 52" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <path d="M78 52 Q84 56 90 52" stroke="#1e293b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <ellipse cx="56" cy="58" rx="2.5" ry="1.5" fill="#94a3b8" opacity="0.6"/>
-      <ellipse cx="84" cy="58" rx="2.5" ry="1.5" fill="#94a3b8" opacity="0.6"/>
-      <!-- 一文字口 -->
-      <line x1="58" y1="66" x2="82" y2="66" stroke="#1e293b" stroke-width="2.6" stroke-linecap="round"/>
-      <!-- 体 -->
-      <rect x="44" y="80" width="52" height="48" rx="6" fill="#7eb6e0" stroke="#475569" stroke-width="2"/>
-      <!-- 胸パネル -->
-      <ellipse cx="70" cy="108" rx="13" ry="13" fill="#fb923c" stroke="#c2410c" stroke-width="1.5"/>
-      <!-- 腕（胸に当てる） -->
-      <path d="M26 90 Q48 100 60 110" stroke="#cbd5e1" stroke-width="13" stroke-linecap="round" fill="none"/>
-      <path d="M26 90 Q48 100 60 110" stroke="#475569" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-      <path d="M114 90 Q92 100 80 110" stroke="#cbd5e1" stroke-width="13" stroke-linecap="round" fill="none"/>
-      <path d="M114 90 Q92 100 80 110" stroke="#475569" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-      <circle cx="62" cy="112" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <circle cx="78" cy="112" r="7" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-      <!-- ため息 -->
-      <ellipse cx="116" cy="42" rx="8" ry="5" fill="#dbe5ef" opacity="0.85"/>
-      <circle cx="124" cy="38" r="3" fill="#dbe5ef" opacity="0.85"/>
-      ${legs}
+      <!-- 体（先に描く） -->
+      <rect x="44" y="80" width="52" height="48" rx="6" fill="#fb923c" stroke="#475569" stroke-width="2"/>
+      <ellipse cx="70" cy="108" rx="13" ry="13" fill="#fed7aa" stroke="#c2410c" stroke-width="1.5"/>
+      <!-- 涙の流れ（手の下から） -->
+      <path d="M48 64 Q47 78 50 88 Q47 92 50 96" stroke="#7eb6e0" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M92 64 Q93 78 90 88 Q93 92 90 96" stroke="#7eb6e0" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="50" cy="98" rx="2.5" ry="3.5" fill="#7eb6e0"/>
+      <ellipse cx="90" cy="98" rx="2.5" ry="3.5" fill="#7eb6e0"/>
+      <!-- 涙目（><） -->
+      <path d="M48 50 L62 56 M48 56 L62 50" stroke="#1e293b" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M78 50 L92 56 M78 56 L92 50" stroke="#1e293b" stroke-width="2.4" stroke-linecap="round"/>
+      <!-- 泣き口 -->
+      <ellipse cx="70" cy="68" rx="4" ry="3" fill="#1e293b"/>
+      <path d="M66 68 Q70 65 74 68" stroke="white" stroke-width="1" fill="none"/>
+      <!-- 手を目に当てる（両腕が上がって顔に） -->
+      <path d="M28 90 Q22 70 42 58" stroke="#cbd5e1" stroke-width="13" stroke-linecap="round" fill="none"/>
+      <path d="M28 90 Q22 70 42 58" stroke="#475569" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <path d="M112 90 Q118 70 98 58" stroke="#cbd5e1" stroke-width="13" stroke-linecap="round" fill="none"/>
+      <path d="M112 90 Q118 70 98 58" stroke="#475569" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <circle cx="44" cy="56" r="8" fill="#cbd5e1" stroke="#475569" stroke-width="1.6"/>
+      <circle cx="96" cy="56" r="8" fill="#cbd5e1" stroke="#475569" stroke-width="1.6"/>
+      <rect x="50" y="130" width="14" height="28" rx="3" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
+      <rect x="76" y="130" width="14" height="28" rx="3" fill="#fb923c" stroke="#475569" stroke-width="1.5"/>
+      <rect x="46" y="156" width="22" height="8" rx="3" fill="#c2410c"/>
+      <rect x="72" y="156" width="22" height="8" rx="3" fill="#c2410c"/>
     </svg>`;
   }
   // recovery: ロボット 元気がない（しょんぼり・アンテナ折れ・腕だらん）
