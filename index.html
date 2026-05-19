@@ -4348,6 +4348,26 @@ document.addEventListener('click', (e) => {
 });
 
 // ===== コンディション・ドロワー =====
+function renderPersonalKeydriverRow(cur, total) {
+  const drivers = [{ key: 'total', label: '総合', score: total }, ...catKeys.map(k => ({ key: k, label: catNames[k], score: cur[k] || 0 }))];
+  return `
+    <div class="kd-card" style="margin-bottom:20px">
+      <div class="kd-card-title">キードライバーごとのスコア</div>
+      <div class="kd-row">
+        ${drivers.map((d, i) => `
+          <div class="kd-chip${i === 0 ? ' active' : ''}">
+            <div class="kd-chip-top">
+              <span class="kd-icon">${driverIcons[d.key] || ''}</span>
+              <span class="kd-score">${d.score}</span>
+            </div>
+            <div class="kd-label">${sanitize(d.label)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function openConditionDrawer(empId) {
   const emp = employees[empId];
   if (!emp) return;
@@ -4365,13 +4385,14 @@ function openConditionDrawer(empId) {
   document.getElementById('condition-drawer-title').textContent = `${emp.name || empId}のコンディション`;
 
   const scoreCard = renderConditionScoreCard(emp, total, diff, cond, month);
+  const keydriverRow = (cur && total !== null) ? renderPersonalKeydriverRow(cur, total) : '';
   const summarySection = renderConditionSummarySection(cond, diff);
   const analysisSection = cur ? renderConditionAnalysisSection(cur, cond, diff) : '';
   const forwardSection = cond ? renderConditionForwardSection(cond, diff) : '';
   const detailHtml = showDetail(empId, true);
 
   document.getElementById('condition-drawer-body').innerHTML =
-    scoreCard + summarySection + analysisSection + forwardSection + detailHtml;
+    scoreCard + keydriverRow + summarySection + analysisSection + forwardSection + detailHtml;
 
   const overlay = document.getElementById('condition-drawer-overlay');
   const drawer = document.getElementById('condition-drawer');
@@ -4505,17 +4526,23 @@ function getConditionCharacterSvg(key) {
   const wrap = (bg, inner) => `<svg viewBox="0 0 140 180" width="120" height="155" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="70" cy="100" rx="62" ry="68" fill="${bg}" opacity="0.75"/>${inner}</svg>`;
 
   if (key === 'dynamic') {
-    // 躍動：バンザイ＋キラキラ5つ
+    // 躍動：バンザイ＋キラキラ7つ（大きめ）＋閉じ目笑顔
     const sparkles = `
-      <g opacity="0.9">
-        <polygon points="18,30 21,38 29,40 21,42 18,50 15,42 7,40 15,38" fill="#fbbf24"/>
-        <polygon points="122,30 125,38 133,40 125,42 122,50 119,42 111,40 119,38" fill="#fbbf24"/>
-        <polygon points="10,110 13,116 19,118 13,120 10,126 7,120 1,118 7,116" fill="#fbbf24"/>
-        <polygon points="130,108 132,114 138,116 132,118 130,124 128,118 122,116 128,114" fill="#fbbf24"/>
-        <polygon points="70,2 72,8 78,10 72,12 70,18 68,12 62,10 68,8" fill="#fbbf24"/>
+      <g opacity="0.95">
+        <polygon points="14,30 18,42 30,46 18,50 14,62 10,50 -2,46 10,42" fill="#fbbf24"/>
+        <polygon points="126,30 130,42 142,46 130,50 126,62 122,50 110,46 122,42" fill="#fbbf24"/>
+        <polygon points="8,108 12,118 22,120 12,122 8,132 4,122 -6,120 4,118" fill="#fbbf24"/>
+        <polygon points="132,106 136,116 146,118 136,120 132,130 128,120 118,118 128,116" fill="#fbbf24"/>
+        <polygon points="70,0 73,8 81,11 73,14 70,22 67,14 59,11 67,8" fill="#fbbf24"/>
+        <polygon points="36,2 39,9 46,11 39,13 36,20 33,13 26,11 33,9" fill="#fbbf24"/>
+        <polygon points="104,4 107,11 114,13 107,15 104,22 101,15 94,13 101,11" fill="#fbbf24"/>
       </g>`;
+    // 閉じ目笑顔（^^）
+    const eyesHappy = `
+      <path d="M50 48 Q56 40 62 48" stroke="${STROKE}" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M78 48 Q84 40 90 48" stroke="${STROKE}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`;
     const smile = `<path d="M58 60 Q70 68 82 60" stroke="${STROKE}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
-    return wrap('#d4f3dd', `${sparkles}${armsBanzai}${antenna('#10b981')}${head}${eyes}${cheeks}${smile}${body}${heartIcon('#fde047', '#eab308')}${legsBody}`);
+    return wrap('#d4f3dd', `${sparkles}${armsBanzai}${antenna('#10b981')}${head}${eyesHappy}${cheeks}${smile}${body}${heartIcon('#fde047', '#eab308')}${legsBody}`);
   }
   if (key === 'good') {
     // 快調：にっこり、手はハートを持つ
@@ -4528,14 +4555,20 @@ function getConditionCharacterSvg(key) {
     return wrap('#fef3c7', `${antenna('#eab308')}${head}${eyes}${cheeks}${mouth}${body}${armsHoldHeart}${heartIcon('#fde047', '#eab308')}${legsBody}`);
   }
   if (key === 'low') {
-    // 低調：目から涙、手は脇（image99参考）
-    const eyesWithTear = `
-      <circle cx="56" cy="46" r="3.5" fill="${STROKE}"/>
-      <circle cx="84" cy="46" r="3.5" fill="${STROKE}"/>
-      <!-- 涙（左目から流れる） -->
-      <path d="M50 52 Q47 58 49 64 Q50 68 53 64 Q55 58 50 52 Z" fill="#7eb6e0" stroke="#5b9bcc" stroke-width="1"/>`;
-    const mouth = `<rect x="62" y="60" width="16" height="3" rx="1.5" fill="${STROKE}"/>`;
-    return wrap('#fde4d2', `${antenna('#fb923c')}${head}${eyesWithTear}${mouth}${body}${armsAtSides}${heartIcon('#fde047', '#eab308')}${legsBody}`);
+    // 低調：>< の目＋涙（image101参考）、手は脇
+    const eyesSqueezed = `
+      <!-- > -->
+      <path d="M50 40 L62 48 L50 56" stroke="${STROKE}" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- < -->
+      <path d="M90 40 L78 48 L90 56" stroke="${STROKE}" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- 左から涙 -->
+      <path d="M50 56 Q42 64 46 72 Q50 76 54 72 Q52 64 50 56 Z" fill="#7eb6e0" stroke="#5b9bcc" stroke-width="1"/>
+      <ellipse cx="44" cy="76" rx="2.5" ry="3.5" fill="#7eb6e0"/>
+      <!-- 右から涙 -->
+      <path d="M90 56 Q98 64 94 72 Q90 76 86 72 Q88 64 90 56 Z" fill="#7eb6e0" stroke="#5b9bcc" stroke-width="1"/>
+      <ellipse cx="96" cy="76" rx="2.5" ry="3.5" fill="#7eb6e0"/>`;
+    const mouth = `<rect x="62" y="62" width="16" height="3" rx="1.5" fill="${STROKE}"/>`;
+    return wrap('#fde4d2', `${antenna('#fb923c')}${head}${eyesSqueezed}${mouth}${body}${armsAtSides}${heartIcon('#fde047', '#eab308')}${legsBody}`);
   }
   // recovery：しょんぼり・腕だらん・ハート色褪せ
   const eyesClosed = `
@@ -4552,7 +4585,7 @@ function getConditionCharacterSvg(key) {
 function renderConditionSummarySection(cond, diff) {
   const text = getConditionLongSummary(cond, diff);
   return `<div style="margin-bottom:24px">
-    <h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:8px 0 14px">サマリー</h2>
+    <h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:8px 0 14px">まとめ</h2>
     <p style="font-size:13.5px;color:#334155;line-height:1.85;margin:0;white-space:pre-line">${sanitize(text)}</p>
   </div>`;
 }
