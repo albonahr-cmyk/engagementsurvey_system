@@ -327,7 +327,10 @@ if (typeof pdfjsLib !== 'undefined') {
   .admin-layout { display: flex; flex: 1; overflow: hidden; height: 0; min-height: 0; }
 
   /* 左サイドバー */
-  .admin-sidebar { width: 340px; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; padding: 20px 0 16px; overflow: hidden; }
+  .admin-sidebar { width: 340px; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; padding: 20px 0 16px; overflow-y: auto; scrollbar-width: thin; }
+  .admin-sidebar::-webkit-scrollbar { width: 6px; }
+  .admin-sidebar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+  .admin-sidebar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
   .sidebar-logo { display: flex; align-items: center; gap: 14px; padding: 0 24px; height: 80px; margin-bottom: 48px; }
   .sidebar-logo-icon { flex-shrink: 0; border-radius: 8px; }
   .sidebar-logo-text { display: flex; flex-direction: column; min-width: 0; }
@@ -336,7 +339,7 @@ if (typeof pdfjsLib !== 'undefined') {
   .sidebar-section { padding: 0 12px; margin-bottom: 8px; }
   .sidebar-section-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px 4px; }
   /* サイドバー下部の3ウィジェット */
-  .sidebar-widgets { margin-top: 80px; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+  .sidebar-widgets { margin-top: auto; padding: 32px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
   .sb-widget { background: white; border: 1px solid transparent; border-radius: 14px; padding: 12px 16px; display: block; text-align: left; width: 100%; font: inherit; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
   .sb-widget:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
   .sb-widget-countdown { background: #fcefcf; border-color: #f3e3b1; }
