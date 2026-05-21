@@ -269,6 +269,7 @@ function handleSendMails(ss, data) {
         .replace(/\{empId\}/g, emp.empId)
         .replace(/\{dept\}/g, emp.dept || '')
         .replace(/\{deadline\}/g, deadline || '今月末')
+        .replace(/\{loginUrl\}/g, surveyBaseUrl)
         .replace(/\{surveyUrl\}/g, surveyLink);
 
       try {
@@ -329,6 +330,7 @@ function handleSendToOne(ss, data) {
       .replace(/\{empId\}/g, emp.empId)
       .replace(/\{dept\}/g, emp.dept || '')
       .replace(/\{deadline\}/g, deadline || '今月末')
+      .replace(/\{loginUrl\}/g, surveyBaseUrl)
       .replace(/\{surveyUrl\}/g, surveyLink);
 
     GmailApp.sendEmail(emp.email, subject, body);
