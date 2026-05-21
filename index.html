@@ -2205,6 +2205,22 @@ ALBONA 人事部</textarea>
 
       <div id="mail-schedule-current" style="margin-top:16px;font-size:13px;color:#64748b;background:#f8fafc;padding:10px 14px;border-radius:8px;display:inline-block"></div>
     </div>
+
+    <!-- 個別メール送信 -->
+    <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
+      <div class="section-title" style="margin-bottom:8px">👤 個別メール送信</div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px">一斉送信でメールが届かなかった人へ、1人ずつ再送できます。<br>※ 上記「メール件名 / 本文テンプレート」が使用されます。回答リンクは前回の一斉送信時のものを再利用します。</p>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+        <input type="text" id="indiv-mail-search" oninput="renderIndivMailList()" placeholder="🔍 氏名 / 社員ID / 部署 / メールアドレスで検索" style="flex:1;min-width:240px;padding:9px 13px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;color:#1e293b">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#475569;font-weight:600;cursor:pointer">
+          <input type="checkbox" id="indiv-mail-unsubmitted-only" onchange="renderIndivMailList()" style="width:16px;height:16px;cursor:pointer">
+          今月未回答のみ表示
+        </label>
+      </div>
+      <div id="indiv-mail-list"></div>
+    </div>
+
     <div id="unsubmitted-section" style="display:none;margin-top:32px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:12px">
         <div class="section-title" style="margin-bottom:0">📬 未回答者一覧 <span id="unsubmitted-count-label" style="font-size:13px;color:#94a3b8;font-weight:500"></span></div>
@@ -5519,7 +5535,7 @@ function switchTab(name, btn) {
   if (name === 'employees') { initMonthSelects(); renderEmployeeList(); }
   if (name === 'score') { populateScoreFilters(); renderScoreTab(); }
   if (name === 'logic') renderLogicTab();
-  if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); initMonthSelects(); renderUnsubmittedList(); }
+  if (name === 'mail') { renderSurveyPeriodForm(); loadMailSchedule(); initMonthSelects(); renderUnsubmittedList(); renderIndivMailList(); }
   if (name === 'settings') { renderSettingsTab(); initBizIQMasterUI(); }
   if (name === 'actions') { initMonthSelects(); renderActionPlan(); }
   renderSidebarWidgets();
@@ -6913,6 +6929,9 @@ async function testSendMail() {
   setTimeout(() => msgEl.style.display = 'none', 8000);
 }
 
+// 当セッション内で個別送信した社員のempIdと送信時刻を記録（UIでの送信済み表示用）
+const indivMailSentMap = {};
+
 async function sendMailToEmployee(empId) {
   const emp = employees[empId];
   if (!emp) { showToast('社員が見つかりません'); return; }
@@ -6921,10 +6940,102 @@ async function sendMailToEmployee(empId) {
   const gasUrl = localStorage.getItem('es_gas_url');
   if (!gasUrl) { showToast('❌ GAS URLが未設定です（設定 → GAS URL）'); return; }
   const gasToken = localStorage.getItem('es_gas_token') || '';
+  // 該当行のボタンを「送信中」に切り替え
+  const btn = document.querySelector(`button[data-indiv-send="${empId}"]`);
+  if (btn) { btn.disabled = true; btn.textContent = '送信中...'; }
   showToast('📨 送信中...');
   const res = await apiPost('gas-proxy', { gasUrl, token: gasToken, action: 'sendToOne', params: { empId } });
-  if (res && res.ok) showToast(`✅ ${emp.name} に送信しました`);
-  else showToast('⚠ ' + (res?.error || '送信失敗') + (res?.preview ? ' / ' + res.preview.substring(0, 100) : ''));
+  if (res && res.ok) {
+    indivMailSentMap[empId] = new Date();
+    showToast(`✅ ${emp.name} に送信しました`);
+    renderIndivMailList();
+  } else {
+    if (btn) { btn.disabled = false; btn.textContent = '📨 送信'; }
+    showToast('⚠ ' + (res?.error || '送信失敗') + (res?.preview ? ' / ' + res.preview.substring(0, 100) : ''));
+  }
+}
+
+function renderIndivMailList() {
+  const listEl = document.getElementById('indiv-mail-list');
+  if (!listEl) return;
+  const searchEl = document.getElementById('indiv-mail-search');
+  const onlyUnsubEl = document.getElementById('indiv-mail-unsubmitted-only');
+  const q = (searchEl?.value || '').trim().toLowerCase();
+  const onlyUnsub = !!(onlyUnsubEl && onlyUnsubEl.checked);
+
+  const month = getSurveyMonth();
+  const submittedIds = (typeof getSubmittedIds === 'function') ? getSubmittedIds(month) : [];
+  const submittedSet = new Set(submittedIds);
+
+  let rows = Object.entries(employees)
+    .filter(([id, emp]) => emp.role !== 'admin' && !!emp.email)
+    .map(([id, emp]) => ({ id, ...emp }));
+
+  if (onlyUnsub) rows = rows.filter(r => !submittedSet.has(r.id));
+
+  if (q) {
+    rows = rows.filter(r => {
+      const hay = (r.id + ' ' + (r.name||'') + ' ' + (r.dept||'') + ' ' + (r.email||'')).toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  rows.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ja'));
+
+  const totalWithEmail = Object.values(employees).filter(e => e.role !== 'admin' && !!e.email).length;
+  const headerNote = `<div style="font-size:12px;color:#94a3b8;margin-bottom:8px">表示: ${rows.length}名 ／ メール登録済み: ${totalWithEmail}名</div>`;
+
+  if (rows.length === 0) {
+    listEl.innerHTML = headerNote + '<div style="background:#f8fafc;border-radius:10px;padding:16px;text-align:center;color:#94a3b8;font-size:13px">該当する社員がいません</div>';
+    return;
+  }
+
+  const fmtTime = (d) => {
+    const h = String(d.getHours()).padStart(2,'0');
+    const m = String(d.getMinutes()).padStart(2,'0');
+    return `${h}:${m}`;
+  };
+
+  listEl.innerHTML = headerNote + `
+    <div style="background:white;border-radius:10px;border:1px solid #e2e8f0;max-height:480px;overflow-y:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="position:sticky;top:0;background:#f8fafc;z-index:1">
+          <tr>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0">社員ID</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0">氏名</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0">所属</th>
+            <th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0">メールアドレス</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0">今月</th>
+            <th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0">操作</th>
+          </tr>
+        </thead>
+        <tbody>${rows.map(r => {
+          const submitted = submittedSet.has(r.id);
+          const sentAt = indivMailSentMap[r.id];
+          const excluded = !!r.mailExcluded;
+          return `
+            <tr>
+              <td style="padding:10px 14px;font-size:13px;border-top:1px solid #f1f5f9">
+                <span style="font-weight:800;color:#3da589;background:#eef6f1;padding:2px 7px;border-radius:5px;font-family:'Inter',monospace;font-size:12px">${sanitize(r.id)}</span>
+              </td>
+              <td style="padding:10px 14px;font-size:13px;border-top:1px solid #f1f5f9;font-weight:600;color:#1e293b">${sanitize(r.name||'')}</td>
+              <td style="padding:10px 14px;font-size:12px;border-top:1px solid #f1f5f9;color:#64748b">${sanitize(r.dept||'')}</td>
+              <td style="padding:10px 14px;font-size:12px;border-top:1px solid #f1f5f9;color:#475569;font-family:monospace">${sanitize(r.email||'')}</td>
+              <td style="padding:10px 14px;font-size:12px;border-top:1px solid #f1f5f9;text-align:center">
+                ${submitted
+                  ? '<span style="background:#ecfdf5;color:#059669;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid #a7f3d0">回答済み</span>'
+                  : '<span style="background:#fef2f2;color:#dc2626;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid #fecaca">未回答</span>'}
+              </td>
+              <td style="padding:10px 14px;font-size:12px;border-top:1px solid #f1f5f9;text-align:right;white-space:nowrap">
+                ${sentAt ? `<span style="font-size:11px;color:#059669;font-weight:700;margin-right:8px">✓ ${fmtTime(sentAt)} 送信済</span>` : ''}
+                ${excluded ? '<span style="font-size:11px;color:#94a3b8;margin-right:8px">配信除外中</span>' : ''}
+                <button data-indiv-send="${sanitize(r.id)}" onclick="sendMailToEmployee('${sanitize(r.id)}')" style="background:${sentAt ? '#f1f5f9' : '#3da589'};color:${sentAt ? '#475569' : 'white'};border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">${sentAt ? '🔁 再送' : '📨 送信'}</button>
+              </td>
+            </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 async function sendMailsNow() {

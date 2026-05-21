@@ -38,6 +38,7 @@ function doGet(e) {
     if (action === 'saveSettings') return handleSaveSettings(ss, data);
     if (action === 'loadSettings') return handleLoadSettings(ss, data);
     if (action === 'sendMails')    return handleSendMails(ss, data);
+    if (action === 'sendToOne')    return handleSendToOne(ss, data);
     if (action === 'scheduleSend') return handleScheduleSend(ss, data);
     if (action === 'cancelSchedule') return handleCancelSchedule();
     if (action === 'listTriggers') return handleListTriggers();
@@ -279,6 +280,59 @@ function handleSendMails(ss, data) {
     }
 
     return jsonResponse({ ok: true, sent: sentCount, errors: errors });
+  } catch(e) {
+    return jsonResponse({ error: e.message });
+  }
+}
+
+// ===== 個別送信（1名のみ） =====
+// 一斉送信でメールが届かなかった人への再送用。empIdで指定された社員1名にだけメール送信する。
+// 既存のサーベイトークンを再利用するため、他の社員のトークンには影響しない。
+function handleSendToOne(ss, data) {
+  try {
+    var empId = String(data.empId || '').trim();
+    if (!empId) return jsonResponse({ error: 'empIdが指定されていません' });
+
+    var empList = fetchEmployeesFromAPI();
+    if (empList.length === 0) return jsonResponse({ error: '社員データを取得できませんでした' });
+
+    var emp = null;
+    for (var i = 0; i < empList.length; i++) {
+      if (empList[i].empId === empId) { emp = empList[i]; break; }
+    }
+    if (!emp) return jsonResponse({ error: empId + ' は配信対象に含まれていません（メール未登録 / 配信除外 / 在籍中=false の可能性）' });
+    if (!emp.email) return jsonResponse({ error: emp.name + ' はメールアドレス未登録です' });
+
+    // 設定を取得
+    var settingsSheet = ss.getSheetByName('settings');
+    var mailConfig = null;
+    var deadline = '';
+    if (settingsSheet) {
+      var settingsData = settingsSheet.getDataRange().getValues();
+      for (var s = 0; s < settingsData.length; s++) {
+        if (settingsData[s][0] === 'es_mail_schedule') {
+          try { mailConfig = JSON.parse(settingsData[s][1]); } catch(ex) {}
+        }
+        if (settingsData[s][0] === 'es_survey_period') {
+          try { var period = JSON.parse(settingsData[s][1]); deadline = period.deadline || period.end || ''; } catch(ex) {}
+        }
+      }
+    }
+
+    var subject = (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
+    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 以下のリンクをクリックするだけで回答できます\n{surveyUrl}\n\nご協力よろしくお願いいたします。';
+
+    var surveyBaseUrl = 'https://engagementsurvey-system-nvlq.vercel.app';
+    var surveyLink = emp.surveyToken ? surveyBaseUrl + '?token=' + emp.surveyToken : surveyBaseUrl;
+    var body = bodyTemplate
+      .replace(/\{name\}/g, emp.name || '')
+      .replace(/\{empId\}/g, emp.empId)
+      .replace(/\{dept\}/g, emp.dept || '')
+      .replace(/\{deadline\}/g, deadline || '今月末')
+      .replace(/\{surveyUrl\}/g, surveyLink);
+
+    GmailApp.sendEmail(emp.email, subject, body);
+    return jsonResponse({ ok: true, sent: 1, empId: emp.empId, name: emp.name, email: emp.email });
   } catch(e) {
     return jsonResponse({ error: e.message });
   }
