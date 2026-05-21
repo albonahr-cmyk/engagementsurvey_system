@@ -2184,7 +2184,10 @@ if (typeof pdfjsLib !== 'undefined') {
 ご協力よろしくお願いいたします。
 
 ALBONA 人事部</textarea>
-        <p style="font-size:11px;color:#94a3b8;margin-top:6px">使える変数: {surveyUrl}=ワンクリック回答リンク（パスワード不要）, {loginUrl}=ログインページURL, {name}=氏名, {empId}=社員ID, {dept}=部署, {deadline}=回答期限</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:12px;flex-wrap:wrap">
+          <p style="font-size:11px;color:#94a3b8;margin:0;flex:1;min-width:200px">使える変数: {surveyUrl}=ワンクリック回答リンク（パスワード不要）, {loginUrl}=ログインページURL, {name}=氏名, {empId}=社員ID, {dept}=部署, {deadline}=回答期限</p>
+          <button class="btn btn-primary" onclick="saveMailSchedule()" style="white-space:nowrap">💾 テンプレートを保存</button>
+        </div>
       </div>
 
       <div style="margin-bottom:20px">
@@ -5139,6 +5142,28 @@ function updateMonthlyCell(empId, m, k, value) {
     if (node) showDetail(empId, false);
   }
 }
+
+// 月別「平均」行の手動入力（カテゴリの合計とは独立してオーバーライド保存）
+function _manualTotalKey(empId, m) { return `mt2_${empId}_${m}`; }
+function getManualTotal(empId, m) {
+  const v = localStorage.getItem(_manualTotalKey(empId, m));
+  return v !== null && v !== '' ? parseInt(v) : null;
+}
+function setManualTotal(empId, m, v) {
+  const key = _manualTotalKey(empId, m);
+  if (v === '' || v === null || v === undefined || isNaN(v)) localStorage.removeItem(key);
+  else localStorage.setItem(key, String(v));
+}
+function updateMonthlyTotal(empId, m, value) {
+  const v = value === '' ? '' : Math.max(0, Math.min(100, parseInt(value)));
+  setManualTotal(empId, m, v);
+  if (typeof openConditionDrawer === 'function' && document.getElementById('condition-drawer')?.style.display === 'block') {
+    openConditionDrawer(empId);
+  } else {
+    const node = document.getElementById('detail-content');
+    if (node) showDetail(empId, false);
+  }
+}
 function changeMonthlyYear(empId, year) {
   window._monthlyTableYear = parseInt(year);
   if (typeof openConditionDrawer === 'function' && document.getElementById('condition-drawer')?.style.display === 'block') {
@@ -5297,13 +5322,18 @@ function showDetail(empId, drawerMode) {
   });
 
   const totalRow = yearMonths.map((m, mi) => {
-    const v = mergedData[m] ? getTotal(mergedData[m]) : null;
-    if (!v) return '<td>―</td>';
-    const prev2 = mi > 0 && mergedData[yearMonths[mi - 1]] ? getTotal(mergedData[yearMonths[mi - 1]]) : null;
-    const d = prev2 !== null ? v - prev2 : null;
-    const cls = v < 60 ? 'cell-alert' : v < 70 ? 'cell-warn' : 'cell-ok';
+    const manualT = getManualTotal(empId, m);
+    const calcT = mergedData[m] ? getTotal(mergedData[m]) : null;
+    const v = manualT !== null ? manualT : (calcT || null);
+    const prevManual = mi > 0 ? getManualTotal(empId, yearMonths[mi - 1]) : null;
+    const prevCalc = mi > 0 && mergedData[yearMonths[mi - 1]] ? getTotal(mergedData[yearMonths[mi - 1]]) : null;
+    const prev2 = prevManual !== null ? prevManual : prevCalc;
+    const d = (v !== null && prev2 !== null) ? v - prev2 : null;
+    const cls = v ? (v < 60 ? 'cell-alert' : v < 70 ? 'cell-warn' : 'cell-ok') : '';
     const diff2 = (d !== null && d !== 0) ? `<br><span class="${d > 0 ? 'cell-diff-up' : 'cell-diff-down'}">${d > 0 ? '+' : ''}${d}</span>` : '';
-    return `<td class="${cls}" style="font-weight:700">${v}${diff2}</td>`;
+    const inputVal = v !== null && v !== undefined ? v : '';
+    const titleHint = manualT !== null ? '手入力された平均値（クリアするには空欄にしてフォーカスアウト）' : (calcT !== null ? 'カテゴリの平均から自動計算' : '');
+    return `<td class="${cls}" style="padding:6px 4px;font-weight:700" title="${titleHint}"><input type="number" min="0" max="100" value="${inputVal}" onchange="updateMonthlyTotal('${empId}','${m}',this.value)" style="width:48px;text-align:center;border:1px solid ${manualT !== null ? '#3da589' : 'transparent'};border-radius:4px;background:${manualT !== null ? '#eef6f1' : 'transparent'};font-size:13px;font-weight:700;color:inherit;padding:4px 0" onfocus="this.style.borderColor='#3da589';this.style.background='#fff'" onblur="this.style.borderColor='${manualT !== null ? '#3da589' : 'transparent'}';this.style.background='${manualT !== null ? '#eef6f1' : 'transparent'}'" placeholder="―">${diff2}</td>`;
   }).join('');
 
   // アラート履歴
@@ -6606,9 +6636,16 @@ function saveMailSchedule() {
     renderMailScheduleStatus(config);
     renderSidebarWidgets();
     if (date) {
-      showToast('✅ 設定を保存しました');
-      // GASに配信予約リクエストを送信（送信日が設定されている場合のみ）
-      scheduleSendToGas(date, hour, minute, subject, body);
+      // 指定日時が過去かをローカルで判定 → 過去ならGAS予約はスキップして分かりやすく通知
+      const [yy, mm, dd] = date.split('-').map(Number);
+      const scheduledAt = new Date(yy, (mm || 1) - 1, dd || 1, hour || 0, minute || 0, 0);
+      if (scheduledAt.getTime() <= Date.now()) {
+        showToast('✅ テンプレートを保存しました（送信日「' + date + ' ' + String(hour).padStart(2,'0') + ':' + String(minute || 0).padStart(2,'0') + '」が過去のため、配信予約はスキップしました）');
+      } else {
+        showToast('✅ 設定を保存しました');
+        // GASに配信予約リクエストを送信（送信日が未来の場合のみ）
+        scheduleSendToGas(date, hour, minute, subject, body);
+      }
     } else {
       showToast('✅ テンプレートを保存しました（配信予約は送信日を設定してください）');
     }
