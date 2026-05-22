@@ -240,7 +240,7 @@ function handleSendMails(ss, data) {
     }
 
     var subject = (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
-    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 以下のリンクをクリックするだけで回答できます\n{surveyUrl}\n\nご協力よろしくお願いいたします。';
+    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\nお疲れ様です。\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n所要時間は約3〜5分です。\n\n▼ 回答はこちら（クリックするだけでログイン不要で回答画面が開きます）\n{surveyUrl}\n\n━━━━━━━━━━━━━━━━━━━━\nうまく開けない場合は、以下のページからログインしてご回答ください。\nログインURL: {loginUrl}\nログインID: {empId}\nパスワード: 初回ログイン時にご自身で設定したパスワード\n　（お忘れの場合は人事部 albonahr@al-bo.io までご連絡ください）\n━━━━━━━━━━━━━━━━━━━━\n\n回答期限: {deadline}\n\nご協力よろしくお願いいたします。\n\nALBONA 人事部';
 
     // 今月の回答済み社員をチェック
     var now = new Date();
@@ -321,7 +321,7 @@ function handleSendToOne(ss, data) {
     }
 
     var subject = (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
-    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n\n▼ 以下のリンクをクリックするだけで回答できます\n{surveyUrl}\n\nご協力よろしくお願いいたします。';
+    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\nお疲れ様です。\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n所要時間は約3〜5分です。\n\n▼ 回答はこちら（クリックするだけでログイン不要で回答画面が開きます）\n{surveyUrl}\n\n━━━━━━━━━━━━━━━━━━━━\nうまく開けない場合は、以下のページからログインしてご回答ください。\nログインURL: {loginUrl}\nログインID: {empId}\nパスワード: 初回ログイン時にご自身で設定したパスワード\n　（お忘れの場合は人事部 albonahr@al-bo.io までご連絡ください）\n━━━━━━━━━━━━━━━━━━━━\n\n回答期限: {deadline}\n\nご協力よろしくお願いいたします。\n\nALBONA 人事部';
 
     var surveyBaseUrl = 'https://engagementsurvey-system-nvlq.vercel.app';
     var surveyLink = emp.surveyToken ? surveyBaseUrl + '?token=' + emp.surveyToken : surveyBaseUrl;

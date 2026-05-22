@@ -2161,7 +2161,16 @@ if (typeof pdfjsLib !== 'undefined') {
           <label style="font-size:12px;font-weight:700;color:#475569">メール本文テンプレート</label>
           <button type="button" onclick="resetMailBodyTemplate()" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🔄 デフォルトに戻す</button>
         </div>
-        <textarea id="mail-body-template" rows="14" style="width:100%;padding:12px 14px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;color:#1e293b;line-height:1.7;resize:vertical">{name} さん
+        <div id="mail-body-upgrade-banner" style="display:none;background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid #f59e0b;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div style="flex:1;min-width:240px">
+              <div style="font-size:13px;font-weight:800;color:#92400e;margin-bottom:2px">📌 新しい本文テンプレートが利用可能です</div>
+              <div style="font-size:12px;color:#78350f;line-height:1.5">現在の本文には <strong>サーベイURL</strong> や <strong>ログインID・パスワード案内</strong> が含まれていません。<br>ワンクリックで新しいデフォルト（一斉送信・個別再送どちらにも適用）に更新できます。</div>
+            </div>
+            <button type="button" onclick="upgradeMailBodyTemplate()" style="background:#d97706;color:white;border:none;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap">✨ 新テンプレに更新して保存</button>
+          </div>
+        </div>
+        <textarea id="mail-body-template" rows="14" oninput="checkMailBodyNeedsUpgrade()" style="width:100%;padding:12px 14px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;color:#1e293b;line-height:1.7;resize:vertical">{name} さん
 
 お疲れ様です。
 
@@ -6682,7 +6691,31 @@ function resetMailBodyTemplate() {
   if (!ta) return;
   if (!confirm('メール本文テンプレートをデフォルトに戻しますか？\n（現在の編集内容は上書きされます）')) return;
   ta.value = DEFAULT_MAIL_BODY_TEMPLATE;
+  checkMailBodyNeedsUpgrade();
   showToast('🔄 デフォルトに戻しました。保存ボタンを押してください');
+}
+
+// 現在の本文テンプレートに必須プレースホルダ（{surveyUrl} / {empId}）が無ければ
+// バナーを表示する。一斉送信と個別再送は同じテンプレを使うので、ここで更新すれば両方反映される。
+function checkMailBodyNeedsUpgrade() {
+  const ta = document.getElementById('mail-body-template');
+  const banner = document.getElementById('mail-body-upgrade-banner');
+  if (!ta || !banner) return;
+  const body = ta.value || '';
+  const missingSurveyUrl = !body.includes('{surveyUrl}');
+  const missingEmpId = !body.includes('{empId}');
+  banner.style.display = (missingSurveyUrl || missingEmpId) ? 'block' : 'none';
+}
+
+// バナーから呼ばれる。新デフォルトテンプレを適用してそのまま保存する。
+// 個別再送でも同じテンプレが使われるので、これ1回でリマインドメールも改善される。
+function upgradeMailBodyTemplate() {
+  const ta = document.getElementById('mail-body-template');
+  if (!ta) return;
+  ta.value = DEFAULT_MAIL_BODY_TEMPLATE;
+  checkMailBodyNeedsUpgrade();
+  saveMailSchedule();
+  showToast('✅ 新テンプレートを適用しました（一斉送信・個別再送の両方に反映されます）');
 }
 
 async function scheduleSendToGas(date, hour, minute, subject, body) {
@@ -6930,6 +6963,7 @@ function applyMailScheduleConfig(config) {
   }
   if (config.subject) document.getElementById('mail-subject').value = config.subject;
   if (config.bodyTemplate) document.getElementById('mail-body-template').value = config.bodyTemplate;
+  checkMailBodyNeedsUpgrade();
   renderMailScheduleStatus(config);
 }
 
