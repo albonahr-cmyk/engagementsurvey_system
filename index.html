@@ -2230,7 +2230,7 @@ ALBONA 人事部</textarea>
     <!-- 個別メール送信 -->
     <div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:28px;border:1px solid rgba(0,0,0,0.04)">
       <div class="section-title" style="margin-bottom:8px">👤 個別メール送信</div>
-      <p style="font-size:13px;color:#64748b;margin-bottom:16px">一斉送信でメールが届かなかった人へ、1人ずつ再送できます。<br>※ 上記「メール件名 / 本文テンプレート」が使用されます。回答リンクは前回の一斉送信時のものを再利用します。</p>
+      <p style="font-size:13px;color:#64748b;margin-bottom:16px">一斉送信でメールが届かなかった人へ、1人ずつ再送できます。<br>※ 上記「メール件名 / 本文テンプレート」と<strong>全く同じ内容</strong>で送られます（サーベイURL・ログイン情報を含む）。<br>※ 本文を更新する場合は、まず上の「💾 テンプレートを保存」を押してから個別送信してください。</p>
 
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
         <input type="text" id="indiv-mail-search" oninput="renderIndivMailList()" placeholder="🔍 氏名 / 社員ID / 部署 / メールアドレスで検索" style="flex:1;min-width:240px;padding:9px 13px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;color:#1e293b">
@@ -6726,6 +6726,9 @@ function saveMailSchedule() {
     if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
     renderMailScheduleStatus(config);
     renderSidebarWidgets();
+    // GAS Sheetsの settings シートにも同期する。GASは送信時にこのシートを読みに行くため、
+    // ここで同期しないと一斉送信・個別再送どちらでも古いテンプレが使われてしまう。
+    pushMailScheduleToGasSheets(configStr);
     if (date) {
       // 指定日時が過去かをローカルで判定 → 過去ならGAS予約はスキップして分かりやすく通知
       const [yy, mm, dd] = date.split('-').map(Number);
@@ -6741,6 +6744,26 @@ function saveMailSchedule() {
       showToast('✅ テンプレートを保存しました（配信予約は送信日を設定してください）');
     }
   });
+}
+
+// GAS の settings シートに es_mail_schedule を同期する。
+// GAS は送信時にこのシートからテンプレを読むため、Notion/localStorage だけでは届かない。
+// gasUrl 未設定なら静かにスキップ。
+async function pushMailScheduleToGasSheets(configStr) {
+  const gasUrl = localStorage.getItem('es_gas_url');
+  if (!gasUrl) return;
+  const gasToken = localStorage.getItem('es_gas_token') || '';
+  try {
+    const res = await apiPost('gas-proxy', {
+      gasUrl, token: gasToken, action: 'saveSettings',
+      params: { key: 'es_mail_schedule', value: configStr },
+    });
+    if (!res || !res.ok) {
+      console.warn('pushMailScheduleToGasSheets failed:', res?.error);
+    }
+  } catch(e) {
+    console.warn('pushMailScheduleToGasSheets error:', e);
+  }
 }
 
 // メール本文をデフォルトに戻す（HTMLに書かれた初期テキストを再適用 → 保存も実行）
