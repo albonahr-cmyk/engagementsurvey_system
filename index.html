@@ -2460,7 +2460,7 @@ async function restoreSurveyAnswersFromServer() {
 const SYNC_KEYS = [
   'es_survey_period', 'es_cat_thresholds', 'es_cat_targets',
   'es_custom_questions', 'es_action_plan', 'es_question_cat_map', 'es_cat_weights', 'es_dept_list',
-  'es_mail_schedule'
+  'es_mail_schedule', 'es_stats_excluded'
 ];
 
 // 設定を1つ保存
@@ -3058,8 +3058,35 @@ let selectedDept = (() => {
 function inSelectedDept(empId) {
   const emp = employees[empId];
   if (!emp || emp.role === 'admin') return false;
+  if (isStatsExcluded(empId)) return false;
   if (!selectedDept || selectedDept === ALL_MEMBERS) return true;
   return emp.dept === selectedDept;
+}
+
+// ===== 集計対象から除外する社員（テストアカウント / 休職等） =====
+// localStorageの 'es_stats_excluded' に empId 配列で保存。SYNC_KEYS に含めてクラウド同期される。
+// 除外された社員はダッシュボードの回答率・スコア平均・未回答者一覧・アラートから外される。
+// （メール配信は別フラグ mailExcluded で管理 — 集計除外≠メール除外）
+function getStatsExcludedSet() {
+  try {
+    const s = localStorage.getItem('es_stats_excluded');
+    return new Set(s ? JSON.parse(s) : []);
+  } catch(e) { return new Set(); }
+}
+function isStatsExcluded(empId) {
+  return getStatsExcludedSet().has(empId);
+}
+function toggleStatsExcluded(empId, excluded) {
+  if (!employees[empId]) return;
+  const set = getStatsExcludedSet();
+  if (excluded) set.add(empId); else set.delete(empId);
+  localStorage.setItem('es_stats_excluded', JSON.stringify([...set]));
+  if (typeof renderEmployeeList === 'function') renderEmployeeList();
+  if (typeof renderIdList === 'function') renderIdList();
+  if (typeof renderDashboard === 'function' && document.getElementById('tab-dashboard')) renderDashboard();
+  if (typeof renderUnsubmittedList === 'function') renderUnsubmittedList();
+  if (typeof renderSidebarWidgets === 'function') renderSidebarWidgets();
+  showToast(excluded ? '🚫 集計対象から除外しました（回答率・平均から除外）' : '✅ 集計対象に戻しました');
 }
 
 // 仮プレースホルダ部署（社員追加までドロップダウン・スコア表で常時表示）
@@ -3241,9 +3268,11 @@ function _floatingDropdownOutsideHandler(e) {
 
 function getMonthData(month, deptFilter) {
   const useDept = deptFilter !== undefined ? deptFilter : selectedDept;
+  const excludedSet = getStatsExcludedSet();
   const empIds = Object.keys(employees).filter(id => {
     const emp = employees[id];
     if (!emp || emp.role === 'admin') return false;
+    if (excludedSet.has(id)) return false;
     if (useDept && useDept !== ALL_MEMBERS) return emp.dept === useDept;
     return true;
   });
@@ -3276,10 +3305,11 @@ function renderUnsubmittedList(monthArg) {
   const month = monthArg || (sel && sel.value) || getSurveyMonth();
   if (sel && sel.value !== month && months.includes(month)) sel.value = month;
   const submittedIds = getSubmittedIds(month);
+  const excludedSet = getStatsExcludedSet();
   const unsubmitted = Object.entries(employees)
-    .filter(([id, emp]) => emp.role !== 'admin' && !submittedIds.includes(id))
+    .filter(([id, emp]) => emp.role !== 'admin' && !excludedSet.has(id) && !submittedIds.includes(id))
     .map(([id, emp]) => ({ id, ...emp }));
-  const totalNonAdmin = Object.keys(employees).filter(id => employees[id].role !== 'admin').length;
+  const totalNonAdmin = Object.keys(employees).filter(id => employees[id].role !== 'admin' && !excludedSet.has(id)).length;
 
   unsubSection.style.display = 'block';
   document.getElementById('unsubmitted-count-label').textContent =
@@ -3762,8 +3792,10 @@ function renderDashboard() {
     // 仮プレースホルダ部署：実際の社員追加までは点線で「回答数が足りません」表示
     const deptMap = {};
     PLACEHOLDER_DEPTS.forEach(d => { deptMap[d] = { totals: [], memberCount: 0 }; });
+    const excludedSet = getStatsExcludedSet();
     Object.entries(employees).forEach(([id, emp]) => {
       if (emp.role === 'admin') return;
+      if (excludedSet.has(id)) return;
       const dept = normalizeDept(emp.dept);
       if (!dept || REMOVED_DEPTS.has(dept)) return;
       if (!deptMap[dept]) deptMap[dept] = { totals: [], memberCount: 0 };
@@ -4103,7 +4135,7 @@ function renderEmployeeList() {
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
-      <th>社員ID</th><th>社員</th><th>事業部</th><th>役職</th><th>雇用形態</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
+      <th>社員ID</th><th>社員</th><th>事業部</th><th>役職</th><th>雇用形態</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center" title="ONにすると未回答者一覧・回答率・スコア平均から除外されます">集計除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
     </tr></thead>
     <tbody>${pageRows.map(r => {
       const emp = employees[r.id] || {};
@@ -4133,6 +4165,15 @@ function renderEmployeeList() {
             <span style="position:absolute;top:2px;left:${emp.mailExcluded ? '2px' : '18px'};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
           </label>
           <div style="font-size:9px;color:${emp.mailExcluded ? '#94a3b8' : '#ef4444'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
+        </td>
+        <td style="text-align:center;white-space:nowrap" onclick="event.stopPropagation()" title="ONにすると未回答者一覧・回答率・スコア平均から除外されます">
+          ${(() => { const sx = isStatsExcluded(r.id); return `
+          <label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">
+            <input type="checkbox" ${sx ? 'checked' : ''} onchange="toggleStatsExcluded('${r.id}', this.checked)" style="opacity:0;width:0;height:0">
+            <span style="position:absolute;inset:0;background:${sx ? '#7c3aed' : '#cbd5e1'};border-radius:10px;transition:.2s"></span>
+            <span style="position:absolute;top:2px;left:${sx ? '18px' : '2px'};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+          </label>
+          <div style="font-size:9px;color:${sx ? '#7c3aed' : '#94a3b8'};margin-top:1px;font-weight:${sx ? '700' : '500'}">${sx ? '除外中' : '集計対象'}</div>`; })()}
         </td>
         <td style="text-align:center" onclick="event.stopPropagation()">
           <button class="action-label-btn" onclick="resetSurvey('${r.id}', '${month}')" title="${month} の回答をリセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>${monthNum}月分をリセット</button>
@@ -6349,6 +6390,15 @@ function renderIdList() {
         </label>
         <div style="font-size:9px;color:${emp.mailExcluded ? '#94a3b8' : '#ef4444'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
       </td>
+      <td style="text-align:center;white-space:nowrap" title="ONにすると未回答者一覧・回答率・スコア平均から除外されます">
+        ${(() => { const sx = isStatsExcluded(id); return `
+        <label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">
+          <input type="checkbox" ${sx ? 'checked' : ''} onchange="toggleStatsExcluded('${id}', this.checked)" style="opacity:0;width:0;height:0">
+          <span style="position:absolute;inset:0;background:${sx ? '#7c3aed' : '#cbd5e1'};border-radius:10px;transition:.2s"></span>
+          <span style="position:absolute;top:2px;left:${sx ? '18px' : '2px'};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+        </label>
+        <div style="font-size:9px;color:${sx ? '#7c3aed' : '#94a3b8'};margin-top:1px;font-weight:${sx ? '700' : '500'}">${sx ? '除外中' : '集計対象'}</div>`; })()}
+      </td>
       <td style="text-align:center">
         <button class="action-label-btn" onclick="resetSurvey('${id}', '${month}')" title="${month} の回答をリセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>${parseInt(month.split('-')[1])}月分をリセット</button>
       </td>
@@ -6356,7 +6406,7 @@ function renderIdList() {
   });
   const resetHeaderLabel = `回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div>`;
   table.innerHTML = `<table>
-    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th>${resetHeaderLabel}</th></tr></thead>
+    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th title="ONにすると未回答者一覧・回答率・スコア平均から除外されます">集計除外</th><th>${resetHeaderLabel}</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
 }
@@ -6830,7 +6880,8 @@ function computeSidebarAlerts() {
     const monthsArr = window.months || [];
     const idx = monthsArr.indexOf(month);
     const prevMonth = idx > 0 ? monthsArr[idx - 1] : null;
-    const nonAdmins = Object.keys(employees || {}).filter(id => employees[id].role !== 'admin');
+    const excludedSet = getStatsExcludedSet();
+    const nonAdmins = Object.keys(employees || {}).filter(id => employees[id].role !== 'admin' && !excludedSet.has(id));
     const total = nonAdmins.length;
     // 全体回答率
     if (total > 0 && typeof getSubmittedIds === 'function') {
@@ -6857,6 +6908,7 @@ function computeSidebarAlerts() {
       const sub = getSubmittedIds(month);
       sub.forEach(id => {
         if (!employees[id] || employees[id].role === 'admin') return;
+        if (excludedSet.has(id)) return;
         const d = (employees[id].dept || '').trim() || '未所属';
         if (deptMap[d]) deptMap[d].sub++;
       });
