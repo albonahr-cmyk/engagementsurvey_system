@@ -3089,6 +3089,15 @@ function toggleStatsExcluded(empId, excluded) {
   showToast(excluded ? '🚫 集計対象から除外しました（回答率・平均から除外）' : '✅ 集計対象に戻しました');
 }
 
+// 未回答者一覧の「🚫 集計取消」ボタン用ラッパー。確認ダイアログを挟む。
+function excludeFromStatsFromUnsubmitted(empId) {
+  const emp = employees[empId];
+  if (!emp) return;
+  const name = emp.name || empId;
+  if (!confirm(`「${name}（${empId}）」を未回答者一覧と回答率の集計から除外しますか？\n\n※ テストアカウント等を集計から外す用途を想定しています。\n※ ダッシュボードの分母（全社員数）・回答率・スコア平均からも除外されます。\n※ 取り消したい場合は、未回答者一覧の下にある「集計から除外中」リストの「戻す」ボタンから戻せます。`)) return;
+  toggleStatsExcluded(empId, true);
+}
+
 // 仮プレースホルダ部署（社員追加までドロップダウン・スコア表で常時表示）
 const PLACEHOLDER_DEPTS = ['人事管理', 'VR', 'AX', 'インキュベーション', 'Monomo', 'ポイポイ', '代理店', 'TTS', 'RAYSEE'];
 // 旧名・廃止部署（プルダウン・ダッシュボードから除外）
@@ -3334,6 +3343,7 @@ function renderUnsubmittedList(monthArg) {
             <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">氏名</th>
             <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">所属</th>
             <th style="background:#f8fafc;padding:13px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">ステータス</th>
+            <th style="background:#f8fafc;padding:13px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px" title="この行のアカウントを未回答者一覧・回答率の集計から除外します">操作</th>
           </tr></thead>
           <tbody>${unsubmitted.map(emp => `
             <tr>
@@ -3347,11 +3357,51 @@ function renderUnsubmittedList(monthArg) {
               <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc">
                 <span style="background:#fef2f2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid #fecaca">未回答</span>
               </td>
+              <td style="padding:13px 16px;font-size:14px;border-top:1px solid #f8fafc;text-align:right;white-space:nowrap">
+                <button onclick="excludeFromStatsFromUnsubmitted('${emp.id}')" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit" title="この行を未回答者一覧・回答率から除外します（テストアカウント等）">🚫 集計取消</button>
+              </td>
             </tr>`).join('')}
           </tbody>
         </table>
       </div>`;
   }
+
+  // 「集計から除外中」リスト（戻すボタン付き）
+  renderStatsExcludedList();
+}
+
+// 集計から除外されている社員のリストを未回答者一覧の下に表示する。
+// 戻すボタンで集計対象に復帰できる。
+function renderStatsExcludedList() {
+  const excludedSet = getStatsExcludedSet();
+  let el = document.getElementById('stats-excluded-list');
+  if (!el) {
+    const parent = document.getElementById('unsubmitted-section');
+    if (!parent) return;
+    el = document.createElement('div');
+    el.id = 'stats-excluded-list';
+    el.style.marginTop = '20px';
+    parent.appendChild(el);
+  }
+  const excludedRows = [...excludedSet]
+    .filter(id => employees[id])
+    .map(id => ({ id, ...employees[id] }));
+  if (excludedRows.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = `
+    <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:14px;padding:18px 22px">
+      <div style="font-size:13px;font-weight:700;color:#6b21a8;margin-bottom:10px">🚫 集計から除外中 <span style="font-weight:500;color:#a78bfa;font-size:12px">（${excludedRows.length}名 / 未回答者一覧と回答率の計算から除外）</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${excludedRows.map(r => `
+          <div style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid #e9d5ff;border-radius:20px;padding:5px 6px 5px 12px;font-size:12px">
+            <span style="font-weight:700;color:#7c3aed;font-family:'Inter',monospace">${sanitize(r.id)}</span>
+            <span style="color:#1e293b;font-weight:600">${sanitize(r.name || '')}</span>
+            <button onclick="toggleStatsExcluded('${r.id}', false)" style="background:#7c3aed;color:white;border:none;padding:3px 10px;border-radius:14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit" title="集計対象に戻す">↩ 戻す</button>
+          </div>`).join('')}
+      </div>
+    </div>`;
 }
 
 // ===== ダッシュボード描画 =====
@@ -4135,7 +4185,7 @@ function renderEmployeeList() {
   const table = document.getElementById('emp-table');
   table.innerHTML = `<table>
     <thead><tr>
-      <th>社員ID</th><th>社員</th><th>事業部</th><th>役職</th><th>雇用形態</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center" title="ONにすると未回答者一覧・回答率・スコア平均から除外されます">集計除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
+      <th>社員ID</th><th>社員</th><th>事業部</th><th>役職</th><th>雇用形態</th><th>勤務地</th><th>パスワード</th><th style="text-align:center">配信除外</th><th style="text-align:center">回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div></th>
     </tr></thead>
     <tbody>${pageRows.map(r => {
       const emp = employees[r.id] || {};
@@ -4165,15 +4215,6 @@ function renderEmployeeList() {
             <span style="position:absolute;top:2px;left:${emp.mailExcluded ? '2px' : '18px'};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
           </label>
           <div style="font-size:9px;color:${emp.mailExcluded ? '#94a3b8' : '#ef4444'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
-        </td>
-        <td style="text-align:center;white-space:nowrap" onclick="event.stopPropagation()" title="ONにすると未回答者一覧・回答率・スコア平均から除外されます">
-          ${(() => { const sx = isStatsExcluded(r.id); return `
-          <label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">
-            <input type="checkbox" ${sx ? 'checked' : ''} onchange="toggleStatsExcluded('${r.id}', this.checked)" style="opacity:0;width:0;height:0">
-            <span style="position:absolute;inset:0;background:${sx ? '#7c3aed' : '#cbd5e1'};border-radius:10px;transition:.2s"></span>
-            <span style="position:absolute;top:2px;left:${sx ? '18px' : '2px'};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
-          </label>
-          <div style="font-size:9px;color:${sx ? '#7c3aed' : '#94a3b8'};margin-top:1px;font-weight:${sx ? '700' : '500'}">${sx ? '除外中' : '集計対象'}</div>`; })()}
         </td>
         <td style="text-align:center" onclick="event.stopPropagation()">
           <button class="action-label-btn" onclick="resetSurvey('${r.id}', '${month}')" title="${month} の回答をリセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>${monthNum}月分をリセット</button>
@@ -6390,15 +6431,6 @@ function renderIdList() {
         </label>
         <div style="font-size:9px;color:${emp.mailExcluded ? '#94a3b8' : '#ef4444'};margin-top:1px">${emp.mailExcluded ? '除外中' : '配信対象'}</div>
       </td>
-      <td style="text-align:center;white-space:nowrap" title="ONにすると未回答者一覧・回答率・スコア平均から除外されます">
-        ${(() => { const sx = isStatsExcluded(id); return `
-        <label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">
-          <input type="checkbox" ${sx ? 'checked' : ''} onchange="toggleStatsExcluded('${id}', this.checked)" style="opacity:0;width:0;height:0">
-          <span style="position:absolute;inset:0;background:${sx ? '#7c3aed' : '#cbd5e1'};border-radius:10px;transition:.2s"></span>
-          <span style="position:absolute;top:2px;left:${sx ? '18px' : '2px'};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
-        </label>
-        <div style="font-size:9px;color:${sx ? '#7c3aed' : '#94a3b8'};margin-top:1px;font-weight:${sx ? '700' : '500'}">${sx ? '除外中' : '集計対象'}</div>`; })()}
-      </td>
       <td style="text-align:center">
         <button class="action-label-btn" onclick="resetSurvey('${id}', '${month}')" title="${month} の回答をリセット"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>${parseInt(month.split('-')[1])}月分をリセット</button>
       </td>
@@ -6406,7 +6438,7 @@ function renderIdList() {
   });
   const resetHeaderLabel = `回答リセット<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:2px">（${month}）</div>`;
   table.innerHTML = `<table>
-    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th title="ONにすると未回答者一覧・回答率・スコア平均から除外されます">集計除外</th><th>${resetHeaderLabel}</th></tr></thead>
+    <thead><tr><th>社員ID</th><th>氏名 ／ ランク・MBTI</th><th>所属部署</th><th>メール</th><th>パスワード</th><th>配信除外</th><th>${resetHeaderLabel}</th></tr></thead>
     <tbody>${rows.join('')}</tbody>
   </table>`;
 }
