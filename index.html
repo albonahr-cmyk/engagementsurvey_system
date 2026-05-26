@@ -3055,12 +3055,51 @@ let selectedDept = (() => {
   catch(e) { return ALL_MEMBERS; }
 })();
 
+// ===== ダッシュボードの属性フィルタ（役職・雇用形態・勤務地） =====
+const ALL_POSITIONS = 'すべての役職';
+const ALL_JOBTYPES  = 'すべての雇用形態';
+const ALL_WORKLOCS  = 'すべての勤務地';
+const POSITION_PRESETS = ['マネージャー','シニアリーダー','リーダー','メンバー'];
+const JOBTYPE_PRESETS  = ['正社員','契約社員','アルバイト','インターン','業務委託','派遣社員'];
+const WORKLOC_PRESETS  = ['東京','福岡'];
+let selectedPosition = (() => {
+  try { return localStorage.getItem('es_dashboard_position') || ALL_POSITIONS; }
+  catch(e) { return ALL_POSITIONS; }
+})();
+let selectedJobType = (() => {
+  try { return localStorage.getItem('es_dashboard_jobtype') || ALL_JOBTYPES; }
+  catch(e) { return ALL_JOBTYPES; }
+})();
+let selectedWorkLocation = (() => {
+  try { return localStorage.getItem('es_dashboard_workloc') || ALL_WORKLOCS; }
+  catch(e) { return ALL_WORKLOCS; }
+})();
+
+function getAllPositions() {
+  const set = new Set(POSITION_PRESETS);
+  Object.values(employees).forEach(e => { if (e.role !== 'admin' && e.position) set.add(e.position); });
+  return Array.from(set);
+}
+function getAllJobTypes() {
+  const set = new Set(JOBTYPE_PRESETS);
+  Object.values(employees).forEach(e => { if (e.role !== 'admin' && e.jobType) set.add(e.jobType); });
+  return Array.from(set);
+}
+function getAllWorkLocations() {
+  const set = new Set(WORKLOC_PRESETS);
+  Object.values(employees).forEach(e => { if (e.role !== 'admin' && e.workLocation) set.add(e.workLocation); });
+  return Array.from(set);
+}
+
 function inSelectedDept(empId) {
   const emp = employees[empId];
   if (!emp || emp.role === 'admin') return false;
   if (isStatsExcluded(empId)) return false;
-  if (!selectedDept || selectedDept === ALL_MEMBERS) return true;
-  return emp.dept === selectedDept;
+  if (selectedDept && selectedDept !== ALL_MEMBERS && emp.dept !== selectedDept) return false;
+  if (selectedPosition && selectedPosition !== ALL_POSITIONS && emp.position !== selectedPosition) return false;
+  if (selectedJobType && selectedJobType !== ALL_JOBTYPES && emp.jobType !== selectedJobType) return false;
+  if (selectedWorkLocation && selectedWorkLocation !== ALL_WORKLOCS && emp.workLocation !== selectedWorkLocation) return false;
+  return true;
 }
 
 // ===== 集計対象から除外する社員（テストアカウント / 休職等） =====
@@ -3275,14 +3314,118 @@ function _floatingDropdownOutsideHandler(e) {
   if (pop && !pop.contains(e.target) && !e.target.closest('.filter-chip')) closeFloatingDropdowns();
 }
 
-function getMonthData(month, deptFilter) {
-  const useDept = deptFilter !== undefined ? deptFilter : selectedDept;
+// ===== 属性フィルタ（役職・雇用形態・勤務地）用ドロップダウン =====
+// 検索可能・選択中ハイライト付き。dept ドロップダウンと同じ見た目を使い回し。
+function _showAttrDropdown(triggerEl, opts) {
+  closeDeptDropdown();
+  closeFloatingDropdowns();
+  const { values, currentValue, onSelectFnName, searchPlaceholder } = opts;
+  const items = values.map(v => {
+    const sel = v === currentValue ? 'selected' : '';
+    const safe = sanitize(v);
+    const arg = v.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return `<div class="dept-dropdown-item ${sel}" data-attr-name="${safe}" onclick="event.stopPropagation();${onSelectFnName}('${arg}')">
+      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${safe}</span>
+    </div>`;
+  }).join('');
+  const popover = document.createElement('div');
+  popover.id = 'floating-dropdown';
+  popover.className = 'dept-dropdown';
+  popover.style.minWidth = '220px';
+  popover.innerHTML = `
+    <div class="dept-dropdown-search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="${sanitize(searchPlaceholder || '検索')}" oninput="filterAttrDropdown(this.value)" onclick="event.stopPropagation()" autocomplete="off"/>
+      <span class="clear-btn" onclick="event.stopPropagation();const i=this.parentElement.querySelector('input');i.value='';filterAttrDropdown('');i.focus()">×</span>
+    </div>
+    <div class="dept-dropdown-list" id="attr-dropdown-list">${items}</div>
+  `;
+  document.body.appendChild(popover);
+  const r = triggerEl.getBoundingClientRect();
+  popover.style.top = (r.bottom + window.scrollY + 6) + 'px';
+  popover.style.left = (r.left + window.scrollX) + 'px';
+  setTimeout(() => {
+    document.addEventListener('click', _floatingDropdownOutsideHandler);
+    const input = popover.querySelector('input');
+    if (input) input.focus();
+  }, 0);
+}
+
+function filterAttrDropdown(query) {
+  const q = (query || '').trim().toLowerCase();
+  document.querySelectorAll('#attr-dropdown-list .dept-dropdown-item').forEach(item => {
+    const v = (item.getAttribute('data-attr-name') || '').toLowerCase();
+    item.style.display = !q || v.includes(q) ? 'flex' : 'none';
+  });
+}
+
+function showPositionDropdown(triggerEl) {
+  _showAttrDropdown(triggerEl, {
+    values: [ALL_POSITIONS, ...getAllPositions()],
+    currentValue: selectedPosition,
+    onSelectFnName: 'selectPosition',
+    searchPlaceholder: '役職名で検索',
+  });
+}
+function showJobTypeDropdown(triggerEl) {
+  _showAttrDropdown(triggerEl, {
+    values: [ALL_JOBTYPES, ...getAllJobTypes()],
+    currentValue: selectedJobType,
+    onSelectFnName: 'selectJobType',
+    searchPlaceholder: '雇用形態で検索',
+  });
+}
+function showWorkLocationDropdown(triggerEl) {
+  _showAttrDropdown(triggerEl, {
+    values: [ALL_WORKLOCS, ...getAllWorkLocations()],
+    currentValue: selectedWorkLocation,
+    onSelectFnName: 'selectWorkLocation',
+    searchPlaceholder: '勤務地で検索',
+  });
+}
+function selectPosition(v) {
+  closeFloatingDropdowns();
+  selectedPosition = v || ALL_POSITIONS;
+  try { localStorage.setItem('es_dashboard_position', selectedPosition); } catch(e) {}
+  renderDashboard();
+}
+function selectJobType(v) {
+  closeFloatingDropdowns();
+  selectedJobType = v || ALL_JOBTYPES;
+  try { localStorage.setItem('es_dashboard_jobtype', selectedJobType); } catch(e) {}
+  renderDashboard();
+}
+function selectWorkLocation(v) {
+  closeFloatingDropdowns();
+  selectedWorkLocation = v || ALL_WORKLOCS;
+  try { localStorage.setItem('es_dashboard_workloc', selectedWorkLocation); } catch(e) {}
+  renderDashboard();
+}
+
+function getMonthData(month, overrides) {
+  // overrides: 文字列 → 部署のみ上書き（旧API互換）／オブジェクト → 任意フィルタ上書き／undefined → グローバル選択値を使用
+  let useDept, usePos, useJob, useLoc;
+  if (typeof overrides === 'string') {
+    useDept = overrides;
+    usePos = selectedPosition; useJob = selectedJobType; useLoc = selectedWorkLocation;
+  } else if (overrides && typeof overrides === 'object') {
+    useDept = overrides.dept !== undefined ? overrides.dept : selectedDept;
+    usePos  = overrides.position !== undefined ? overrides.position : selectedPosition;
+    useJob  = overrides.jobType !== undefined ? overrides.jobType : selectedJobType;
+    useLoc  = overrides.workLocation !== undefined ? overrides.workLocation : selectedWorkLocation;
+  } else {
+    useDept = selectedDept; usePos = selectedPosition; useJob = selectedJobType; useLoc = selectedWorkLocation;
+  }
   const excludedSet = getStatsExcludedSet();
   const empIds = Object.keys(employees).filter(id => {
     const emp = employees[id];
     if (!emp || emp.role === 'admin') return false;
     if (excludedSet.has(id)) return false;
-    if (useDept && useDept !== ALL_MEMBERS) return emp.dept === useDept;
+    if (useDept && useDept !== ALL_MEMBERS && emp.dept !== useDept) return false;
+    if (usePos  && usePos  !== ALL_POSITIONS && emp.position !== usePos) return false;
+    if (useJob  && useJob  !== ALL_JOBTYPES  && emp.jobType !== useJob) return false;
+    if (useLoc  && useLoc  !== ALL_WORKLOCS  && emp.workLocation !== useLoc) return false;
     return true;
   });
   const prev = months[months.indexOf(month) - 1];
@@ -3411,6 +3554,19 @@ function renderDashboard() {
     selectedDept = ALL_MEMBERS;
     try { localStorage.setItem('es_dashboard_dept', ALL_MEMBERS); } catch(e) {}
   }
+  // 属性フィルタも同様に、存在しない値が選択中ならリセット
+  if (selectedPosition !== ALL_POSITIONS && !getAllPositions().includes(selectedPosition)) {
+    selectedPosition = ALL_POSITIONS;
+    try { localStorage.setItem('es_dashboard_position', ALL_POSITIONS); } catch(e) {}
+  }
+  if (selectedJobType !== ALL_JOBTYPES && !getAllJobTypes().includes(selectedJobType)) {
+    selectedJobType = ALL_JOBTYPES;
+    try { localStorage.setItem('es_dashboard_jobtype', ALL_JOBTYPES); } catch(e) {}
+  }
+  if (selectedWorkLocation !== ALL_WORKLOCS && !getAllWorkLocations().includes(selectedWorkLocation)) {
+    selectedWorkLocation = ALL_WORKLOCS;
+    try { localStorage.setItem('es_dashboard_workloc', ALL_WORKLOCS); } catch(e) {}
+  }
   const month = document.getElementById('month-select').value;
   const { cats, prevCats, total, prevTotal } = getMonthData(month);
 
@@ -3473,10 +3629,22 @@ function renderDashboard() {
   const filtersEl = document.getElementById('dashboard-filters');
   if (filtersEl) {
     const monthDateLabel = formatMonthAsDate(month);
+    const iconBriefcase = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
+    const iconBadge = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2"/><line x1="14" y1="9" x2="18" y2="9"/><line x1="14" y1="13" x2="18" y2="13"/><line x1="6" y1="17" x2="18" y2="17"/></svg>`;
+    const iconPin = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="meta-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+    const posIsAll = !selectedPosition || selectedPosition === ALL_POSITIONS;
+    const jobIsAll = !selectedJobType || selectedJobType === ALL_JOBTYPES;
+    const locIsAll = !selectedWorkLocation || selectedWorkLocation === ALL_WORKLOCS;
+    const posLabel = sanitize(posIsAll ? ALL_POSITIONS : selectedPosition);
+    const jobLabel = sanitize(jobIsAll ? ALL_JOBTYPES  : selectedJobType);
+    const locLabel = sanitize(locIsAll ? ALL_WORKLOCS  : selectedWorkLocation);
     filtersEl.innerHTML = `
       <span class="filter-chip dept-trigger ${deptIsAll ? '' : 'active'}" onclick="event.stopPropagation();showDeptDropdown(this)">${iconPeople}${deptLabel}${iconChevron}</span>
       <span class="filter-chip dept-trigger" onclick="event.stopPropagation();showDateDropdown(this)">${iconCalendar}${monthDateLabel}${iconChevron}</span>
       <span class="filter-chip dept-trigger" onclick="event.stopPropagation();showPeriodDropdown(this)">${iconCalendar}${sanitize(selectedPeriod)}${iconChevron}</span>
+      <span class="filter-chip dept-trigger ${posIsAll ? '' : 'active'}" onclick="event.stopPropagation();showPositionDropdown(this)">${iconBriefcase}${posLabel}${iconChevron}</span>
+      <span class="filter-chip dept-trigger ${jobIsAll ? '' : 'active'}" onclick="event.stopPropagation();showJobTypeDropdown(this)">${iconBadge}${jobLabel}${iconChevron}</span>
+      <span class="filter-chip dept-trigger ${locIsAll ? '' : 'active'}" onclick="event.stopPropagation();showWorkLocationDropdown(this)">${iconPin}${locLabel}${iconChevron}</span>
     `;
   }
 
@@ -6890,7 +7058,7 @@ function renderSidebarWidgets() {
     if (typeof rebuildEmpData === 'function') rebuildEmpData();
     const month = (typeof getSurveyMonth === 'function') ? getSurveyMonth() : null;
     if (month && typeof getMonthData === 'function') {
-      const md = getMonthData(month, ALL_MEMBERS);
+      const md = getMonthData(month, { dept: ALL_MEMBERS, position: ALL_POSITIONS, jobType: ALL_JOBTYPES, workLocation: ALL_WORKLOCS });
       if (md && md.total > 0) {
         totalAvg = md.total;
         conditionTier = getCondition(totalAvg);
