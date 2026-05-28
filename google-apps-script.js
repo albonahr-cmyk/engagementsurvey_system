@@ -320,8 +320,10 @@ function handleSendToOne(ss, data) {
       }
     }
 
-    var subject = (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
-    var bodyTemplate = (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\nお疲れ様です。\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n所要時間は約3〜5分です。\n\n▼ 回答はこちら（クリックするだけでログイン不要で回答画面が開きます）\n{surveyUrl}\n\n━━━━━━━━━━━━━━━━━━━━\nうまく開けない場合は、以下のページからログインしてご回答ください。\nログインURL: {loginUrl}\nログインID: {empId}\nパスワード: 初回ログイン時にご自身で設定したパスワード\n　（お忘れの場合は人事部 albonahr@al-bo.io までご連絡ください）\n━━━━━━━━━━━━━━━━━━━━\n\n回答期限: {deadline}\n\nご協力よろしくお願いいたします。\n\nALBONA 人事部';
+    // 管理画面から件名・本文が渡された場合はそれを最優先で使う（一斉送信と同じテンプレを画面の値で確実に送るため）。
+    // 渡されなければ settings シート → デフォルトの順でフォールバック。
+    var subject = (data && data.subject) || (mailConfig && mailConfig.subject) || '【ALBONA】今月のエンゲージメントサーベイのお願い';
+    var bodyTemplate = (data && data.bodyTemplate) || (mailConfig && mailConfig.bodyTemplate) || '{name} さん\n\nお疲れ様です。\n\n今月のエンゲージメントサーベイの回答をお願いいたします。\n所要時間は約3〜5分です。\n\n▼ 回答はこちら（クリックするだけでログイン不要で回答画面が開きます）\n{surveyUrl}\n\n━━━━━━━━━━━━━━━━━━━━\nうまく開けない場合は、以下のページからログインしてご回答ください。\nログインURL: {loginUrl}\nログインID: {empId}\nパスワード: 初回ログイン時にご自身で設定したパスワード\n　（お忘れの場合は人事部 albonahr@al-bo.io までご連絡ください）\n━━━━━━━━━━━━━━━━━━━━\n\n回答期限: {deadline}\n\nご協力よろしくお願いいたします。\n\nALBONA 人事部';
 
     var surveyBaseUrl = 'https://engagementsurvey-system-nvlq.vercel.app';
     var surveyLink = emp.surveyToken ? surveyBaseUrl + '?token=' + emp.surveyToken : surveyBaseUrl;

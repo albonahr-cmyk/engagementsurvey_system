@@ -7328,11 +7328,15 @@ async function sendMailToEmployee(empId) {
   const gasUrl = localStorage.getItem('es_gas_url');
   if (!gasUrl) { showToast('❌ GAS URLが未設定です（設定 → GAS URL）'); return; }
   const gasToken = localStorage.getItem('es_gas_token') || '';
+  // 一斉送信と全く同じ件名・本文テンプレで送るため、設定画面の値をそのまま渡す。
+  // GAS Sheets の同期状態に依存せず、画面に表示されているテンプレで確実に送信される。
+  const subject = (document.getElementById('mail-subject')?.value || '').trim();
+  const bodyTemplate = document.getElementById('mail-body-template')?.value || '';
   // 該当行のボタンを「送信中」に切り替え
   const btn = document.querySelector(`button[data-indiv-send="${empId}"]`);
   if (btn) { btn.disabled = true; btn.textContent = '送信中...'; }
   showToast('📨 送信中...');
-  const res = await apiPost('gas-proxy', { gasUrl, token: gasToken, action: 'sendToOne', params: { empId } });
+  const res = await apiPost('gas-proxy', { gasUrl, token: gasToken, action: 'sendToOne', params: { empId, subject, bodyTemplate } });
   if (res && res.ok) {
     indivMailSentMap[empId] = new Date();
     showToast(`✅ ${emp.name} に送信しました`);
