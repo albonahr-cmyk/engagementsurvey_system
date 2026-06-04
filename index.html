@@ -6744,6 +6744,8 @@ function _renderAccountView(empId) {
       <div class="account-info-row"><div class="label">役職</div><div class="value">${sanitize(emp.position || '—')}</div></div>
       <div class="account-info-row"><div class="label">雇用形態</div><div class="value">${sanitize(emp.jobType || '—')}</div></div>
       <div class="account-info-row"><div class="label">勤務地</div><div class="value">${sanitize(emp.workLocation || '—')}</div></div>
+      <div class="account-info-row"><div class="label">上長</div><div class="value">${sanitize(emp.supervisor || '—')}</div></div>
+      <div class="account-info-row"><div class="label">入社日</div><div class="value">${emp.hireDate ? sanitize(emp.hireDate) : '—'}</div></div>
       <div class="account-info-row"><div class="label">メールアドレス</div><div class="value">${emp.email ? sanitize(emp.email) : '—'}</div></div>
     </div>
     <div class="account-info-section">
@@ -6781,6 +6783,11 @@ function _renderAccountEdit(empId) {
         <option value=""${!emp.workLocation ? ' selected' : ''}>未選択</option>
         ${['東京','福岡'].map(l => `<option value="${l}"${emp.workLocation === l ? ' selected' : ''}>${l}</option>`).join('')}
       </select></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">上長</div><select id="ai-edit-supervisor" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
+        <option value=""${!emp.supervisor ? ' selected' : ''}>未選択</option>
+        ${['江﨑','輪嶋','幅','前田','稜貴','平田','小磯','山口','小池','松本','代表','shoko','壇','藤田','百合草'].map(s => `<option value="${s}"${emp.supervisor === s ? ' selected' : ''}>${s}</option>`).join('')}
+      </select></div>
+      <div class="account-info-row" style="margin-top:10px"><div class="label">入社日</div><input id="ai-edit-hiredate" type="date" value="${sanitize(emp.hireDate || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">メールアドレス</div><input id="ai-edit-email" value="${sanitize(emp.email || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">新しいパスワード（変更する場合のみ）</div><input id="ai-edit-pw" type="text" placeholder="空欄なら変更なし" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
     </div>`;
@@ -6796,15 +6803,17 @@ function _accountSave(empId) {
   const position = document.getElementById('ai-edit-position').value.trim();
   const jobType = document.getElementById('ai-edit-jobtype').value || '';
   const workLocation = document.getElementById('ai-edit-workloc').value || '';
+  const supervisor = document.getElementById('ai-edit-supervisor').value || '';
+  const hireDate = document.getElementById('ai-edit-hiredate').value || '';
   const email = document.getElementById('ai-edit-email').value.trim();
   const pw = document.getElementById('ai-edit-pw').value.trim();
   if (!name) { showToast('氏名を入力してください'); return; }
-  const payload = { empId, name, dept, email, position, jobType, workLocation };
+  const payload = { empId, name, dept, email, position, jobType, workLocation, supervisor, hireDate };
   if (pw) payload.password = pw;
   showToast('保存中...');
   apiPost('employee-save', payload).then(res => {
     if (res?.ok) {
-      employees[empId] = { ...employees[empId], name, dept, email, position, jobType, workLocation };
+      employees[empId] = { ...employees[empId], name, dept, email, position, jobType, workLocation, supervisor, hireDate };
       if (pw) employees[empId].hasPassword = true;
       renderEmployeeList();
       _renderAccountView(empId);
