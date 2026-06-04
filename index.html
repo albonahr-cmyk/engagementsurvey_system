@@ -1684,6 +1684,31 @@ if (typeof pdfjsLib !== 'undefined') {
             </optgroup>
           </select>
         </div>
+        <div class="form-group" style="max-width:200px">
+          <label>上長</label>
+          <select id="new-emp-supervisor">
+            <option value="">未選択</option>
+            <option value="江﨑">江﨑</option>
+            <option value="輪嶋">輪嶋</option>
+            <option value="幅">幅</option>
+            <option value="前田">前田</option>
+            <option value="稜貴">稜貴</option>
+            <option value="平田">平田</option>
+            <option value="小磯">小磯</option>
+            <option value="山口">山口</option>
+            <option value="小池">小池</option>
+            <option value="松本">松本</option>
+            <option value="代表">代表</option>
+            <option value="shoko">shoko</option>
+            <option value="壇">壇</option>
+            <option value="藤田">藤田</option>
+            <option value="百合草">百合草</option>
+          </select>
+        </div>
+        <div class="form-group" style="max-width:200px">
+          <label>入社日</label>
+          <input type="date" id="new-emp-hiredate">
+        </div>
         <button class="btn btn-primary" onclick="issueNewId()" style="flex-shrink:0;white-space:nowrap;height:44px;align-self:flex-end">IDを発行する ＋</button>
       </div>
       <div class="issued-result" id="issued-result">
@@ -6521,11 +6546,13 @@ function issueNewId() {
   const jobType      = document.getElementById('new-emp-jobtype').value || '';
   const workLocation = document.getElementById('new-emp-workloc').value.trim();
   const mbti         = document.getElementById('new-emp-mbti').value || '';
+  const supervisor   = document.getElementById('new-emp-supervisor').value || '';
+  const hireDate     = document.getElementById('new-emp-hiredate').value || '';
   const newId = nextEmpId();
   const pw = generatePassword();
 
   showToast('登録中...');
-  apiPost('employee-save', { empId: newId, name, dept, role: 'employee', position, jobType, workLocation, mbti, email, password: pw }).then(saveRes => {
+  apiPost('employee-save', { empId: newId, name, dept, role: 'employee', position, jobType, workLocation, mbti, supervisor, hireDate, email, password: pw }).then(saveRes => {
     if (!saveRes?.ok) { showToast('❌ 保存に失敗しました'); return Promise.reject(); }
     return fetchEmployeesFromServer();
   }).then(emps => {
@@ -6553,6 +6580,8 @@ function issueNewId() {
     document.getElementById('new-emp-workloc').value = '';
     document.getElementById('new-emp-email').value = '';
     document.getElementById('new-emp-mbti').value = '';
+    document.getElementById('new-emp-supervisor').value = '';
+    document.getElementById('new-emp-hiredate').value = '';
     rebuildEmpData();
     renderIdList();
     renderEmployeeList();

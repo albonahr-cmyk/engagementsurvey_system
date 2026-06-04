@@ -29,6 +29,8 @@ module.exports = async function handler(req, res) {
         jobType: P.readRich(p.jobType),
         position: P.readRich(p.position),
         workLocation: P.readRich(p.workLocation),
+        supervisor: P.readRich(p.supervisor),
+        hireDate: P.readRich(p.hireDate),
       };
     });
 

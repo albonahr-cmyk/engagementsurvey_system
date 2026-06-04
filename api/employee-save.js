@@ -8,7 +8,7 @@ module.exports = async function handler(req, res) {
 
   try {
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
-    const { empId, name, dept, role, iq, battlePower, mbti, email, password, mailExcluded, jobType, position, workLocation } = req.body;
+    const { empId, name, dept, role, iq, battlePower, mbti, email, password, mailExcluded, jobType, position, workLocation, supervisor, hireDate } = req.body;
     if (!empId || typeof empId !== 'string') return res.status(400).json({ ok: false, error: 'empId required' });
     if (empId.length > 20) return res.status(400).json({ ok: false, error: 'empId too long' });
 
@@ -35,6 +35,8 @@ module.exports = async function handler(req, res) {
     if (jobType !== undefined) props.jobType = P.rich(jobType);
     if (position !== undefined) props.position = P.rich(position);
     if (workLocation !== undefined) props.workLocation = P.rich(workLocation);
+    if (supervisor !== undefined) props.supervisor = P.rich(supervisor);
+    if (hireDate !== undefined) props.hireDate = P.rich(hireDate);
     if (password) props.password = P.rich(password);
 
     if (existing.length > 0) {
