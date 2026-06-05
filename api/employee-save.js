@@ -1,6 +1,34 @@
-const { queryDB, createPage, updatePage, P } = require('../lib/notion');
+const { queryDB, createPage, updatePage, P, dbId, headers } = require('../lib/notion');
 const { requireAuth } = require('../lib/auth');
 const crypto = require('crypto');
+
+const NOTION_API = 'https://api.notion.com/v1';
+// supervisor/hireDate のように Notion DB に未追加の可能性がある列。エラー時に自動補完する。
+const EMPLOYEE_EXTRA_PROPS = {
+  supervisor: { rich_text: {} },
+  hireDate: { rich_text: {} },
+};
+
+function detectMissingProps(errMsg) {
+  if (!errMsg) return [];
+  return Object.keys(EMPLOYEE_EXTRA_PROPS).filter(n => errMsg.includes(n));
+}
+
+async function addEmployeeDbProps(names) {
+  const properties = {};
+  for (const n of names) {
+    if (EMPLOYEE_EXTRA_PROPS[n]) properties[n] = EMPLOYEE_EXTRA_PROPS[n];
+  }
+  if (Object.keys(properties).length === 0) return;
+  const res = await fetch(`${NOTION_API}/databases/${dbId('employees')}`, {
+    method: 'PATCH', headers: headers(),
+    body: JSON.stringify({ properties }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error('Notion DB schema update failed: ' + (data.message || res.statusText));
+  }
+}
 
 module.exports = async function handler(req, res) {
   const user = requireAuth(req, res, 'admin');
@@ -39,15 +67,27 @@ module.exports = async function handler(req, res) {
     if (hireDate !== undefined) props.hireDate = P.rich(hireDate);
     if (password) props.password = P.rich(password);
 
-    if (existing.length > 0) {
-      props.isActive = P.checkbox(true);
-      await updatePage(existing[0].id, props);
-    } else {
-      props.empId = P.rich(empId);
-      props.isActive = P.checkbox(true);
-      if (!props.name) props.name = P.title('');
-      if (!props.issuedAt) props.issuedAt = P.rich(new Date().toISOString());
-      await createPage('employees', props);
+    const performWrite = async () => {
+      if (existing.length > 0) {
+        props.isActive = P.checkbox(true);
+        await updatePage(existing[0].id, props);
+      } else {
+        props.empId = P.rich(empId);
+        props.isActive = P.checkbox(true);
+        if (!props.name) props.name = P.title('');
+        if (!props.issuedAt) props.issuedAt = P.rich(new Date().toISOString());
+        await createPage('employees', props);
+      }
+    };
+
+    try {
+      await performWrite();
+    } catch (e) {
+      const missing = detectMissingProps(e.message);
+      if (missing.length === 0) throw e;
+      // Notion DBに supervisor/hireDate 列が無い場合、自動で追加してリトライ
+      await addEmployeeDbProps(missing);
+      await performWrite();
     }
 
     // パスワードが指定されていればAuth DBも更新
