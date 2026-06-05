@@ -4541,8 +4541,10 @@ function populateScoreFilters() {
   updateScoreMonthBtn();
 }
 
-// ===== 列ヘッダーフィルター（事業部・コンディション） =====
+// ===== 列ヘッダーフィルター（事業部・上長・入社日・コンディション） =====
 let _scoreDeptFilter = '';
+let _scoreSupervisorFilter = '';
+let _scoreHireYearFilter = '';
 let _openScoreColFilter = '';
 
 function _scoreColJsArg(v) {
@@ -4550,15 +4552,37 @@ function _scoreColJsArg(v) {
 }
 
 function buildScoreColFilterContent(key) {
+  const plainRow = (label, value, cur, filterKey) => {
+    const sel = value === cur;
+    const bg = sel ? 'background:#d8ebe1;color:#1f604c' : 'color:#334155';
+    return `<div onclick="selectScoreColFilter('${filterKey}','${_scoreColJsArg(value)}')" style="padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;${bg};transition:background .1s" onmouseover="if(!${sel}){this.style.background='#f1f5f9'}" onmouseout="if(!${sel}){this.style.background='transparent'}">${sanitize(label)}</div>`;
+  };
   if (key === 'dept') {
     const depts = getDeptsFromEmployees();
     const cur = _scoreDeptFilter;
-    const row = (label, value) => {
-      const sel = value === cur;
-      const bg = sel ? 'background:#d8ebe1;color:#1f604c' : 'color:#334155';
-      return `<div onclick="selectScoreColFilter('dept','${_scoreColJsArg(value)}')" style="padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;${bg};transition:background .1s" onmouseover="if(!${sel}){this.style.background='#f1f5f9'}" onmouseout="if(!${sel}){this.style.background='transparent'}">${sanitize(label)}</div>`;
-    };
-    return row('すべて', '') + depts.map(d => row(d, d)).join('');
+    return plainRow('すべて', '', cur, 'dept') + depts.map(d => plainRow(d, d, cur, 'dept')).join('');
+  }
+  if (key === 'supervisor') {
+    const sups = [...new Set(Object.values(employees)
+      .filter(e => e.role !== 'admin')
+      .map(e => e.supervisor)
+      .filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ja'));
+    const cur = _scoreSupervisorFilter;
+    const items = [plainRow('すべて', '', cur, 'supervisor')];
+    items.push(...sups.map(s => plainRow(s, s, cur, 'supervisor')));
+    items.push(plainRow('（未設定）', '__none__', cur, 'supervisor'));
+    return items.join('');
+  }
+  if (key === 'hireYear') {
+    const years = [...new Set(Object.values(employees)
+      .filter(e => e.role !== 'admin')
+      .map(e => (e.hireDate || '').slice(0, 4))
+      .filter(y => /^\d{4}$/.test(y)))].sort().reverse();
+    const cur = _scoreHireYearFilter;
+    const items = [plainRow('すべて', '', cur, 'hireYear')];
+    items.push(...years.map(y => plainRow(`${y}年`, y, cur, 'hireYear')));
+    items.push(plainRow('（未設定）', '__none__', cur, 'hireYear'));
+    return items.join('');
   }
   if (key === 'cond') {
     const cur = _scoreCondFilter;
@@ -4597,6 +4621,8 @@ function closeScoreColFilter() {
 
 function selectScoreColFilter(key, value) {
   if (key === 'dept') _scoreDeptFilter = value;
+  else if (key === 'supervisor') _scoreSupervisorFilter = value;
+  else if (key === 'hireYear') _scoreHireYearFilter = value;
   else if (key === 'cond') _scoreCondFilter = value;
   closeScoreColFilter();
   renderScoreTab();
@@ -5166,6 +5192,8 @@ function renderScoreTab() {
   if (!tbl) return;
   const search = (document.getElementById('score-search')?.value || '').toLowerCase().trim();
   const groupFilter = _scoreDeptFilter || '';
+  const supervisorFilter = _scoreSupervisorFilter || '';
+  const hireYearFilter = _scoreHireYearFilter || '';
   const condFilter = _scoreCondFilter || '';
   const statusFilter = _scoreStatusFilter || '';
 
@@ -5193,6 +5221,16 @@ function renderScoreTab() {
       }
       if (groupFilter) {
         if (normalizeDept(r.emp.dept || '') !== groupFilter) return false;
+      }
+      if (supervisorFilter) {
+        const sup = r.emp.supervisor || '';
+        if (supervisorFilter === '__none__') { if (sup) return false; }
+        else if (sup !== supervisorFilter) return false;
+      }
+      if (hireYearFilter) {
+        const yr = (r.emp.hireDate || '').slice(0, 4);
+        if (hireYearFilter === '__none__') { if (yr) return false; }
+        else if (yr !== hireYearFilter) return false;
       }
       if (condFilter) {
         if (!r.cond || r.cond.key !== condFilter) return false;
@@ -5225,14 +5263,18 @@ function renderScoreTab() {
   const sortLabel = _scoreSortDir === 'asc' ? '低い順' : '高い順';
   const sortBtn = `<button type="button" onclick="event.stopPropagation();toggleScoreSort()" title="クリックでソート切替" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:#2d8a6f;color:white;border:none;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;line-height:1" onmouseover="this.style.background='#1f604c'" onmouseout="this.style.background='#2d8a6f'">${sortIconWhite}${sortLabel}</button>`;
   const deptFilterHeader = renderScoreColFilterHeader('事業部', 'dept', _scoreDeptFilter);
+  const supDisplay = _scoreSupervisorFilter === '__none__' ? '未設定' : _scoreSupervisorFilter;
+  const supFilterHeader = renderScoreColFilterHeader('上長', 'supervisor', supDisplay);
+  const hireDisplay = _scoreHireYearFilter === '__none__' ? '未設定' : (_scoreHireYearFilter ? `${_scoreHireYearFilter}年` : '');
+  const hireFilterHeader = renderScoreColFilterHeader('入社日', 'hireYear', hireDisplay);
   const condFilterLabel = _scoreCondFilter ? (CONDITION_LEVELS.find(c => c.key === _scoreCondFilter)?.label || '') : '';
   const condFilterHeader = renderScoreColFilterHeader('コンディション', 'cond', condFilterLabel);
   tbl.innerHTML = `<table>
     <thead><tr>
       <th style="width:22%">メンバー</th>
       <th style="width:11%">${deptFilterHeader}</th>
-      <th style="width:8%">上長</th>
-      <th style="width:10%">入社日</th>
+      <th style="width:9%">${supFilterHeader}</th>
+      <th style="width:11%">${hireFilterHeader}</th>
       <th style="width:16%;text-align:left;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:8px">${condFilterHeader}${sortBtn}</span></th>
       <th style="width:9%">前回との差分</th>
       <th>サマリー</th>
