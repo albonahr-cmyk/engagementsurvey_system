@@ -1705,6 +1705,7 @@ if (typeof pdfjsLib !== 'undefined') {
             <option value="百合草">百合草</option>
             <option value="田代">田代</option>
             <option value="見城">見城</option>
+            <option value="福田">福田</option>
           </select>
         </div>
         <div class="form-group" style="max-width:200px">
@@ -6846,7 +6847,7 @@ function _renderAccountEdit(empId) {
       </select></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">上長</div><select id="ai-edit-supervisor" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white">
         <option value=""${!emp.supervisor ? ' selected' : ''}>未選択</option>
-        ${['江﨑','輪嶋','幅','前田','稜貴','平田','小磯','山口','小池','松本','代表','shoko','壇','藤田','百合草','田代','見城'].map(s => `<option value="${s}"${emp.supervisor === s ? ' selected' : ''}>${s}</option>`).join('')}
+        ${['江﨑','輪嶋','幅','前田','稜貴','平田','小磯','山口','小池','松本','代表','shoko','壇','藤田','百合草','田代','見城','福田'].map(s => `<option value="${s}"${emp.supervisor === s ? ' selected' : ''}>${s}</option>`).join('')}
       </select></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">入社日</div><input id="ai-edit-hiredate" type="date" value="${sanitize(emp.hireDate || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px;font-family:inherit;background:white"></div>
       <div class="account-info-row" style="margin-top:10px"><div class="label">メールアドレス</div><input id="ai-edit-email" value="${sanitize(emp.email || '')}" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-top:2px"></div>
