@@ -5367,7 +5367,8 @@ async function exportToSpreadsheet() {
   const gasToken = localStorage.getItem('es_gas_token');
   if (!gasUrl) { showToast('⚠️ 設定タブでGAS URLを登録してください'); return; }
 
-  const month = document.getElementById('emp-month-select')?.value || months[months.length-1];
+  // タブ名・データ取得月はサーベイ期間の開始月（getSurveyMonth）を使用
+  const month = getSurveyMonth();
 
   showToast('📤 データを取得中...');
 
