@@ -5341,14 +5341,14 @@ function renderEmpPagination(totalPages) {
 
 function exportEmployeeCSV() {
   const month = document.getElementById('emp-month-select')?.value || months[months.length-1];
-  const headers = ['社員ID','氏名','所属','ランク','MBTI','IQ','戦闘力','総合スコア','職務','自己成長','健康','支援','人間関係','承認','理念戦略','組織風土','環境'];
+  const headers = ['社員ID','氏名','所属','上長','入社日','ランク','MBTI','IQ','戦闘力','総合スコア','職務','自己成長','健康','支援','人間関係','承認','理念戦略','組織風土','環境'];
   const rows = Object.entries(empData).map(([id, data]) => {
     const emp = employees[id] || {};
     const profile = getProfile(id);
     const rank = calcRank(profile.iq, profile.battlePower) || '';
     const scores = data[month] || {};
     const total = Object.keys(scores).length > 0 ? getTotal(scores) : '';
-    return [id, emp.name||'', emp.dept||'', rank, profile.mbti||'', profile.iq||'', profile.battlePower||'', total,
+    return [id, emp.name||'', emp.dept||'', emp.supervisor||'', emp.hireDate||'', rank, profile.mbti||'', profile.iq||'', profile.battlePower||'', total,
       scores['やりがい']||'', scores['成長']||'', scores['健康']||'', scores['上司']||'',
       scores['チーム']||'', scores['承認']||'', scores['信頼']||'', scores['組織']||'', scores['業務']||''
     ].join(',');
@@ -5396,7 +5396,7 @@ async function exportToSpreadsheet() {
 
   // ヘッダー構築
   const scoreCols = ['総合スコア','職務','自己成長','健康','支援','人間関係','承認','理念戦略','組織風土','環境'];
-  const baseHeaders = ['社員ID','氏名','所属','ランク','MBTI','IQ','戦闘力'];
+  const baseHeaders = ['社員ID','氏名','所属','上長','入社日','ランク','MBTI','IQ','戦闘力'];
   const headers = [...baseHeaders];
   for (let r = 1; r <= maxRounds; r++) {
     const prefix = maxRounds > 1 ? `${r}回目_` : '';
@@ -5408,7 +5408,7 @@ async function exportToSpreadsheet() {
     if (emp.role === 'admin') return null;
     const profile = getProfile(id);
     const rank = calcRank(profile.iq, profile.battlePower) || '';
-    const row = [id, emp.name||'', emp.dept||'', rank, profile.mbti||'', profile.iq||'', profile.battlePower||''];
+    const row = [id, emp.name||'', emp.dept||'', emp.supervisor||'', emp.hireDate||'', rank, profile.mbti||'', profile.iq||'', profile.battlePower||''];
 
     const empResponses = responsesByEmp[id] || [];
     for (let r = 0; r < maxRounds; r++) {
